@@ -12,6 +12,7 @@ app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = 'False'
 Session(app)
 
+
 conn_str = (
     r'DRIVER={ODBC Driver 18 For Sql Server};'
     r'SERVER=LITERALLYME\SQLSERVER_DEV;'
@@ -28,13 +29,13 @@ cursor = conn.cursor()
 def register():
     if request.method == "POST":
         # Fetch valid countries and industries from the database
-        country = [c[0] for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
-        industry = [i[0] for i in cursor.execute("SELECT Name FROM industries ORDER BY id").fetchall()]
+        country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
+        industry = [i[0].lower().strip() for i in cursor.execute("SELECT Name FROM industries ORDER BY id").fetchall()]
 
         # Retrieve form data
         Name = request.form.get("Name")
-        Industry = request.form.get("Industry")
-        Country = request.form.get("Country")
+        Industry = request.form.get("Industry").lower().strip()
+        Country = request.form.get("Country").lower().strip()
         Internal_Audit = request.form.get("Internal_Audit")
         Company_Size = request.form.get("Company_Size")
         Using_Solution = request.form.get("Using_Solution")
@@ -83,7 +84,7 @@ def register():
             conn.close()
             return "Failed to retrieve user ID after registration."
 
-        return redirect("/")
+        return redirect("/questions")
     else:
         return render_template("register.html")
 
@@ -92,22 +93,50 @@ def register():
 def index():
     return render_template("index.html")
 
-@app.route("/question1", methods=["GET", "POST"])
+@app.route("/questions", methods=["GET", "POST"])
 def questions():
+    option_scores = {
+        'A':0,
+        'B':1,
+        'C':3,
+        'D':4
+    }
     if request.method == "POST":
-        Option1 = request.method.get("Option1")
-        Option2 = request.method.get("Option2")
-        Option3 = request.method.get("Option3")
-        Option4 = request.method.get("Option4")
+        user_id = session.get("id")
+        user_answers = request.form.to_dict()
+        total_score = 0
+        for question, option in user_answers.items():
+            score = option_scores.get(option, 0)
+            total_score += score
+            cursor.execute(
+                """INSERT INTO Questions(Question, Answer) VALUES (?,?)""", (question, option)
+            )
+            conn.commit()
+        cursor.execute(
+            """UPDATE Users SET score = ? WHERE id = ?""", (total_score, user_id)
+        )
+        conn.commit()
+        return redirect("/thankyou")
+    else:
+        return render_template("questions.html")
+    
+@app.route("/thankyou")
+def thankyou():
+    if "id" not in session:
+        return redirect("/register")
+    
+    user_id = session["id"]
+    cursor.execute("""SELECT score FROM Users WHERE id = ?""", (user_id))
+    row = cursor.fetchone()
 
-        if not (Option1 and Option2 and Option3 and Option4):
-            return "You have to enter atleast one value"
-        elif Option1:
-            
+    if row:
+        user_score = row[0]
+    else:
+        user_score = None
+    
+    return render_template("thankyou.html", score = user_score)
 
 
-
-        
         
         
 

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Your Score
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Your Final Score</h1>
+        {% if score is not none %}
+            <p>Your score is: {{ score }}</p>
+        {% else %}
+            <p>No score available yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

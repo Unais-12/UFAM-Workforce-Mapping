@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Questions
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        #submit {
+            display: none;
+        }
+    </style>
+
+    <div class="container">
+        <form id="Questions" method="post" action="/questions">
+            <div class="question" id="question1">
+                <p>Question 1: Who is the goat of beyblade?</p>
+                <input type="radio" name="Question1" value="A">Ryuga<br>
+                <input type="radio" name="Question1" value="B">Ginga<br>
+                <input type="radio" name="Question1" value="C">Kyoya<br>
+                <input type="radio" name="Question1" value="D">Centa<br>
+            </div>
+            <div class="question" id="question2">
+                <p>Question 2: What is the greatest food ever?</p>
+                <input type="radio" name="Question2" value="A">Bhindi<br>
+                <input type="radio" name="Question2" value="B">Pasta<br>
+                <input type="radio" name="Question2" value="C">Burger<br>
+                <input type="radio" name="Question2" value="D">Pizza<br>
+            </div>
+            <div class = "question" id = "question3">
+                <p>Question 3: Who is the better one?</p>
+                <input type = "radio" name = "Question3" value = "A">Unais<br>
+                <input type = "radio" name = "Question3" value = "B">Mohsin<br>
+                <input type = "radio" name = "Question3" value = "C">Minhal<br>
+                <input type = "radio" name = "Question3" value = "D">Jawad<br>
+            </div>
+            
+            <!-- Next Button moved outside the question divs -->
+            <div id="nextBtnContainer">
+                <button type="button" id="nextBtn" onclick="nextQuestion()">Next</button>
+            </div>
+
+            <!-- Submit Button -->
+            <div id="submit">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const totalQuestions = document.querySelectorAll('.question').length;
+
+        function showQuestion(index) {
+            document.querySelectorAll('.question').forEach((q, i) => {
+                q.classList.toggle('active', i === index);
+            });
+
+            // Show "Next" button for all but the last question
+            if (index === totalQuestions - 1) {
+                document.getElementById('nextBtn').style.display = 'none'; // Hide Next button
+                document.getElementById('submit').style.display = 'block'; // Show Submit button
+            } else {
+                document.getElementById('nextBtn').style.display = 'inline-block'; // Show Next button
+                document.getElementById('submit').style.display = 'none'; // Hide Submit button
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= totalQuestions) {
+                currentQuestion = totalQuestions - 1; // Ensure it doesn't exceed the last question
+            }
+            showQuestion(currentQuestion);
+        }
+
+        // Initialize by showing the first question
+        showQuestion(currentQuestion);
+    </script>
+
+{% endblock %}
+
+
+
