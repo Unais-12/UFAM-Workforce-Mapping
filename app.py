@@ -1,5 +1,5 @@
 from flask import session, redirect, render_template, Flask, request
-from helpers import apology
+from helpers import determine_next_category
 import sqlite3
 import pyodbc
 from flask_session import Session
@@ -27,6 +27,11 @@ cursor = conn.cursor()
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    # Initialize session for the new user
+    session['id'] = id
+    session['category'] = 'Values'  # Start with the first category
+    session['total_score'] = 0
+    session['category_scores'] = {}
     if request.method == "POST":
         # Fetch valid countries and industries from the database
         country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
@@ -95,46 +100,296 @@ def index():
 
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
-    option_scores = {
-        'A':0,
-        'B':1,
-        'C':3,
-        'D':4
+    if request.form.get == "":
+        return "You have to select atleast one option"
+    categories = {
+        'Values': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+        'Methadology': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+        'Stakeholder Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+        'Resource Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+    }
+    
+    questions_per_category = {
+        'Values': 5,
+        'Methadology': 11,
+        'Stakeholder Management': 6,
+        'Resource Management': 9,
+    }
+    questions_data = {
+        'Values' : [
+            {'id': 'q1', 'text': "Question 1: On the scale of 1 -4 how  would you rate the Internal Audit department's ability to always do the right thing and tell the truth even when it is uncomfortable or difficult. (1 being lowest and 4 highest)", 'options':[
+                {'label': '1', 'value': 'A'},
+                {'label': '2', 'value': 'B'},
+                {'label': '3', 'value': 'C'},
+                {'label': '4', 'value': 'D'},
+            ]},
+            {'id': 'q2', 'text': 'Question 2: On a scale of 1-4  how would you rate the environment created by CAE where Internal Auditors feel supported when expressing legitimate, evidence-based engagement results.' , 'options': [
+                {'label': '1', 'value': 'A'},
+                {'label': '2', 'value': 'B'},
+                {'label': '3', 'value': 'C'},
+                {'label': '4', 'value': 'D'},
+            ]},
+            {'id': 'q3', 'text': 'Question 3: Is there a practice in place to document the disclosure of potential conflict of interest (of internal audit team member) or other impairments to objectivity', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Very Rare', 'value': 'B'},
+                {'label': 'Ocassioanlly', 'value': 'C'},
+                {'label': 'Always', 'value': 'D'},
+            ]},
+            {'id': 'q4', 'text': 'Question 4: How often do you assess ethical related risks and controls during individual engagements', 'options':[
+                {'label': 'Never', 'value': 'A'},
+                {'label': 'Very Rare', 'value': 'B'},
+                {'label': 'Ocassionally', 'value': 'C'},
+                {'label': 'Always considered where relevant', 'value': 'D'},
+            ]},
+            {'id': 'q5', 'text': 'Question 5: Is there  a documented methodology established by an Internal Audit function for handling illegal and discreditable behavior by Internal Auditors', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Development', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]}
+        ],
+        'Methadology': [
+            {'id' : 'q1', 'text': 'Question 6: As part of your audit engagements or otherwise in addition to providing assurance and insight do you also provide the foresight to better protect and create value for the entity.', 'options': [
+                {'label': 'Never', 'value': 'A'},
+                {'label': 'Very Rare', 'value': 'B'},
+                {'label': 'Occasionally', 'value': 'C'},
+                {'label': 'Always considered where relevant', 'value': 'D'},
+            ]},
+            {'id': 'q2', 'text' : 'Question 7: Is the internal audit strategy developed in line with charter, organization strategy and expectation of board and senior management', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q3', 'text': 'Question 8: Has the Internal Audit function established Internal Audit methodology  according to the Global internal audit standards', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},     
+            ]},
+            {'id': 'q4', 'text': 'Question 9: Has the Internal Audit function identified any requirement of Global Internal Audit Standards that is not in conformance with any application regulation.', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'}, 
+            ]},
+            {'id': 'q5', 'text': 'Question 10: Is there a mechanism in place whereby CAE document and communicate the circumstances, alternative action taken and their impact, if internal auditor cannot meet the standard requirement', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q6', 'text': 'Question 11: Does the internal audit charter comply with global internal audit standards?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q7', 'text': 'Questions 12: Does Internal Audit function conduct Surveys, interviews and workshops for the input on fraud and risks from internal stakeholders?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q8', 'text': 'Question 13: Does the CAE evaluate, update and train auditors on methodology', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q9', 'text': 'Question 14 : Is there a mechanism in place through which maturity of organization’s governance structure, risk management and control processes is assessed in comparison with leading principles and globally accepted framework.', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q10', 'text': "Question 15: Is the Audit plan developed based on assessment of organization’s strategy, objectives and risks", 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q11', 'text': 'Question 16: Are there controls in place that restrict information access and its disclosure to unauthorized party?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+        ],
+        'Stakeholder Management': [
+            {'id': 'q1', 'text': 'Question 17: Does the internal audit function has unrestricted access to the board as well as to all the activities across the organization', 'options': [
+                {'label' : 'No', 'value': 'A'},
+                {'label' : 'Partly', 'value': 'B'},
+                {'label' : 'On most occasions', 'value': 'C'},
+                {'label' : 'Absolute', 'value': 'D'},
+            ]},
+            {'id' : 'q2', 'text': 'Question 18: Has the CAE held a meeting with the Board apprising it of the way Board should support Internal Audit Functions as per the Global Internal Audit Standards', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q3', 'text': 'Question 18: Is the board helped by CAE in order to understand qualification requirements of CAE?', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q4', 'text': 'Question 19: Is there a practice in place whereby the CAE conduct Meetings with senior executives and board members to build relationship and identify their concerns?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q5', 'text': 'Question 20: Does Internal Audit Function use Newsletters, presentations and other form of communication for sharing internal audit role and benefit with stakeholders', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q6', 'text': 'Question 21: For the development of Internal Audit performance objectives, does CAE incorporate input from board and senior management', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+        ],
+        'Resource Management': [
+            {'id': 'q1', 'text': 'Question 22: Is there a practice in place through which further Education plans of chief audit executive are developed?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q2', 'text': 'Question 23: Does CAE allocate Sufficient budget for the successful implementation of audit plan including training and acquisition of technological tools?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q3', 'text': 'Question 24: Has the CAE developed approach to recruit, develop and retain competent internal auditors?','options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q4', 'text': 'Questions 25: Is there a practice in place whereby Gap analysis between competency of internal auditor on staff and those required is carried out?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q5', 'text': 'Question 26: Does CAE collaborate with internal auditors to develop individual competencies through trainings?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q6', 'text': 'Question 27: Is there a practice in place, whereby, In case of insufficient resources, the board is timely informed about the impact of limitations?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q7', 'text': 'Question 28: Does the CAE evaluate the technology used by internal audit function and ensure that it support internal audit process?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q8', 'text': 'Question 29:  Does CAE collaborate with organization’s IT and IS to implement technological resources properly?', 'options': [
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+            {'id': 'q9', 'text': 'Question 30: Does Internal Audit function use any Software to track progress of auditors recommendations?', 'options':[
+                {'label': 'No', 'value': 'A'},
+                {'label': 'Under Consideration', 'value': 'B'},
+                {'label': 'Under Implementation', 'value': 'C'},
+                {'label': 'Yes', 'value': 'D'},
+            ]},
+        ] 
     }
     if request.method == "POST":
         user_id = session.get("id")
+        current_category = session.get("category", "Values")
+        questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
-        total_score = 0
+        total_score = ("total_score", 0)
+        category_scores = session.get('category_scores', {})
+
         for question, option in user_answers.items():
-            score = option_scores.get(option, 0)
-            total_score += score
+            score = categories[current_category].get(option, 0)
+            category_scores[current_category] = category_scores.get(current_category, 0) + score
+            
+        session['category_scores'] = category_scores
+        total_score = sum(category_scores.values())
+        session['total_score'] = total_score
+            # Insert user's answers into the Questions table
+        for question, option in user_answers.items():
             cursor.execute(
-                """INSERT INTO Questions(Question, Answer) VALUES (?,?)""", (question, option)
+                """INSERT INTO Questions(Question, Answer, Category) VALUES (?,?,?)""",
+                (question, option, current_category)
             )
             conn.commit()
+
+        # Update or insert the category score into the UserScores table
         cursor.execute(
-            """UPDATE Users SET score = ? WHERE id = ?""", (total_score, user_id)
+            """
+            MERGE INTO UserScores AS target
+            USING (VALUES (?, ?, ?)) AS source (user_id, category, score)
+            ON target.user_id = source.user_id AND target.category = source.category
+            WHEN MATCHED THEN 
+                UPDATE SET target.score = source.score
+            WHEN NOT MATCHED THEN 
+                INSERT (user_id, category, score) 
+                VALUES (source.user_id, source.category, source.score);
+            """, (user_id, current_category, category_scores[current_category])
+        )
+
+        conn.commit()
+        # Update total score for the user in Users table
+        cursor.execute(
+            """UPDATE Users SET score = ? WHERE id = ?""",
+            (total_score, user_id)
         )
         conn.commit()
-        return redirect("/thankyou")
+
+        # Determine next category (if applicable)
+        next_category, next_question = determine_next_category(current_category, 1, questions_per_category)
+        if next_category:
+            session['category'] = next_category
+            return redirect("/questions")
+        else:
+            return redirect("/thankyou")
+
     else:
-        return render_template("questions.html")
+        current_category = session.get("category", "Values")
+        questions = questions_data.get(current_category, [])
+        return render_template("questions.html",current_category=current_category, questions=questions)
+
     
 @app.route("/thankyou")
 def thankyou():
     if "id" not in session:
         return redirect("/register")
-    
-    user_id = session["id"]
-    cursor.execute("""SELECT score FROM Users WHERE id = ?""", (user_id))
-    row = cursor.fetchone()
 
-    if row:
-        user_score = row[0]
-    else:
-        user_score = None
-    
-    return render_template("thankyou.html", score = user_score)
+    user_id = session["id"]
+
+    # Retrieve total score
+    cursor.execute("""SELECT score FROM Users WHERE id = ?""", (user_id,))
+    row = cursor.fetchone()
+    total_score = row[0] if row else None
+
+    # Retrieve category-wise scores
+    cursor.execute("""SELECT category, score FROM UserScores WHERE user_id = ?""", (user_id,))
+    category_scores = cursor.fetchall()
+
+    scores_by_category = {row[0]: row[1] for row in category_scores}
+
+    return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category)
+
 
 
         

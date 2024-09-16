@@ -5,12 +5,13 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>Your Final Score</h1>
-        {% if score is not none %}
-            <p>Your score is: {{ score }}</p>
-        {% else %}
-            <p>No score available yet.</p>
-        {% endif %}
-    </div>
+    <h1>Thank You!</h1>
+    <p>Your total score is: {{ total_score }}</p>
+
+    <h2>Category Scores</h2>
+    <ul>
+        {% for category, score in category_scores.items() %}
+            <li>{{ category }}: {{ score }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

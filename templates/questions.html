@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Questions
+    Questions - {{ current_category }}
 {% endblock %}
 
 {% block content %}
@@ -19,37 +19,35 @@
     </style>
 
     <div class="container">
+        <h2>{{ current_category }}</h2>
+        
         <form id="Questions" method="post" action="/questions">
-            <div class="question" id="question1">
-                <p>Question 1: Who is the goat of beyblade?</p>
-                <input type="radio" name="Question1" value="A">Ryuga<br>
-                <input type="radio" name="Question1" value="B">Ginga<br>
-                <input type="radio" name="Question1" value="C">Kyoya<br>
-                <input type="radio" name="Question1" value="D">Centa<br>
+            {% for question in questions %}
+            <div class="question" id="question{{ loop.index }}">
+                <p>{{ question['text'] }}</p>
+                <div class="options">
+                    {% for option in question['options'] %}
+                    <label>
+                        <input type="radio" name="{{ question['id'] }}" value="{{ option['value'] }}">
+                        {{ option['label'] }}
+                    </label><br>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="question" id="question2">
-                <p>Question 2: What is the greatest food ever?</p>
-                <input type="radio" name="Question2" value="A">Bhindi<br>
-                <input type="radio" name="Question2" value="B">Pasta<br>
-                <input type="radio" name="Question2" value="C">Burger<br>
-                <input type="radio" name="Question2" value="D">Pizza<br>
-            </div>
-            <div class = "question" id = "question3">
-                <p>Question 3: Who is the better one?</p>
-                <input type = "radio" name = "Question3" value = "A">Unais<br>
-                <input type = "radio" name = "Question3" value = "B">Mohsin<br>
-                <input type = "radio" name = "Question3" value = "C">Minhal<br>
-                <input type = "radio" name = "Question3" value = "D">Jawad<br>
-            </div>
-            
-            <!-- Next Button moved outside the question divs -->
-            <div id="nextBtnContainer">
+            {% endfor %}
+
+            <!-- Error message for validation -->
+            <div id="error-message" style="color: red; display: none;">Please select an option before proceeding.</div>
+
+            <!-- Navigation Buttons -->
+            <div id="navigationBtns">
+                <button type="button" id="prevBtn" onclick="previousQuestion()" style="display: none;">Previous</button>
                 <button type="button" id="nextBtn" onclick="nextQuestion()">Next</button>
             </div>
 
             <!-- Submit Button -->
             <div id="submit">
-                <button type="submit">Submit</button>
+                <button type="button" id="submitBtn" onclick="validateSubmit()">Submit</button>
             </div>
         </form>
     </div>
@@ -63,22 +61,64 @@
                 q.classList.toggle('active', i === index);
             });
 
-            // Show "Next" button for all but the last question
-            if (index === totalQuestions - 1) {
-                document.getElementById('nextBtn').style.display = 'none'; // Hide Next button
-                document.getElementById('submit').style.display = 'block'; // Show Submit button
-            } else {
-                document.getElementById('nextBtn').style.display = 'inline-block'; // Show Next button
-                document.getElementById('submit').style.display = 'none'; // Hide Submit button
-            }
+            // Show or hide buttons based on the question index
+            document.getElementById('prevBtn').style.display = (index === 0) ? 'none' : 'inline-block'; // Show "Previous" button if not the first question
+            document.getElementById('nextBtn').style.display = (index === totalQuestions - 1) ? 'none' : 'inline-block'; // Hide "Next" button if it's the last question
+            document.getElementById('submit').style.display = (index === totalQuestions - 1) ? 'block' : 'none'; // Show "Submit" button if it's the last question
+        }
+
+        function validateQuestion(index) {
+            const currentQuestionElement = document.querySelectorAll('.question')[index];
+            const radios = currentQuestionElement.querySelectorAll("input[type='radio']");
+            const isAnyOptionChecked = Array.from(radios).some(radio => radio.checked);
+
+            return isAnyOptionChecked;
         }
 
         function nextQuestion() {
-            currentQuestion++;
-            if (currentQuestion >= totalQuestions) {
-                currentQuestion = totalQuestions - 1; // Ensure it doesn't exceed the last question
+            const errorMessage = document.getElementById('error-message');
+            
+            if (!validateQuestion(currentQuestion)) {
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+                currentQuestion++;
+                if (currentQuestion >= totalQuestions) {
+                    currentQuestion = totalQuestions - 1; // Ensure it doesn't exceed the last question
+                }
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function previousQuestion() {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none'; // Hide error message when going back
+
+            currentQuestion--;
+            if (currentQuestion < 0) {
+                currentQuestion = 0; // Ensure it doesn't go below the first question
             }
             showQuestion(currentQuestion);
+        }
+
+        function validateSubmit() {
+            const errorMessage = document.getElementById('error-message');
+            let isFormValid = true;
+
+            // Validate each question
+            for (let i = 0; i < totalQuestions; i++) {
+                if (!validateQuestion(i)) {
+                    isFormValid = false;
+                    break;
+                }
+            }
+
+            if (!isFormValid) {
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+                document.getElementById('Questions').submit(); // Submit the form
+            }
         }
 
         // Initialize by showing the first question
@@ -87,5 +127,9 @@
 
 {% endblock %}
 
+
+
+
+    
 
 

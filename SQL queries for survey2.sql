@@ -1,0 +1,39 @@
+CREATE TABLE Users(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(255) NOT NULL,
+    Industry NVARCHAR(255) NOT NULL,
+    Country NVARCHAR(255) NOT NULL,
+    Internal_Audit INT NOT NULL,
+    Company_Size NVARCHAR(255) NOT NULL, 
+    Using_Solution NVARCHAR(255) NOT NULL,
+    Email NVARCHAR(255) NOT NULL,
+    Score INT,
+    Question_Id INT FOREIGN KEY REFERENCES Questions(id),
+);
+
+SELECT * FROM Users
+
+DROP TABLE Users
+
+ALTER TABLE Questions
+DROP COLUMN Score_B
+
+CREATE TABLE Industries(
+    id INT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+);
+
+CREATE TABLE Countries(
+    id INT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+);
+
+
+
+CREATE TABLE Questions(
+    id INT PRIMARY KEY IDENTITY(1,1),
+    Question VARCHAR(255) NOT NULL,
+    Answer VARCHAR(255) NOT NULL,
+);
+
+SELECT * FROM Questions
