@@ -7,11 +7,26 @@
 {% block content %}
     <h1>Hyphen Consultancy</h1>
     <h2>Survey</h2>
-    <button id="submit" class="btn btn-primary" type="button">To Registration</button>
-    <script>
-        document.getElementById("submit").addEventListener("click", function() {
-            window.location.href = "/register";
-        });
-    </script>
+    <div class = "container">
+        <button id="submit" class="btn btn-primary" type="button">To Registration</button>
+            <script>
+                document.getElementById("submit").addEventListener("click", function() {
+                    window.location.href = "/register";
+                });
+            </script>
+        </button>
+    </div>
+
+    <style>
+        h1{
+            text-align: center;
+        }
+        h2{
+            text-align: center;
+        }
+        .container{
+            text-align: center;
+        }
+    </style>
 {% endblock %}
 

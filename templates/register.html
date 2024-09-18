@@ -6,60 +6,88 @@
 
 {% block content %}
 <link rel="stylesheet" href="styles.css">
-<div class = "container">
-    <form id = "register" action = "/register" method = "post" class="row g-3">
+
+<!-- jQuery and jQuery UI for autocomplete -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<div class="container">
+    <form id="register" action="/register" method="post" class="row g-3">
         <div class="col-md-6">
-          <label for="Name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="Name" name = "Name" required>
+            <label for="Name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="Name" name="Name" required>
         </div>
         <div class="col-md-6">
-          <label for="Email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="Email" name = "Email" required>
+            <label for="Email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="Email" name="Email" required>
         </div>
         <div class="col-12">
-          <label for="Industry" class="form-label">Industry</label>
-          <input type="text" class="form-control" id="Industry" name = "Industry" required>
+            <label for="Industry" class="form-label">Industry</label>
+            <input type="text" class="form-control" id="Industry" name="Industry" required>
         </div>
         <div class="col-12">
-          <label for="Country" class="form-label">Country</label>
-          <input type="text" class="form-control" id="Country" name = "Country" required>
+            <label for="Country" class="form-label">Country</label>
+            <input type="text" class="form-control" id="Country" name="Country" required>
         </div>
         <div class="col-md-6">
-          <label for="Internal_Audit" class="form-label">Number of people in Internal Audit Department</label>
-          <input type="Number" class="form-control" id="Internal_Audit" name = "Internal_Audit" required>
+            <label for="Internal_Audit" class="form-label">Number of people in Internal Audit Department</label>
+            <input type="number" class="form-control" id="Internal_Audit" name="Internal_Audit" required>
         </div>
         <div class="col-md-4">
-          <label for="Company_Size" class="form-label">Company Size</label>
-          <select id="Company_Size" class="form-select" name = "Company_Size" required>
-            <option disabled selected value="">Choose</option>
-            <option>Small</option>
-            <option>Medium</option>
-            <option>Large</option>
-          </select>
+            <label for="Company_Size" class="form-label">Company Size</label>
+            <select id="Company_Size" class="form-select" name="Company_Size" required>
+                <option disabled selected value="">Choose</option>
+                <option>Small</option>
+                <option>Medium</option>
+                <option>Large</option>
+            </select>
         </div>
         <div class="col-md-2">
-          <label for="Using_Solution" class="form-label">Using an internal audit solution?</label>
-          <select id = "Using_Solution" class = "form-select" required name = "Using_Solution">
-            <option selected>No</option>
-            <option>Yes</option>
+            <label for="Using_Solution" class="form-label">Using an internal audit solution?</label>
+            <select id="Using_Solution" class="form-select" required name="Using_Solution">
+                <option selected>No</option>
+                <option>Yes</option>
+            </select> <!-- Corrected the missing closing tag -->
         </div>
         <div class="col-12">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="gridCheck">
-          </div>
-        </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary">To the Survey</button>
+            <button type="submit" class="btn btn-primary">To the Survey</button>
         </div>
     </form>
+
     <script>
-        function submitForm() {
-            document.getElementById("yourFormId").submit();
-        }
+      function submitForm() {
+        document.getElementById("yourFormId").submit();
+    }
+        $(document).ready(function () {
+            // Autocomplete for Industry
+            $("#Industry").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/autocomplete/industries",
+                        data: { q: request.term },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2
+            });
+
+            // Autocomplete for Country
+            $("#Country").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/autocomplete/countries",
+                        data: { q: request.term },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2
+            });
+        });
     </script>
 </div>
-
-
-  
-
 {% endblock %}

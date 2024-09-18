@@ -1,17 +1,123 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Your Score
+    Thank You
 {% endblock %}
 
 {% block content %}
-    <h1>Thank You!</h1>
-    <p>Your total score is: {{ total_score }}</p>
+    <h1>Thank You For Participating!</h1>
 
-    <h2>Category Scores</h2>
-    <ul>
-        {% for category, score in category_scores.items() %}
-            <li>{{ category }}: {{ score }}</li>
-        {% endfor %}
-    </ul>
+    <div class="slider-container">
+        <label for="totalScoreSlider">Your Score: <span id="sliderValue">{{ total_score }}</span></label>
+        <input type="range" min="0" max="120" step="1" class="slider" id="changeSlider" disabled>
+        
+        <div class="labels">
+            <span class="label" style="left: 0%;">You're a dissapointement</span>
+            <span class = "label" style = "left: 45%;">You're Getting there</span>
+            <span class="label" style="left: 100%;">You're Him</span>
+        </div>
+    </div>
+    
+    <script>
+        window.onload = function() {
+            const totalScoreSlider = document.getElementById("changeSlider");
+            const sliderValue = document.getElementById("sliderValue");
+    
+            // Get the score from the backend
+            const score = {{ total_score }};
+            
+            // Set slider value and displayed score
+            totalScoreSlider.value = score;
+            sliderValue.textContent = score;
+    
+            // Apply multicolor background to the slider
+            applyMulticolorBackground(totalScoreSlider);
+        };
+    
+        function applyMulticolorBackground(slider) {
+            // Create a gradient background: Red for 0-30, Yellow for 31-75, Green for 76-120
+            slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
+        }
+    </script>
+    
+    <style>
+        .slider-container {
+            margin: 20px 0;
+            width: 80%;
+        }
+    
+        input[type="range"] {
+            width: 100%;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            outline: none;
+            cursor: not-allowed; /* Disabled cursor */
+        }
+    
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff; /* Keep the thumb blue */
+        }
+    
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+    
+        .labels {
+            position: relative;
+            margin-top: 1px;
+            width: 100%;
+        }
+    
+        .label {
+            position: absolute;
+            font-size: 14px;
+            transform: translateX(-50%);
+        }
+        #sliderValue {
+            font-size: 30px;  /* Increase the font size */
+            color: #007bff;   /* Blue color */
+            font-weight: bold; /* Bold text */
+        }
+        
+        label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        h2{
+            margin-top: 60px;
+        }
+        table{
+            margin-right: 60px;
+        }
+    </style>
+    
+
+    <h2>Score By Section</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Section</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category, score in category_scores.items() %}
+                <tr>
+                    <td>{{ category }}</td>
+                    <td>{{ score }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
 {% endblock %}
+

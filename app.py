@@ -1,4 +1,4 @@
-from flask import session, redirect, render_template, Flask, request
+from flask import session, redirect, render_template, Flask, request, jsonify
 from helpers import determine_next_category
 import sqlite3
 import pyodbc
@@ -25,6 +25,32 @@ conn_str = (
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
+
+@app.route("/autocomplete/countries", methods=["GET"])
+def autocomplete_countries():
+    query = request.args.get("q", "").lower().strip()
+    if query:
+        result = cursor.execute(
+            "SELECT Name FROM Countries WHERE LOWER(Name) LIKE ? ORDER BY ID",
+            ('%' + query + '%',)
+        ).fetchall()
+        countries = [r[0] for r in result]
+        return jsonify(countries)
+    return jsonify([])
+
+@app.route("/autocomplete/industries", methods=["GET"])
+def autocomplete_industries():
+    query = request.args.get("q", "").lower().strip()
+    if query:
+        result = cursor.execute(
+            "SELECT Name FROM Industries WHERE LOWER(Name) LIKE ? ORDER BY ID",
+            ('%' + query + '%',)
+        ).fetchall()
+        industries = [r[0] for r in result]
+        return jsonify(industries)
+    return jsonify([])
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Initialize session for the new user
@@ -39,13 +65,12 @@ def register():
 
         # Retrieve form data
         Name = request.form.get("Name")
-        Industry = request.form.get("Industry").lower().strip()
-        Country = request.form.get("Country").lower().strip()
         Internal_Audit = request.form.get("Internal_Audit")
         Company_Size = request.form.get("Company_Size")
         Using_Solution = request.form.get("Using_Solution")
         Email = request.form.get("Email")
-
+        Industry = request.form.get("Industry").strip().lower()
+        Country = request.form.get("Country").strip().lower()
         # Input validation
         if not Name:
             return "Enter a Name"
@@ -389,17 +414,3 @@ def thankyou():
     scores_by_category = {row[0]: row[1] for row in category_scores}
 
     return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category)
-
-
-
-        
-        
-
-    
-
-
-        
-        
-
-        
-
