@@ -5,28 +5,99 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Hyphen Consultancy</h1>
-    <h2>Survey</h2>
+    <link rel="stylesheet" href="styles.css">
     <div class = "container">
-        <button id="submit" class="btn btn-primary" type="button">To Registration</button>
+        <h1>Take Our Expert-Designed <span class = "highlight">Internal Audit</span> Survey</h1>
+        <p>In just a few minutes, you'll get immediate insights on how your audit function measures up against global standards and industry best practices.</p>
+
+        <h5> What You'll Gain:</h5>
+        <ul>
+            <li><span class="highlight1">Identify Hidden Gaps</span>: Uncover weaknesses in your internal audit processes that may be holding you back.</li>
+            <li><span class = "highlight1">Benchmark Your Audit Function</span>: See how your team stacks up against global standards and identify areas for improvement.</li>
+            <li><span class = "highlight1">Actionable Insights</span>: Get tailored recommendations to enhance your internal audit framework and boost compliance and risk management.</li>
+        </ul>
+        <button id = "submit" class="start-survey-btn custom-btn">Start Survey
             <script>
                 document.getElementById("submit").addEventListener("click", function() {
-                    window.location.href = "/register";
+                    window.location.href = "/questions";
                 });
             </script>
         </button>
     </div>
-
     <style>
+        .highlight1{
+            font-weight: bold;
+        }
+        .highlight{
+            color: #FF5508;
+        }
+
+        h5{
+            font-weight: bold;
+            font-size: 15px;
+        }
         h1{
-            text-align: center;
+            width: 1183px
+            height: 127px
+            font-size: 35px;
+            font-family: 'lato',sans-serif;
+            font-weight: bold;
         }
         h2{
-            text-align: center;
+            font-family: 'lato',sans-serif;
         }
-        .container{
+        
+        body {
+            font-family: "lato", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFD580;
+        }
+        
+        .container {
+            max-height: 1000px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
             text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            margin-bottom: 30px;
+        }
+        
+        ul {
+            margin-top: 20px;
+            list-style-type: disc;
+            padding: 0;
+        }
+        
+        li {
+            margin-bottom: 10px;
+            font-size: 15px
+            margin-right: 30px
+        }
+        button.start-survey-btn.custom-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: #FF5508;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+            height: 50px;
+            font-size: 18px;
         }
     </style>
+    
 {% endblock %}
 

@@ -16,21 +16,35 @@
         #submit {
             display: none;
         }
+        .question.horizontal .options {
+            display: flex;
+            flex-direction: row; /* Display radio buttons horizontally */
+        }
+        .question.horizontal .options label {
+            margin-right: 10px; /* Space between horizontally aligned radio buttons */
+        }
+        .question:not(.horizontal) .options {
+            display: flex;
+            flex-direction: column; /* Display radio buttons vertically */
+        }
+        .question:not(.horizontal) .options label {
+            margin-bottom: 5px; /* Space between vertically aligned radio buttons */
+        }
     </style>
 
     <div class="container">
         <h2>{{ current_category }}</h2>
-        
+        <hr class="line">
         <form id="Questions" method="post" action="/questions">
             {% for question in questions %}
-            <div class="question" id="question{{ loop.index }}">
+            <div class="question {% if loop.index in [1, 2] and current_category == "Values" %}horizontal{% endif %}" id="question{{ loop.index }}">
                 <p>{{ question['text'] }}</p>
                 <div class="options">
                     {% for option in question['options'] %}
                     <label>
                         <input type="radio" name="{{ question['id'] }}" value="{{ option['value'] }}">
                         {{ option['label'] }}
-                    </label><br>
+                    </label>
                     {% endfor %}
                 </div>
             </div>
@@ -41,8 +55,8 @@
 
             <!-- Navigation Buttons -->
             <div id="navigationBtns">
-                <button type="button" id="prevBtn" onclick="previousQuestion()" style="display: none;">Previous</button>
-                <button type="button" id="nextBtn" onclick="nextQuestion()">Next</button>
+                <button type="button" id="prevBtn" onclick="previousPage()" style="display: none;">Previous</button>
+                <button type="button" id="nextBtn" onclick="nextPage()">Next</button>
             </div>
 
             <!-- Submit Button -->
@@ -53,61 +67,75 @@
     </div>
 
     <script>
-        let currentQuestion = 0;
+        const questionsPerPage = 2;
+        let currentPage = 0;
         const totalQuestions = document.querySelectorAll('.question').length;
+        const totalPages = Math.ceil(totalQuestions / questionsPerPage);
 
-        function showQuestion(index) {
-            document.querySelectorAll('.question').forEach((q, i) => {
-                q.classList.toggle('active', i === index);
+        function showPage(page) {
+            const questions = document.querySelectorAll('.question');
+            questions.forEach((q, i) => {
+                const start = page * questionsPerPage;
+                const end = start + questionsPerPage;
+                q.classList.toggle('active', i >= start && i < end);
             });
 
-            // Show or hide buttons based on the question index
-            document.getElementById('prevBtn').style.display = (index === 0) ? 'none' : 'inline-block'; // Show "Previous" button if not the first question
-            document.getElementById('nextBtn').style.display = (index === totalQuestions - 1) ? 'none' : 'inline-block'; // Hide "Next" button if it's the last question
-            document.getElementById('submit').style.display = (index === totalQuestions - 1) ? 'block' : 'none'; // Show "Submit" button if it's the last question
+            // Show or hide buttons based on the current page
+            document.getElementById('prevBtn').style.display = (page === 0) ? 'none' : 'inline-block'; // Show "Previous" button if not the first page
+            document.getElementById('nextBtn').style.display = (page === totalPages - 1) ? 'none' : 'inline-block'; // Hide "Next" button if it's the last page
+            document.getElementById('submit').style.display = (page === totalPages - 1) ? 'block' : 'none'; // Show "Submit" button if it's the last page
         }
 
-        function validateQuestion(index) {
-            const currentQuestionElement = document.querySelectorAll('.question')[index];
-            const radios = currentQuestionElement.querySelectorAll("input[type='radio']");
-            const isAnyOptionChecked = Array.from(radios).some(radio => radio.checked);
+        function validatePage(page) {
+            const start = page * questionsPerPage;
+            const end = start + questionsPerPage;
+            const questions = Array.from(document.querySelectorAll('.question')).slice(start, end);
+            let isValid = true;
 
-            return isAnyOptionChecked;
+            questions.forEach(q => {
+                const radios = q.querySelectorAll("input[type='radio']");
+                const isAnyOptionChecked = Array.from(radios).some(radio => radio.checked);
+                if (!isAnyOptionChecked) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
         }
 
-        function nextQuestion() {
+        function nextPage() {
             const errorMessage = document.getElementById('error-message');
             
-            if (!validateQuestion(currentQuestion)) {
+            if (!validatePage(currentPage)) {
                 errorMessage.style.display = 'block';
             } else {
                 errorMessage.style.display = 'none';
-                currentQuestion++;
-                if (currentQuestion >= totalQuestions) {
-                    currentQuestion = totalQuestions - 1; // Ensure it doesn't exceed the last question
+                currentPage++;
+                if (currentPage >= totalPages) {
+                    currentPage = totalPages - 1; // Ensure it doesn't exceed the last page
                 }
-                showQuestion(currentQuestion);
+                showPage(currentPage);
             }
         }
 
-        function previousQuestion() {
+        function previousPage() {
             const errorMessage = document.getElementById('error-message');
             errorMessage.style.display = 'none'; // Hide error message when going back
 
-            currentQuestion--;
-            if (currentQuestion < 0) {
-                currentQuestion = 0; // Ensure it doesn't go below the first question
+            currentPage--;
+            if (currentPage < 0) {
+                currentPage = 0; // Ensure it doesn't go below the first page
             }
-            showQuestion(currentQuestion);
+            showPage(currentPage);
         }
 
         function validateSubmit() {
             const errorMessage = document.getElementById('error-message');
             let isFormValid = true;
 
-            // Validate each question
-            for (let i = 0; i < totalQuestions; i++) {
-                if (!validateQuestion(i)) {
+            // Validate each page
+            for (let i = 0; i < totalPages; i++) {
+                if (!validatePage(i)) {
                     isFormValid = false;
                     break;
                 }
@@ -121,9 +149,38 @@
             }
         }
 
-        // Initialize by showing the first question
-        showQuestion(currentQuestion);
+        // Initialize by showing the first page
+        showPage(currentPage);
     </script>
+
+    <style>
+
+        h2{
+            text-align: center
+        }
+
+        .question{
+            margin-top: 30px;
+        }
+
+        .container {
+            max-height: 1000px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .line {
+            border: 0;
+            border-top: 1px solid #000; /* Line color and thickness */
+            width: 100%;
+            margin: 20px 0; /* Adjust margin as needed */
+        }
+        
+    </style>
 
 {% endblock %}
 

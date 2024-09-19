@@ -1,0 +1,6 @@
+SELECT * FROM Users
+
+SELECT * FROM Questions
+
+ALTER TABLE Users
+DROP COLUMN Question_Id

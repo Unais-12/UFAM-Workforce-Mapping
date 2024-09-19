@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 app.config["SESSION_TYPE"] = 'filesystem'
-app.config["SESSION_PERMANENT"] = 'False'
+app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 
@@ -125,8 +125,6 @@ def index():
 
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
-    if request.form.get == "":
-        return "You have to select atleast one option"
     categories = {
         'Values': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
         'Methadology': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
@@ -337,7 +335,7 @@ def questions():
         ] 
     }
     if request.method == "POST":
-        user_id = session.get("id")
+        user_id = session.get("Id")
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
@@ -366,17 +364,16 @@ def questions():
             USING (VALUES (?, ?, ?)) AS source (user_id, category, score)
             ON target.user_id = source.user_id AND target.category = source.category
             WHEN MATCHED THEN 
-                UPDATE SET target.score = source.score
+                UPDATE SET score = source.score
             WHEN NOT MATCHED THEN 
                 INSERT (user_id, category, score) 
-                VALUES (source.user_id, source.category, source.score);
+                VALUES (source.user_id, source.category, Source.score);
             """, (user_id, current_category, category_scores[current_category])
         )
-
         conn.commit()
         # Update total score for the user in Users table
         cursor.execute(
-            """UPDATE Users SET score = ? WHERE id = ?""",
+            """UPDATE Users SET Score = ? WHERE id = ?""",
             (total_score, user_id)
         )
         conn.commit()
