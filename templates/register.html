@@ -5,14 +5,50 @@
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="styles.css">
+
+<style>
+    .btn-primary{
+        display: block;
+        margin: 20px auto 0;
+        padding: 10px 20px;
+        background-color: #FF5508;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 150px;
+        height: 50px;
+        font-size: 18px;
+    }
+    .form{
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    h1{
+        color: #FF5508;
+        font-size: 40px;
+        text-align: center;
+    }
+    p{
+        text-align: center;
+    }
+    body{
+        background-color: #FAF9F6;
+    }
+</style>
 
 <!-- jQuery and jQuery UI for autocomplete -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
-<div class="container">
+<div class="form">
+    <h1>One More Step</h1>
+    <p>Kindly fill out this form to begin the survey<p>
     <form id="register" action="/register" method="post" class="row g-3">
         <div class="col-md-6">
             <label for="Name" class="form-label">Name</label>
@@ -35,23 +71,24 @@
             <input type="number" class="form-control" id="Internal_Audit" name="Internal_Audit" required>
         </div>
         <div class="col-md-4">
-            <label for="Company_Size" class="form-label">Company Size</label>
+            <label for="Company_Size" class="form-label">Number Of Employees</label>
             <select id="Company_Size" class="form-select" name="Company_Size" required>
                 <option disabled selected value="">Choose</option>
-                <option>Small</option>
-                <option>Medium</option>
-                <option>Large</option>
+                <option>Less than 50</option>
+                <option>50-250</option>
+                <option>250-1000</option>
+                <option>1000+</option>
             </select>
         </div>
         <div class="col-md-2">
-            <label for="Using_Solution" class="form-label">Using an internal audit solution?</label>
+            <label for="Using_Solution" class="form-label">Using audit solution?</label>
             <select id="Using_Solution" class="form-select" required name="Using_Solution">
                 <option selected>No</option>
                 <option>Yes</option>
             </select> <!-- Corrected the missing closing tag -->
         </div>
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">To the Survey</button>
+            <button type="submit" class="btn btn-primary">To The Survey</button>
         </div>
     </form>
 

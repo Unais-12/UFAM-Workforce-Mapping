@@ -7,37 +7,150 @@
 {% block content %}
 
     <style>
+        body {
+            font-family: "lato", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FAF9F6;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            font-family: 'lato', sans-serif;
+        }
+
+        .form {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
         .question {
             display: none;
+            border-bottom: 2px solid #ccc; /* Adds a line between questions */
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .question.active {
             display: block;
         }
-        #submit {
+
+        #submitBtn {
             display: none;
         }
+
         .question.horizontal .options {
             display: flex;
             flex-direction: row; /* Display radio buttons horizontally */
+            gap: 20px;
         }
+
         .question.horizontal .options label {
             margin-right: 10px; /* Space between horizontally aligned radio buttons */
         }
+
         .question:not(.horizontal) .options {
             display: flex;
             flex-direction: column; /* Display radio buttons vertically */
         }
+
         .question:not(.horizontal) .options label {
             margin-bottom: 5px; /* Space between vertically aligned radio buttons */
         }
+
+        /* Progress Bar Styling */
+        .progress-container {
+            width: 10%;
+            height: 10px; /* Smaller height */
+            background-color: #f3f3f3;
+            border-radius: 50px;
+            margin: 20px auto;
+            position: fixed;
+            bottom: 30px; /* Positioned towards the bottom */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4caf50;
+            border-radius: 50px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 1px;
+            position: fixed;
+            bottom: 23px; /* Text aligned with the bar */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Styling the Buttons */
+        #navigationBtns {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #nextBtn, #submitBtn, #prevBtn {
+            padding: 10px 20px;
+            background-color: #FF5508; /* Orange background */
+            color: #fff; /* White text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100px;
+            height: 50px;
+            font-size: 18px;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+        }
+
+        #nextBtn:hover, #submitBtn:hover, #prevBtn:hover {
+            background-color: #e64c00; /* Darker orange on hover */
+            transform: scale(1.05); /* Slightly enlarge button on hover */
+        }
+
+        #nextBtn:active, #submitBtn:active, #prevBtn:active {
+            background-color: #cc4400; /* Even darker orange on click */
+        }
+
+        /* Error message styling */
+        #error-message {
+            color: red;
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
     </style>
 
-    <div class="container">
+    <div class="form">
         <h2>{{ current_category }}</h2>
         <hr class="line">
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">
+            <span id="progressText">0/15</span>
+        </div>
+
         <form id="Questions" method="post" action="/questions">
             {% for question in questions %}
-            <div class="question {% if loop.index in [1, 2] and current_category == "Values" %}horizontal{% endif %}" id="question{{ loop.index }}">
+            <div class="question {% if question.category == current_category and loop.index in [1, 2] and current_category == "Values" %}horizontal{% endif %}" id="question{{ loop.index }}">
                 <p>{{ question['text'] }}</p>
                 <div class="options">
                     {% for option in question['options'] %}
@@ -51,16 +164,12 @@
             {% endfor %}
 
             <!-- Error message for validation -->
-            <div id="error-message" style="color: red; display: none;">Please select an option before proceeding.</div>
+            <div id="error-message">Please select an option before proceeding.</div>
 
             <!-- Navigation Buttons -->
             <div id="navigationBtns">
                 <button type="button" id="prevBtn" onclick="previousPage()" style="display: none;">Previous</button>
                 <button type="button" id="nextBtn" onclick="nextPage()">Next</button>
-            </div>
-
-            <!-- Submit Button -->
-            <div id="submit">
                 <button type="button" id="submitBtn" onclick="validateSubmit()">Submit</button>
             </div>
         </form>
@@ -71,6 +180,14 @@
         let currentPage = 0;
         const totalQuestions = document.querySelectorAll('.question').length;
         const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        function updateProgressBar() {
+            const percentage = ((currentPage + 1) / totalPages) * 100;
+            progressBar.style.width = percentage + '%';
+            progressText.innerText = `${currentPage + 1}/${totalPages}`;
+        }
 
         function showPage(page) {
             const questions = document.querySelectorAll('.question');
@@ -80,10 +197,13 @@
                 q.classList.toggle('active', i >= start && i < end);
             });
 
+            // Update the progress bar
+            updateProgressBar();
+
             // Show or hide buttons based on the current page
             document.getElementById('prevBtn').style.display = (page === 0) ? 'none' : 'inline-block'; // Show "Previous" button if not the first page
             document.getElementById('nextBtn').style.display = (page === totalPages - 1) ? 'none' : 'inline-block'; // Hide "Next" button if it's the last page
-            document.getElementById('submit').style.display = (page === totalPages - 1) ? 'block' : 'none'; // Show "Submit" button if it's the last page
+            document.getElementById('submitBtn').style.display = (page === totalPages - 1) ? 'inline-block' : 'none'; // Show "Submit" button if it's the last page
         }
 
         function validatePage(page) {
@@ -105,7 +225,7 @@
 
         function nextPage() {
             const errorMessage = document.getElementById('error-message');
-            
+
             if (!validatePage(currentPage)) {
                 errorMessage.style.display = 'block';
             } else {
@@ -149,40 +269,16 @@
             }
         }
 
-        // Initialize by showing the first page
+        // Initialize by showing the first page and updating the progress bar
         showPage(currentPage);
+        updateProgressBar();
     </script>
 
-    <style>
-
-        h2{
-            text-align: center
-        }
-
-        .question{
-            margin-top: 30px;
-        }
-
-        .container {
-            max-height: 1000px;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .line {
-            border: 0;
-            border-top: 1px solid #000; /* Line color and thickness */
-            width: 100%;
-            margin: 20px 0; /* Adjust margin as needed */
-        }
-        
-    </style>
-
 {% endblock %}
+
+
+
+
 
 
 

@@ -2,6 +2,8 @@ from flask import session, redirect, render_template, Flask, request, jsonify
 from helpers import determine_next_category
 import sqlite3
 import pyodbc
+import uuid
+import hashlib
 from flask_session import Session
 
 
@@ -123,18 +125,20 @@ def register():
 def index():
     return render_template("index.html")
 
+
+
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
     categories = {
         'Values': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
-        'Methadology': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+        'Methodology': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
         'Stakeholder Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
         'Resource Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
     }
     
     questions_per_category = {
         'Values': 5,
-        'Methadology': 11,
+        'Methodology': 11,
         'Stakeholder Management': 6,
         'Resource Management': 9,
     }
@@ -171,7 +175,7 @@ def questions():
                 {'label': 'Yes', 'value': 'D'},
             ]}
         ],
-        'Methadology': [
+        'Methodology': [
             {'id' : 'q1', 'text': 'Question 6: As part of your audit engagements or otherwise in addition to providing assurance and insight do you also provide the foresight to better protect and create value for the entity.', 'options': [
                 {'label': 'Never', 'value': 'A'},
                 {'label': 'Very Rare', 'value': 'B'},
@@ -252,25 +256,25 @@ def questions():
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q3', 'text': 'Question 18: Is the board helped by CAE in order to understand qualification requirements of CAE?', 'options':[
+            {'id': 'q3', 'text': 'Question 19: Is the board helped by CAE in order to understand qualification requirements of CAE?', 'options':[
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q4', 'text': 'Question 19: Is there a practice in place whereby the CAE conduct Meetings with senior executives and board members to build relationship and identify their concerns?', 'options': [
+            {'id': 'q4', 'text': 'Question 20: Is there a practice in place whereby the CAE conduct Meetings with senior executives and board members to build relationship and identify their concerns?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q5', 'text': 'Question 20: Does Internal Audit Function use Newsletters, presentations and other form of communication for sharing internal audit role and benefit with stakeholders', 'options': [
+            {'id': 'q5', 'text': 'Question 21: Does Internal Audit Function use Newsletters, presentations and other form of communication for sharing internal audit role and benefit with stakeholders', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q6', 'text': 'Question 21: For the development of Internal Audit performance objectives, does CAE incorporate input from board and senior management', 'options': [
+            {'id': 'q6', 'text': 'Question 22: For the development of Internal Audit performance objectives, does CAE incorporate input from board and senior management', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
@@ -278,55 +282,55 @@ def questions():
             ]},
         ],
         'Resource Management': [
-            {'id': 'q1', 'text': 'Question 22: Is there a practice in place through which further Education plans of chief audit executive are developed?', 'options': [
+            {'id': 'q1', 'text': 'Question 23: Is there a practice in place through which further Education plans of chief audit executive are developed?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q2', 'text': 'Question 23: Does CAE allocate Sufficient budget for the successful implementation of audit plan including training and acquisition of technological tools?', 'options': [
+            {'id': 'q2', 'text': 'Question 24: Does CAE allocate Sufficient budget for the successful implementation of audit plan including training and acquisition of technological tools?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q3', 'text': 'Question 24: Has the CAE developed approach to recruit, develop and retain competent internal auditors?','options': [
+            {'id': 'q3', 'text': 'Question 25: Has the CAE developed approach to recruit, develop and retain competent internal auditors?','options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q4', 'text': 'Questions 25: Is there a practice in place whereby Gap analysis between competency of internal auditor on staff and those required is carried out?', 'options': [
+            {'id': 'q4', 'text': 'Questions 26: Is there a practice in place whereby Gap analysis between competency of internal auditor on staff and those required is carried out?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q5', 'text': 'Question 26: Does CAE collaborate with internal auditors to develop individual competencies through trainings?', 'options': [
+            {'id': 'q5', 'text': 'Question 27: Does CAE collaborate with internal auditors to develop individual competencies through trainings?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q6', 'text': 'Question 27: Is there a practice in place, whereby, In case of insufficient resources, the board is timely informed about the impact of limitations?', 'options': [
+            {'id': 'q6', 'text': 'Question 28: Is there a practice in place, whereby, In case of insufficient resources, the board is timely informed about the impact of limitations?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q7', 'text': 'Question 28: Does the CAE evaluate the technology used by internal audit function and ensure that it support internal audit process?', 'options': [
+            {'id': 'q7', 'text': 'Question 29: Does the CAE evaluate the technology used by internal audit function and ensure that it support internal audit process?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q8', 'text': 'Question 29:  Does CAE collaborate with organization’s IT and IS to implement technological resources properly?', 'options': [
+            {'id': 'q8', 'text': 'Question 30:  Does CAE collaborate with organization’s IT and IS to implement technological resources properly?', 'options': [
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
                 {'label': 'Yes', 'value': 'D'},
             ]},
-            {'id': 'q9', 'text': 'Question 30: Does Internal Audit function use any Software to track progress of auditors recommendations?', 'options':[
+            {'id': 'q9', 'text': 'Question 31: Does Internal Audit function use any Software to track progress of auditors recommendations?', 'options':[
                 {'label': 'No', 'value': 'A'},
                 {'label': 'Under Consideration', 'value': 'B'},
                 {'label': 'Under Implementation', 'value': 'C'},
@@ -335,7 +339,7 @@ def questions():
         ] 
     }
     if request.method == "POST":
-        user_id = session.get("Id")
+        user_id = session.get("id")
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
@@ -359,17 +363,18 @@ def questions():
 
         # Update or insert the category score into the UserScores table
         cursor.execute(
-            """
-            MERGE INTO UserScores AS target
-            USING (VALUES (?, ?, ?)) AS source (user_id, category, score)
-            ON target.user_id = source.user_id AND target.category = source.category
-            WHEN MATCHED THEN 
-                UPDATE SET score = source.score
-            WHEN NOT MATCHED THEN 
-                INSERT (user_id, category, score) 
-                VALUES (source.user_id, source.category, Source.score);
-            """, (user_id, current_category, category_scores[current_category])
-        )
+    """
+    MERGE INTO UserScores AS target
+    USING (VALUES (?, ?, ?)) AS source (user_id, category, Score)
+    ON target.user_id = source.user_id AND target.category = source.category
+    WHEN MATCHED THEN 
+        UPDATE SET Score = source.Score
+    WHEN NOT MATCHED THEN 
+        INSERT (user_id, category, Score) 
+        VALUES (source.user_id, source.category, source.Score);
+    """, (user_id, current_category, category_scores[current_category])
+)
+
         conn.commit()
         # Update total score for the user in Users table
         cursor.execute(
@@ -384,7 +389,7 @@ def questions():
             session['category'] = next_category
             return redirect("/questions")
         else:
-            return redirect("/thankyou")
+            return redirect("/wait")
 
     else:
         current_category = session.get("category", "Values")
@@ -394,13 +399,19 @@ def questions():
     
 @app.route("/thankyou")
 def thankyou():
+    total_cat_score = {
+        'Values' : {'total': 20},
+        'Methodology': {'total': 44},
+        'Stakeholder Management' : {'total': 24},
+        'Resource Management': {'total': 36},
+    }
     if "id" not in session:
         return redirect("/register")
 
     user_id = session["id"]
 
     # Retrieve total score
-    cursor.execute("""SELECT score FROM Users WHERE id = ?""", (user_id,))
+    cursor.execute("""SELECT Score FROM Users WHERE Id = ?""", (user_id))
     row = cursor.fetchone()
     total_score = row[0] if row else None
 
@@ -410,4 +421,12 @@ def thankyou():
 
     scores_by_category = {row[0]: row[1] for row in category_scores}
 
-    return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category)
+    return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
+
+@app.route("/wait")
+def wait():
+    return render_template("wait.html")
+
+@app.route("/choice")
+def choice():
+    return render_template("choice.html")

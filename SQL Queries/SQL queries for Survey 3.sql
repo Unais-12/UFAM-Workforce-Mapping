@@ -8,8 +8,8 @@ CREATE TABLE UserScores (
     id INTEGER PRIMARY KEY IDENTITY(1,1),
     user_id INTEGER,
     category TEXT,
-    score INTEGER,
-    FOREIGN KEY(user_id) REFERENCES Users(id)
+    FOREIGN KEY(user_id) REFERENCES Users(id)score INTEGER,
+    
 );
 SELECT * FROM UserScores
 SELECT * FROM Countries

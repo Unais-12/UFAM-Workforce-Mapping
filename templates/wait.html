@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Wait
+{% endblock %}
+
+{% block content %}
+
+    <style>
+        body, h1, p {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Container styling to center content */
+        .container {
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        /* Heading (h1) styling */
+        h1 {
+            font-size: 36px;
+            color: #FF5508; /* Orange color */
+            margin-bottom: 20px;
+        }
+
+        /* Paragraph (p) styling */
+        p {
+            font-size: 18px;
+            color: #333; /* Darker text color */
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+        /* Button styling */
+        .view-results-btn {
+            background-color: #FF5508; /* Orange background */
+            color: white; /* White text */
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .view-results-btn:hover {
+            background-color: #e64a05; /* Darker orange on hover */
+            transform: scale(1.05); /* Slightly enlarge the button on hover */
+        }
+
+        /* Optional: Background styling */
+        body {
+            background-color: #fff;
+            position: relative;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            background-color: #FF5508;
+            border-radius: 50%;
+            width: 250px;
+            height: 250px;
+            z-index: -1;
+        }
+
+        /* Position of the background circles */
+        body::before {
+            bottom: 0;
+            left: -100px;
+        }
+
+        body::after {
+            top: 100px;
+            right: -100px;
+        }
+
+    </style>
+
+    <div class = "container">
+        <h2>Almost There!</h2>
+        <p>Thank you for completing the Internal Audit Survey. Your responses are being processed, and we’re preparing your personalized insights.</p>
+        <button id = "submit" class="view-results-btn">View My Results
+            <script>
+                document.getElementById("submit").addEventListener("click", function() {
+                    window.location.href = "/thankyou";
+                });
+            </script>
+        </button>
+    </div>
+    <style>
+        h2{
+            text-align: center;
+            padding-top: 100px;
+            color:#FF5508
+        }
+        p{
+            text-align: center;
+
+        }
+    </style>
+{% endblock %}

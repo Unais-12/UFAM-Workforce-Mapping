@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+
+{% block title%}
+    choice
+{%endblock%}
+
+{% block content%}
+
+    <style>
+        .container{
+            max-height: 1000px;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #FF6C00;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 20px;
+        }
+        
+        .result-options {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .result-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 45%;
+        }
+        
+        h2 {
+            color: #FF6C00;
+            margin-bottom: 10px;
+        }
+        
+        h3 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        ul {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        ul li {
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            background-color: #FF6C00;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background-color: #e65a00;
+        }
+        
+        .free-result {
+            background-color: #F9F9F9;
+        }
+        
+        .premium-result {
+            background-color: #FFEDD9;
+        }
+        
+        .premium-result .btn {
+            background-color: #FF6C00;
+        }
+        
+        .premium-result .btn:hover {
+            background-color: #e65a00;
+        }
+        
+        @media (max-width: 768px) {
+            .result-options {
+                flex-direction: column;
+                align-items: center;
+            }
+        
+            .result-box {
+                width: 100%;
+            }
+        }
+        
+    </style>
+
+    <div class="container">
+        <h1>Choose Your Results</h1>
+        <p>Thank you for completing the Internal Audit Survey! Your personalized insights are ready. Now, choose how you'd like to view your results:</p>
+
+        <div class="result-options">
+            <div class="result-box free-result">
+                <h2>Free Result</h2>
+                <h3>Quick Insights to Get Started</h3>
+                <p>Get an overview of your audit function's performance with key insights into how your team measures up against industry standards.</p>
+                <p><strong>What You Get:</strong></p>
+                <ul>
+                    <li>A high-level summary of your internal audit performance.</li>
+                    <li>Key areas where your controls are strong and where improvements may be needed.</li>
+                </ul>
+                <button class="btn free-btn" id="freeResultBtn">Get Free Results</button>
+            </div>
+
+            <div class="result-box premium-result">
+                <h2>Premium Result</h2>
+                <h3>In-Depth Analysis and Action Plan</h3>
+                <p>A detailed breakdown of your results, including tailored recommendations and strategies for improvement.</p>
+                <p><strong>What You Get:</strong></p>
+                <ul>
+                    <li>Comprehensive, detailed analysis of each aspect of your internal audit function.</li>
+                    <li>A step-by-step action plan to enhance compliance, efficiency, and risk management.</li>
+                    <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
+                </ul>
+                <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add click event for Free Result button
+        document.getElementById('freeResultBtn').addEventListener('click', function() {
+            window.location.href = '/thankyou'; // Redirect to /thankyou
+        });
+
+        // Add click event for Premium Result button
+        document.getElementById('premiumResultBtn').addEventListener('click', function() {
+            window.location.href = '/premium'; // Redirect to /premium
+        });
+    </script>
+
+
+{%endblock%}
