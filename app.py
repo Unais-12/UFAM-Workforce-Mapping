@@ -1,9 +1,6 @@
 from flask import session, redirect, render_template, Flask, request, jsonify,flash
 from helpers import determine_next_category
-import sqlite3
 import pyodbc
-import uuid
-import hashlib
 from flask_session import Session
 import os
 
