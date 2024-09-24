@@ -7,6 +7,13 @@
 {% block content%}
 
     <style>
+    .premium-result h2,
+    .premium-result h3,
+    .premium-result p,
+    .premium-result ul li {
+        color: white; /* Ensure specific text elements are white */
+    }
+    
         .container{
             max-height: 1000px;
             max-width: 900px;
@@ -43,6 +50,17 @@
         p {
             margin-bottom: 20px;
         }
+
+        .free-result p{
+            padding-top: 25px;
+            font-size: 15px;
+            text-align: left;
+        }
+        .premium-result p{
+            padding-top: 25px;
+            font-size: 15px;
+            text-align: left;
+        }
         
         .result-options {
             display: flex;
@@ -66,6 +84,7 @@
         h3 {
             color: #666;
             margin-bottom: 15px;
+            font-size: 15px;
         }
         
         ul {
@@ -97,15 +116,18 @@
         }
         
         .premium-result {
-            background-color: #FFEDD9;
+            background-color: #FF5508;
+            color: #FFFFFF
         }
         
         .premium-result .btn {
-            background-color: #FF6C00;
+            background-color: #F4F3F6;
+            color: #FF5508
         }
         
         .premium-result .btn:hover {
-            background-color: #e65a00;
+            background-color: #F4F3F6;
+            color: #000000
         }
         
         @media (max-width: 768px) {

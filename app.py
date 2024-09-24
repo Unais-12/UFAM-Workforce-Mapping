@@ -1,4 +1,4 @@
-from flask import session, redirect, render_template, Flask, request, jsonify
+from flask import session, redirect, render_template, Flask, request, jsonify,flash
 from helpers import determine_next_category
 import sqlite3
 import pyodbc
@@ -75,28 +75,28 @@ def register():
         Country = request.form.get("Country").strip().lower()
         # Input validation
         if not Name:
-            return "Enter a Name"
+            return("Enter a Name")
         elif not Industry:
-            return "Enter an Industry"
+            return("Enter an Industry")
         elif not Country:
-            return "Enter a Country"
+            return("Enter a Country")
         elif not Internal_Audit:
-            return "Have to enter the number of members in IA department"
+            return("Have to enter the number of members in IA department")
         elif not Company_Size:
-            return "Enter company size"
+            return("Enter company size")
         elif not Using_Solution:
-            return "Have to mention if using solution or not"
+            return("Have to mention if using solution or not")
         elif not Email:
-            return "Have to enter email"
+            return("Have to enter email")
         elif Industry not in industry:
-            return "Invalid Industry"
+            return("Invalid Industry")
         elif Country not in country:
-            return "Invalid Country"
+            return("Invalid Country")
 
         # Check if email is unique
         emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
         if Email in emails:
-            return "Email must be unique"
+            return("Email must be unique")
 
         # Insert the user into the database
         try:
@@ -430,3 +430,7 @@ def wait():
 @app.route("/choice")
 def choice():
     return render_template("choice.html")
+
+@app.route("/premium")
+def premium():
+    return render_template("premium.html")

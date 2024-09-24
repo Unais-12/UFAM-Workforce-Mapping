@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    premium results
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="popup">
+            <span class="close">&times;</span>
+            <h1>Thank You for Choosing Premium Results!</h1>
+            <p>Your detailed insights are being prepared, and we’re tailoring a comprehensive analysis specifically for your organization.</p>
+            
+            <h2>What's Included in Your Premium Report:</h2>
+            <ul>
+                <li><strong>In-Depth Analysis:</strong> A detailed breakdown of each aspect of your internal audit function, highlighting strengths, weaknesses, and opportunities for improvement.</li>
+                <li><strong>Tailored Recommendations:</strong> Customized action steps designed to close gaps in compliance, boost efficiency, and optimize your audit processes.</li>
+                <li><strong>Step-by-Step Action Plan:</strong> A roadmap for improving your internal controls, enhancing stakeholder confidence, and driving better outcomes.</li>
+                <li><strong>Consultation with Our Experts:</strong> A follow-up call with one of our internal audit consultants to discuss your results and answer any questions.</li>
+            </ul>
+            <p class = "email">You’ll receive the full report directly in your email inbox.</p>
+
+            <h2 class = "result-wait">While You Wait</h2>
+            <p class = "explore">Why not explore our latest insights and resources on internal audit best practices?</p>
+
+            <button class="cta-button">Visit Our Blog</button>
+        </div>
+    </div>
+    <style>
+        .email{
+            font-weight: bold; 
+            font-size: 14px;        
+            color: #FFFFFF     
+            margin-top: 20px; 
+            text-align: left;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .popup {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px; /* Increased from 600px to 800px */
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #F26522;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: bold
+        }
+        
+        h2 {
+            color: #000000;
+            font-size: 14px;
+            margin: 20px 0 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        ul {
+            text-align: left;
+            margin: 10px 0 20px;
+        }
+        
+        ul li {
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        button.cta-button {
+            background-color: #F26522;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        button.cta-button:hover {
+            background-color: #d14f1c;
+        }
+        
+        .close {
+            font-size: 24px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: red;
+        }
+        .result-wait{
+            color: #FF5508;
+            font-size: 25px;
+
+        }
+        .explore{
+            text-align: left;
+            font-size: 14px;
+        }
+    </style>
+
+{% endblock %}

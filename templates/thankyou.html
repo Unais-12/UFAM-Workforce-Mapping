@@ -35,6 +35,9 @@
                 </div>
             {% endfor %}
         </div>
+        <div class="premium-btn-container">
+            <button id="premiumBtn" class="prem-btn">Get Premium Result</button>
+        </div>
         <script>
             window.onload = function() {
                 const totalScoreSlider = document.getElementById("changeSlider");
@@ -96,8 +99,30 @@
                 }
                 element.style.color = color;  // Apply color dynamically
             }
+            document.getElementById('premiumBtn').onclick = function() {
+                window.location.href = '/premium';
+            };
         </script>
         <style>
+            .premium-btn-container {
+                text-align: center;
+                margin-top: 40px;
+            }
+
+            .prem-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #FF5508;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .prem-btn:hover {
+                background-color: #FF7633;
+            }
+
             .container {
                 max-width: 1200px;
                 margin: 40px auto;
@@ -111,6 +136,7 @@
                 text-align: center;
                 color: #FF5508;
                 margin-top: 50px;
+                font-weight: bold;
             }
 
             p {
