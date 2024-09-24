@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block content %}
+    <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
     <div class="container">
-        <h2>Your Free Results: High Level Audit Insights</h2>
+        <h2>Global Internal Audit Standard Readiness Assessment Score </h2>
         <p>Here’s an overview of how your internal audit function performs based on the survey responses</p>
 
         <!-- Dark background container for the slider -->
@@ -37,6 +38,7 @@
         </div>
         <div class="premium-btn-container">
             <button id="premiumBtn" class="prem-btn">Get Premium Result</button>
+            <button id="downloadPdfBtn" class="prem-btn">Download PDF</button>
         </div>
         <script>
             window.onload = function() {
@@ -69,10 +71,18 @@
                     // Update the color based on the percentage
                     updateCircleScoreColor(percentage, leftSideElement);
                 });
+            
+                // PDF download functionality
+                document.getElementById('downloadPdfBtn').onclick = function() {
+                    generatePDF();
+                };
+            
+                document.getElementById('premiumBtn').onclick = function() {
+                    window.location.href = '/premium';
+                };
             };
             
             function applyMulticolorBackground(slider) {
-                // Create a gradient background: Red for 0-30, Yellow for 31-75, Green for 76-124
                 slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
             }
             
@@ -99,9 +109,20 @@
                 }
                 element.style.color = color;  // Apply color dynamically
             }
-            document.getElementById('premiumBtn').onclick = function() {
-                window.location.href = '/premium';
-            };
+            
+            function generatePDF() {
+                const element = document.querySelector('.container'); // Capture the content inside the container
+                const opt = {
+                    margin: 0,  // Remove all margins
+                    filename: 'audit_report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },  // Ensure the canvas scales properly
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                html2pdf().from(element).set(opt).save(); // Use html2pdf library to generate and save the PDF
+            }
+
         </script>
         <style>
             .premium-btn-container {
@@ -288,6 +309,23 @@
                 font-size: 18px; /* Smaller size */
                 color: #31CD63; /* Green color */
             }
+
+            @media print {
+                body{
+                    margin: 0;
+                    padding: 0;
+                    padding-top: 0;
+                }
+                .container {
+                    page-break-inside: avoid;
+                    padding-top: 0;
+                    margin: 0;
+                }
+                .circles {
+                    page-break-inside: avoid;
+                }
+            }
+            
             
         </style>
     </div>
