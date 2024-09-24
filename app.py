@@ -5,7 +5,7 @@ import pyodbc
 import uuid
 import hashlib
 from flask_session import Session
-
+import os
 
 app = Flask(__name__)
 
@@ -24,6 +24,7 @@ conn_str = (
     'Encrypt=yes;'
 )
 
+conn_str = os.environ.get('DATABASE_URL')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
