@@ -16,17 +16,7 @@ app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-server = 'tcp:literallyme.database.windows.net,1433'
-database = 'hyphen_survey'
-username = 'Unais'
-password = 'Iamhim_123'  # Replace with your actual password
-
-# Establish a connection to Azure SQL Database
-connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'
-
-# Create a connection
-conn = pyodbc.connect(connection_string)
-cursor = conn.cursor()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def apology(message, code=400):
     """Render message as an apology to user."""
