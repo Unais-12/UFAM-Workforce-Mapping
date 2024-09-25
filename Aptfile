@@ -1,3 +1,5 @@
+unixodbc-dev
+msodbcsql17
 apt-transport-https
 ca-certificates
 curl
