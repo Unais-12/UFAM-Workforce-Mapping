@@ -12,8 +12,14 @@ app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 
-
-conn_str = os.environ.get('DATABASE_URL')
+conn_str = (
+    r'DRIVER={ODBC Driver 18 For Sql Server};'
+    r'SERVER=LITERALLYME\SQLSERVER_DEV;'
+    'DATABASE=Hyphen_Survey;'
+    'Trusted_Connection=yes;'
+    'TrustServerCertificate=yes;'
+    'Encrypt=yes;'
+)
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 

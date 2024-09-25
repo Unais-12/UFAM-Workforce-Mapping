@@ -1,1 +1,1 @@
-web: gunicorn Hyphen-Survey: app
+web: gunicorn Hyphen-Survey.app: app
