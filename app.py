@@ -6,6 +6,7 @@ import csv
 import datetime
 import urllib
 import uuid
+import sqlalchemy
 
 
 app = Flask(__name__)
@@ -15,10 +16,16 @@ app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-conn_str = os.environ.get('DATABASE_URL')
-conn = pyodbc.connect(conn_str)
-cursor = conn.cursor()
+server = 'literallyme.database.windows.net'  # Azure server
+database = 'hyphen_survey'  # Your database name
+username = 'Unais'  # Your Azure SQL username
+password = 'Iamhim_123'  # Your Azure SQL password
+driver = '{ODBC Driver 17 for SQL Server}'
 
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+conn = pyodbc.connect(DATABASE_URL)
+cursor = conn.cursor()
 def apology(message, code=400):
     """Render message as an apology to user."""
 

@@ -10,6 +10,7 @@ CREATE TABLE users (
     Score INT
 );
 
+
 ALTER TABLE users
 ADD Company_Size VARCHAR(255) NOT NULL
 
