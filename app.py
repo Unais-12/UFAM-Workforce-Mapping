@@ -16,14 +16,13 @@ app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-server = os.getenv('')  # Example: 'your-server.database.windows.net'
-database = os.getenv('DB_DATABASE')  # Example: 'your-database'
-username = os.getenv('DB_USERNAME')  # Example: 'your-username'
-password = os.getenv('DB_PASSWORD')  # Example: 'your-password'
+connection_url = os.getenv('MSSQL_TCP_URL')  # Or 'MSSQL_URL'
 
-# SQL Server driver (adjust if needed)
+# SQL Server driver
 driver = '{ODBC Driver 18 for SQL Server}'
-connection_string = f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+
+# The connection string directly from the environment variable
+connection_string = f'DRIVER={driver};{connection_url}'
 conn = pyodbc.connect(connection_string)
 cursor = conn.cursor()
 
