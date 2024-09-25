@@ -20,6 +20,7 @@ conn_str = (
     'TrustServerCertificate=yes;'
     'Encrypt=yes;'
 )
+
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
