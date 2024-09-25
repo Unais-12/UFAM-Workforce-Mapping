@@ -14,14 +14,8 @@ app = Flask(__name__)
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
-conn_str = (
-    "DRIVER={ODBC Driver 18 for SQL Server};"
-    r"SERVER=LITERALLYME\SQLSERVER_DEV;"
-    r"DATABASE=Hyphen_Survey;"
-    "Trusted_Connection=yes;"
-    "Encrypt=yes;"
-    "TrustServerConnection=yes;"
-)
+
+conn_str = os.environ.get('DATABASE_URL')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
