@@ -20,7 +20,6 @@ server = 'literallyme.database.windows.net'  # Azure server
 database = 'hyphen_survey'  # Your database name
 username = 'Unais'  # Your Azure SQL username
 password = 'Iamhim_123'  # Your Azure SQL password
-driver = '{ODBC Driver 17 for SQL Server}'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
