@@ -3,6 +3,11 @@ from helpers import determine_next_category
 import pyodbc
 from flask_session import Session
 import os
+import csv
+import datetime
+import urllib
+import uuid
+
 
 app = Flask(__name__)
 
@@ -14,6 +19,22 @@ Session(app)
 conn_str = os.environ.get('DATABASE_URL')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
+
+def apology(message, code=400):
+    """Render message as an apology to user."""
+
+    
+def determine_next_category(current_category, current_question_index, questions_per_category):
+    categories = list(questions_per_category.keys())
+    current_index = categories.index(current_category)
+    
+    # If there's a next category, return it
+    if current_index < len(categories) - 1:
+        next_category = categories[current_index + 1]
+        return next_category, 0  # Start with the first question of the next category
+    
+    # No more categories
+    return None, None
 
 
 @app.route("/autocomplete/countries", methods=["GET"])
