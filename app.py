@@ -21,6 +21,7 @@ conn_str = (
     'Encrypt=yes;'
 )
 
+conn_str = os.environ.get('DATABASE_URL')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
