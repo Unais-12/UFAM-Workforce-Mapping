@@ -22,6 +22,7 @@ conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
                       'UID=Unais;'
                       'PWD=Iamhim_123;')
 
+
 cursor = conn.cursor()
 
     
