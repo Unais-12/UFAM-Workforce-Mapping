@@ -10,6 +10,10 @@ import uuid
 
 app = Flask(__name__)
 
+app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
+
+
 @app.route('/health')
 def health_check():
     return "Healthy", 200
