@@ -16,6 +16,14 @@ app.config["SESSION_PERMANENT"] = False
 Session(app)
 import pyodbc
 
+conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                      'SERVER=tcp:literallyme.database.windows.net,1433;'
+                      'DATABASE=hyphen_survey;'
+                      'UID=Unais;'
+                      'PWD=Iamhim_123;')
+
+
+cursor = conn.cursor()
 
     
 def determine_next_category(current_category, current_question_index, questions_per_category):
