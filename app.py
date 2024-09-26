@@ -18,13 +18,8 @@ app.config["SESSION_PERMANENT"] = False
 Session(app)
 import pyodbc
 
-conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
-                      'SERVER=tcp:literallyme.database.windows.net,1433;'
-                      'DATABASE=hyphen_survey;'
-                      'UID=Unais;'
-                      'PWD=Iamhim_123;')
-
-
+conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
     
