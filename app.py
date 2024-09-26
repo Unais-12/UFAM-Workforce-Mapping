@@ -75,10 +75,10 @@ def autocomplete_industries():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     # Initialize session for the new user
+    session['id'] = id
     session['category'] = 'Values'  # Start with the first category
     session['total_score'] = 0
     session['category_scores'] = {}
-    
     if request.method == "POST":
         # Fetch valid countries and industries from the database
         country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
@@ -92,41 +92,30 @@ def register():
         Email = request.form.get("Email")
         Industry = request.form.get("Industry").strip().lower()
         Country = request.form.get("Country").strip().lower()
-
         # Input validation
         if not Name:
-            flash("Enter a Name")
-            return redirect(request.url)
+            return("Enter a Name")
         elif not Industry:
-            flash("Enter an Industry")
-            return redirect(request.url)
+            return("Enter an Industry")
         elif not Country:
-            flash("Enter a Country")
-            return redirect(request.url)
+            return("Enter a Country")
         elif not Internal_Audit:
-            flash("Have to enter the number of members in IA department")
-            return redirect(request.url)
+            return("Have to enter the number of members in IA department")
         elif not Company_Size:
-            flash("Enter company size")
-            return redirect(request.url)
+            return("Enter company size")
         elif not Using_Solution:
-            flash("Have to mention if using solution or not")
-            return redirect(request.url)
+            return("Have to mention if using solution or not")
         elif not Email:
-            flash("Have to enter email")
-            return redirect(request.url)
+            return("Have to enter email")
         elif Industry not in industry:
-            flash("Invalid Industry")
-            return redirect(request.url)
+            return("Invalid Industry")
         elif Country not in country:
-            flash("Invalid Country")
-            return redirect(request.url)
+            return("Invalid Country")
 
         # Check if email is unique
         emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
         if Email in emails:
-            flash("Email must be unique")
-            return redirect(request.url)
+            return("Email must be unique")
 
         # Insert the user into the database
         try:
@@ -138,11 +127,10 @@ def register():
         except pyodbc.ProgrammingError as e:
             print(f"Database Error: {e}")
             return "There was an error with the database operation."
-        
         # Fetch the user's ID after insertion
         rows = cursor.execute("SELECT id FROM users WHERE Name = ?", Name).fetchall()
         if rows:
-            session["id"] = rows[0][0]  # Save the user ID to the session
+            session["id"] = rows[0][0]
         else:
             conn.close()
             return "Failed to retrieve user ID after registration."
