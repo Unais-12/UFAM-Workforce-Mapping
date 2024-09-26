@@ -1,6 +1,6 @@
 Flask==2.3.2
 Flask-Session==0.4.0
-pyodbc==4.0.35
+pyodbc
 gunicorn==20.1.0
 
 
