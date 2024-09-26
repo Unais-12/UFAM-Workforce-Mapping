@@ -1,7 +1,7 @@
 from flask import session, redirect, render_template, Flask, request, jsonify,flash
-import pyodbc
 from flask_session import Session
 import os
+import pyodbc
 import csv
 import datetime
 import urllib
@@ -15,15 +15,8 @@ app = Flask(__name__)
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
-
-connection_url = os.getenv('MSSQL_TCP_URL')  # Or 'MSSQL_URL'
-
-# SQL Server driver
-driver = '{ODBC Driver 18 for SQL Server}'
-
-# The connection string directly from the environment variable
-connection_string = f'DRIVER={driver};{connection_url}'
-conn = pyodbc.connect(connection_string)
+conn_str = 'DRIVER={ODBC Driver 18 for SQL Server};Server=tcp:literallyme.database.windows.net,1433;Initial Catalog=hyphen_survey;Persist Security Info=False;User ID=Unais;Password=Iamhim_123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
 def apology(message, code=400):
