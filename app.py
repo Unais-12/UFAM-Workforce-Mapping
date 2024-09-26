@@ -11,12 +11,6 @@ import uuid
 app = Flask(__name__)
 
 
-
-
-@app.route('/health')
-def health_check():
-    return "Healthy", 200
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     app.run(host='0.0.0.0', port=port)
@@ -33,7 +27,13 @@ conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
-    
+
+
+@app.route('/health')
+def health_check():
+    return "Healthy", 200
+
+
 def determine_next_category(current_category, current_question_index, questions_per_category):
     categories = list(questions_per_category.keys())
     current_index = categories.index(current_category)
