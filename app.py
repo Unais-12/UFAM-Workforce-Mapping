@@ -6,7 +6,6 @@ import csv
 import datetime
 import urllib
 import uuid
-import sqlalchemy
 
 
 app = Flask(__name__)
@@ -15,12 +14,15 @@ app = Flask(__name__)
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 Session(app)
-conn_str = 'DRIVER={ODBC Driver 18 for SQL Server};Server=tcp:literallyme.database.windows.net,1433;Initial Catalog=hyphen_survey;Persist Security Info=False;User ID=Unais;Password=Iamhim_123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-conn = pyodbc.connect(conn_str)
-cursor = conn.cursor()
+import pyodbc
 
-def apology(message, code=400):
-    """Render message as an apology to user."""
+conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
+                      'SERVER=tcp:literallyme.database.windows.net,1433;'
+                      'DATABASE=hyphen_survey;'
+                      'UID=Unais;'
+                      'PWD=Iamhim_123;')
+
+cursor = conn.cursor()
 
     
 def determine_next_category(current_category, current_question_index, questions_per_category):
