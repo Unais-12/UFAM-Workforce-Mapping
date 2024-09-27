@@ -1,4 +1,4 @@
 Flask==3.0.3
 Flask-Session==0.8.0
 pyodbc
-gunicorn==20.1.0
+gunicorn==23.0.0
