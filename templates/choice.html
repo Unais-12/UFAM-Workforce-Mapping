@@ -7,12 +7,16 @@
 {% block content%}
 
     <style>
-    .premium-result h2,
-    .premium-result h3,
-    .premium-result p,
-    .premium-result ul li {
-        color: white; /* Ensure specific text elements are white */
-    }
+        .premiumplus-result h2,
+        .premiumplus-result h3,
+        .premiumplus-result p,
+        .premiumplus-result ul li
+        .premium-result h2,
+        .premium-result h3,
+        .premium-result p,
+        .premium-result ul li {
+            color: white;
+        }
     
         .container{
             max-height: 1000px;
@@ -35,9 +39,15 @@
             color: #333;
             padding: 20px;
         }
+        .Price{
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: white;
+        }
         
         .container {
-            max-width: 900px;
+            max-width: 1500px;
             margin: 0 auto;
             text-align: center;
         }
@@ -189,6 +199,7 @@
                     <li>A step-by-step action plan to enhance compliance, efficiency, and risk management.</li>
                     <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
                 </ul>
+                <p class = "Price">$19</p>
                 <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
             </div>
 
@@ -202,6 +213,7 @@
                     <li>A step-by-step action plan to enhance compliance, efficiency, and risk management.</li>
                     <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
                 </ul>
+                <p class = "Price">$39</p>
                 <button class = "btn premiumplus-btn" id = "premiumPlusResultBtn">Get Premium Results</button>
             </div>        
             </div>
