@@ -36,15 +36,11 @@
                 </div>
             {% endfor %}
         </div>
-
-        <!-- Premium buttons container -->
         <div class="premium-btn-container">
             <button id="premiumBtn" class="prem-btn">Get Premium Result</button>
             <button id="downloadPdfBtn" class="prem-btn">Download PDF</button>
-            <!-- New Premium+ Results button -->
-            <button id="premiumPlusBtn" class="prem-btn">Premium+ Results</button>
+            <button id = "premiumPlusBtn" class = "premplus-btn">Get Premium+ Results</button>
         </div>
-
         <script>
             window.onload = function() {
                 const totalScoreSlider = document.getElementById("changeSlider");
@@ -85,10 +81,8 @@
                 document.getElementById('premiumBtn').onclick = function() {
                     window.location.href = '/premium';
                 };
-
-                // New Premium+ Results button functionality
                 document.getElementById('premiumPlusBtn').onclick = function() {
-                    window.location.href = '/premium-plus';
+                    window.location.href = '/premium';
                 };
             };
             
@@ -132,8 +126,8 @@
 
                 html2pdf().from(element).set(opt).save(); // Use html2pdf library to generate and save the PDF
             }
-        </script>
 
+        </script>
         <style>
             .premium-btn-container {
                 text-align: center;
@@ -148,7 +142,6 @@
                 border: none;
                 border-radius: 5px;
                 cursor: pointer;
-                margin: 5px; /* Add margin between buttons */
             }
 
             .prem-btn:hover {
@@ -176,7 +169,6 @@
             }
         </style>
 
-        <!-- Styles for the slider and circles -->
         <style>
             /* New dark background for the slider section */
             .slider-wrapper {
@@ -258,76 +250,90 @@
             }
         </style>
         <style>
-            #TotalOutOf {
+            #TotalOutOf{
                 font-size: 25px;
                 color: #31CD63;
             }
-            body {
+            body{
                 background-color: #FAF9F6;
             }
+            .container-circle{
+                background-color: #000000; /* Dark background */
+                padding: 20px;
+                border-radius: 10px;
+                color: #fff; /* White text */
+                margin: 20px 0;
+                height: 180px
 
-            h2 {
-                text-align: center;
-                color: #FF5508;
-                margin-top: 50px;
             }
-
-            p {
-                text-align: center;
-            }
-
-            /* Styles for circle containers */
             .circles {
                 display: flex;
                 justify-content: space-around;
-                margin: 40px 0;
-                flex-wrap: wrap;
-            }
-
-            .container-circle {
-                text-align: center;
-            }
-
-            .circle {
+                background-color: #D6D6D6; /* Dark background */
+                padding: 20px;
+                border-radius: 10px;
+                color: #fff; /* White text */
+                margin: 20px 0;
+                max-height: 300px;
+              }
+              
+              .circle {
+                position: relative;
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
-                background-color: #FF5508;
-                color: #fff;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin: 0 auto;
-                position: relative;
-            }
-
-            .circle .score {
+                background-color: #000000;
+                border: 2px solid #ccc;
+              }
+              
+              .score {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
                 font-size: 24px;
-            }
-
-            .label2 {
-                margin-top: 10px;
-                font-size: 14px;
-                color: #333;
                 font-weight: bold;
+              }
+              
+              .label2 {
+                position: absolute;
+                top: 110px; /* Adjust this value to control the distance from the bottom */
+                left: 50%;
+                transform: translate(-50%, 0);
+                font-size: 12px;
+                color: #D6D6D6;
+                font-weight: bold;
+              }
+              .left-side {
+                font-size: 30px; /* Adjust this as necessary */
+                color: #fff; /* Keeps it white */
             }
-
-            .left-side {
-                color: #fff;
-            }
-
+            
             .right-side {
-                font-size: 14px;
-                color: #fff;
+                font-size: 18px; /* Smaller size */
+                color: #31CD63; /* Green color */
             }
 
-            #TotalOutOf {
-                font-size: 25px;
-                color: #31CD63;
+            @media print {
+                body{
+                    margin: 0;
+                    padding: 0;
+                    padding-top: 0;
+                }
+                .container {
+                    page-break-inside: avoid;
+                    padding-top: 0;
+                    margin: 0;
+                }
+                .circles {
+                    page-break-inside: avoid;
+                }
             }
+            
+            
         </style>
     </div>
+    
 {% endblock %}
-
 
 
