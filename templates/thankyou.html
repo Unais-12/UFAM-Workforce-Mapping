@@ -117,33 +117,23 @@
             function generatePDF() {
                 const element = document.querySelector('.container');
                 const opt = {
-                    margin: 1,
+                    margin: 0,
                     filename: 'audit_report.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
             
-                // Hide buttons during PDF generation
+                // Hide the buttons before generating the PDF
                 document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
             
-                html2pdf()
-                    .from(element)
-                    .set(opt)
-                    .save()
-                    .then(() => {
-                        // Add a slight delay before showing buttons back
-                        setTimeout(() => {
-                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                        }, 100); // Adjust the delay if necessary
-                    })
-                    .catch(err => {
-                        console.error('Error generating PDF:', err);
-                        // Show buttons back if there is an error
-                        document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                    });
-            }
+                setTimeout(() => {
+                    html2pdf().from(element).set(opt).save();
             
+                    // Show buttons back after generating PDF
+                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                }, 100); // Adjust the timeout duration if needed
+            }
             
 
         </script>
