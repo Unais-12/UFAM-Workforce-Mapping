@@ -6,7 +6,8 @@ import csv
 import datetime
 import urllib
 import uuid
-from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import pdfkit
 
 app = Flask(__name__)
@@ -30,14 +31,6 @@ conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL') == 'True'
-
-mail = Mail(app)
 
 @app.route('/health')
 def health_check():
@@ -521,13 +514,27 @@ def generate_and_send_pdf(data, to_email):
             print(f"Error generating PDF: {e}")
             return "Error generating PDF."
 
-        # Send PDF via email
-        msg = Message("Your PDF Report", sender='unaisbinfaheem@gmail.com', recipients=[to_email])
-        msg.body = "Please find your PDF report attached."
-        msg.attach("report.pdf", "application/pdf", pdf)
+        # Send PDF via SendGrid
+        message = Mail(
+            from_email='unaisbinfaheem@gmail.com',
+            to_emails=to_email,
+            subject="Your PDF Report",
+            html_content="Please find your PDF report attached."
+        )
+        
+        # Attach the PDF
+        message.add_attachment(
+            file_content=pdf,
+            file_name="report.pdf",
+            file_type="application/pdf",
+            disposition="attachment"
+        )
 
+        # Send email using SendGrid
         try:
-            mail.send(msg)
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            print(f"Email sent: {response.status_code}")
         except Exception as e:
             print(f"Error sending email: {e}")
             return "Error sending email."
@@ -535,6 +542,7 @@ def generate_and_send_pdf(data, to_email):
     except Exception as e:
         print(f"Error in generating and sending PDF: {e}")
         return "An error occurred during the PDF generation or email process."
+
 
 @app.route("/choice")
 def choice():

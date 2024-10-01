@@ -2,6 +2,5 @@ Flask==3.0.3
 Flask-Session==0.8.0
 pyodbc
 gunicorn==23.0.0
-flask_mail
+sendgrid
 pdfkit
-
