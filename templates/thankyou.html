@@ -37,10 +37,10 @@
             {% endfor %}
         </div>
         <div class="premium-btn-container">
-            <button id="premiumBtn" class="prem-btn">Get Premium Result</button>
-            <button id="downloadPdfBtn" class="prem-btn">Download PDF</button>
-            <button id = "premiumPlusBtn" class = "prem-btn">Get Premium+ Results</button>
-        </div>
+            <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
+            <button id="downloadPdfBtn" class="prem-btn no-print">Download PDF</button>
+            <button id="premiumPlusBtn" class="prem-btn no-print">Get Premium+ Results</button>
+        </div>        
         <script>
             window.onload = function() {
                 const totalScoreSlider = document.getElementById("changeSlider");
@@ -315,6 +315,9 @@
             }
 
             @media print {
+                .no-print {
+                    display: none; /* Hide elements with the 'no-print' class */
+                }
                 body{
                     margin: 0;
                     padding: 0;
