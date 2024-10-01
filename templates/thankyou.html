@@ -117,23 +117,33 @@
             function generatePDF() {
                 const element = document.querySelector('.container');
                 const opt = {
-                    margin: 0,
+                    margin: 1,
                     filename: 'audit_report.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
             
-                // Hide the buttons before generating the PDF
+                // Hide buttons during PDF generation
                 document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
             
-                setTimeout(() => {
-                    html2pdf().from(element).set(opt).save();
-            
-                    // Show buttons back after generating PDF
-                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                }, 100); // Adjust the timeout duration if needed
+                html2pdf()
+                    .from(element)
+                    .set(opt)
+                    .save()
+                    .then(() => {
+                        // Add a slight delay before showing buttons back
+                        setTimeout(() => {
+                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                        }, 100); // Adjust the delay if necessary
+                    })
+                    .catch(err => {
+                        console.error('Error generating PDF:', err);
+                        // Show buttons back if there is an error
+                        document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                    });
             }
+            
             
 
         </script>
@@ -347,5 +357,3 @@
     </div>
     
 {% endblock %}
-
-
