@@ -480,55 +480,102 @@ def get_data(user_id):
 
 
 def make_comparisons(data):
-
-    comparison_result= {}
-    if data[9] <= 31:
-        comparison_result['status'] = "Bad"
-        comparison_result['message'] = "You are amazing just the way you are. But seriously bro you need to lock in. Things won't work out like this. Your company will die and you will be a sad looser forever. So yeah lock in unlike the Pakistani Government"
-    elif data[9] >= 31:
-        comparison_result['status'] = "Good"
-        comparison_result['message'] = "You're doing well my boy you know what's up so I won't bore you with anything else"
+    comparison_result = {}
+    try:
+        if data[9] <= 31:
+            comparison_result['status'] = "Bad"
+            comparison_result['message'] = (
+                "You are amazing just the way you are. But seriously bro you need to lock in. "
+                "Things won't work out like this. Your company will die and you will be a sad loser forever. "
+                "So yeah lock in unlike the Pakistani Government"
+            )
+        elif data[9] >= 31:
+            comparison_result['status'] = "Good"
+            comparison_result['message'] = (
+                "You're doing well my boy you know what's up so I won't bore you with anything else"
+            )
+    except IndexError as e:
+        print(f"Error in comparison: {e}")
+        comparison_result['status'] = "Error"
+        comparison_result['message'] = "Error during comparison."
 
     return comparison_result
 
 def generate_and_send_pdf(data, to_email):
-    # Make comparisons and prepare content for the PDF
-    comparisons = make_comparisons(data)
+    try:
+        # Make comparisons and prepare content for the PDF
+        comparisons = make_comparisons(data)
 
-    # Create a PDF document (this is a simple example)
-    content = f"""
-    <h1>User Report</h1>
-    <p>Name: {data[1]}</p>
-    <p>Status: {comparisons['status']}</p>
-    <p>Message: {comparisons['message']}</p>
-    """
-    pdf = pdfkit.from_string(content, False)
+        # Create a PDF document
+        content = f"""
+        <h1>User Report</h1>
+        <p>Name: {data[1]}</p>
+        <p>Status: {comparisons['status']}</p>
+        <p>Message: {comparisons['message']}</p>
+        """
 
-    # Send PDF via email
-    msg = Message("Your PDF Report", sender='unaisbinfaheem@gmail.com', recipients=[to_email])
-    msg.body = "Please find your PDF report attached."
-    msg.attach("report.pdf", "application/pdf", pdf)
-    mail.send(msg)
+        # Use pdfkit to generate the PDF
+        try:
+            pdf = pdfkit.from_string(content, False)
+        except Exception as e:
+            print(f"Error generating PDF: {e}")
+            return "Error generating PDF."
+
+        # Send PDF via email
+        msg = Message("Your PDF Report", sender='unaisbinfaheem@gmail.com', recipients=[to_email])
+        msg.body = "Please find your PDF report attached."
+        msg.attach("report.pdf", "application/pdf", pdf)
+
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return "Error sending email."
+
+    except Exception as e:
+        print(f"Error in generating and sending PDF: {e}")
+        return "An error occurred during the PDF generation or email process."
 
 @app.route("/choice")
 def choice():
-    user_id = session.get('id') 
-    email = session.get('email') 
-    return render_template("choice.html",user_id=user_id, email=email)
+    try:
+        user_id = session.get('id') 
+        email = session.get('email') 
+        return render_template("choice.html", user_id=user_id, email=email)
+    except Exception as e:
+        print(f"Error in rendering choice page: {e}")
+        return "Error in loading the page."
 
-@app.route("/send_pdf", methods = ["POST"])
+@app.route("/send_pdf", methods=["POST"])
 def send_pdf():
-    user_id = session.get('id')  # Get the user ID from the session
-    email = session.get('email')  # Get email from the session
+    try:
+        user_id = session.get('id')  # Get the user ID from the session
+        email = session.get('email')  # Get email from the session
 
-    if user_id is None:
-        return "User not registered. Please register first."
+        if user_id is None:
+            return "User not registered. Please register first."
 
-    # Fetch user data from the database
-    data = get_data(user_id)
+        # Fetch user data from the database
+        try:
+            data = get_data(user_id)
+            if data is None:
+                print("No data found for the user.")
+                return "No data found for the user."
+        except Exception as e:
+            print(f"Error fetching data: {e}")
+            return "Error fetching data from the database."
 
-    # Generate and send PDF
-    generate_and_send_pdf(data, email)
+        # Generate and send PDF
+        result = generate_and_send_pdf(data, email)
+        if "Error" in result:
+            return result
+
+        return "PDF sent successfully."
+    except Exception as e:
+        print(f"Error in send_pdf route: {e}")
+        return "An error occurred while sending the PDF."
+
+
 
 @app.route("/premium")
 def premium():
