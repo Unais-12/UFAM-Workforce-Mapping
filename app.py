@@ -6,7 +6,6 @@ import csv
 import datetime
 import urllib
 import uuid
-from weasyprint import HTML
 from flask_mail import Mail, Message
 import pdfkit
 
