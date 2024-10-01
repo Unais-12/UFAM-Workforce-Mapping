@@ -6,7 +6,9 @@ import csv
 import datetime
 import urllib
 import uuid
-
+from weasyprint import HTML
+from flask_mail import Mail, Message
+import pdfkit
 
 app = Flask(__name__)
 
@@ -29,7 +31,14 @@ conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL') == 'True'
 
+mail = Mail(app)
 
 @app.route('/health')
 def health_check():
@@ -72,6 +81,26 @@ def autocomplete_industries():
         industries = [r[0] for r in result]
         return jsonify(industries)
     return jsonify([])
+
+def get_data(user_id):
+    cursor.execute("SELECT * FROM Users WHERE id = ?", (user_id,))
+    data = cursor.fetchone()
+    conn.close()
+    return data
+
+
+def make_comparisons(data):
+
+    comparison_result= {}
+    if data[9] <= 31:
+        comparison_result['status'] = "Bad"
+        comparison_result['message'] = "You are amazing just the way you are. But seriously bro you need to lock in. Things won't work out like this. Your company will die and you will be a sad looser forever. So yeah lock in unlike the Pakistani Government"
+    elif data[9] >= 31:
+        comparison_result['status'] = "Good"
+        comparison_result['message'] = "You're doing well my boy you know what's up so I won't bore you with anything else"
+
+    return comparison_result
+
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -461,9 +490,44 @@ def thankyou():
 def wait():
     return render_template("wait.html")
 
+def generate_and_send_pdf(data, to_email):
+    # Make comparisons and prepare content for the PDF
+    comparisons = make_comparisons(data)
+
+    # Create a PDF document (this is a simple example)
+    content = f"""
+    <h1>User Report</h1>
+    <p>Name: {data[1]}</p>
+    <p>Status: {comparisons['status']}</p>
+    <p>Message: {comparisons['message']}</p>
+    """
+    pdf = pdfkit.from_string(content, False)
+
+    # Send PDF via email
+    msg = Message("Your PDF Report", sender='unaisbinfaheem@gmail.com', recipients=[to_email])
+    msg.body = "Please find your PDF report attached."
+    msg.attach("report.pdf", "application/pdf", pdf)
+    mail.send(msg)
+
 @app.route("/choice")
 def choice():
-    return render_template("choice.html")
+    user_id = session.get('id') 
+    email = session.get('email') 
+    return render_template("choice.html",user_id=user_id, email=email)
+
+@app.route("/send_pdf", methods = ["POST"])
+def send_pdf():
+    user_id = session.get('id')  # Get the user ID from the session
+    email = session.get('email')  # Get email from the session
+
+    if user_id is None:
+        return "User not registered. Please register first."
+
+    # Fetch user data from the database
+    data = get_data(user_id)
+
+    # Generate and send PDF
+    generate_and_send_pdf(data, email)
 
 @app.route("/premium")
 def premium():
