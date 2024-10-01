@@ -6,11 +6,6 @@
 
 {% block content %}
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
-    <div class="premium-btn-container">
-        <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
-        <button id="downloadPdfBtn" class="prem-btn no-print">Download PDF</button>
-        <button id="premiumPlusBtn" class="prem-btn no-print">Get Premium+ Results</button>
-    </div>  
     <div class="container">
         <h2>Global Internal Audit Standard Readiness Assessment Score </h2>
         <p>Here’s an overview of how your internal audit function performs based on the survey responses</p>
@@ -40,7 +35,12 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>      
+        </div>
+        <div class="premium-btn-container">
+            <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
+            <button id="downloadPdfBtn" class="prem-btn no-print">Download PDF</button>
+            <button id="premiumPlusBtn" class="prem-btn no-print">Get Premium+ Results</button>
+        </div>        
         <script>
             window.onload = function() {
                 const totalScoreSlider = document.getElementById("changeSlider");
