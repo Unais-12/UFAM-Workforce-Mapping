@@ -482,14 +482,14 @@ def get_data(user_id):
 def make_comparisons(data):
     comparison_result = {}
     try:
-        if data[9] <= 31:
+        if data[8] <= 31:
             comparison_result['status'] = "Bad"
             comparison_result['message'] = (
                 "You are amazing just the way you are. But seriously bro you need to lock in. "
                 "Things won't work out like this. Your company will die and you will be a sad loser forever. "
                 "So yeah lock in unlike the Pakistani Government"
             )
-        elif data[9] >= 31:
+        elif data[8] >= 31:
             comparison_result['status'] = "Good"
             comparison_result['message'] = (
                 "You're doing well my boy you know what's up so I won't bore you with anything else"
