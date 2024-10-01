@@ -81,24 +81,7 @@ def autocomplete_industries():
         return jsonify(industries)
     return jsonify([])
 
-def get_data(user_id):
-    cursor.execute("SELECT * FROM Users WHERE id = ?", (user_id,))
-    data = cursor.fetchone()
-    conn.close()
-    return data
 
-
-def make_comparisons(data):
-
-    comparison_result= {}
-    if data[9] <= 31:
-        comparison_result['status'] = "Bad"
-        comparison_result['message'] = "You are amazing just the way you are. But seriously bro you need to lock in. Things won't work out like this. Your company will die and you will be a sad looser forever. So yeah lock in unlike the Pakistani Government"
-    elif data[9] >= 31:
-        comparison_result['status'] = "Good"
-        comparison_result['message'] = "You're doing well my boy you know what's up so I won't bore you with anything else"
-
-    return comparison_result
 
 
 
@@ -488,6 +471,25 @@ def thankyou():
 @app.route("/wait")
 def wait():
     return render_template("wait.html")
+
+def get_data(user_id):
+    cursor.execute("SELECT * FROM Users WHERE id = ?", (user_id,))
+    data = cursor.fetchone()
+    #conn.close()
+    return data
+
+
+def make_comparisons(data):
+
+    comparison_result= {}
+    if data[9] <= 31:
+        comparison_result['status'] = "Bad"
+        comparison_result['message'] = "You are amazing just the way you are. But seriously bro you need to lock in. Things won't work out like this. Your company will die and you will be a sad looser forever. So yeah lock in unlike the Pakistani Government"
+    elif data[9] >= 31:
+        comparison_result['status'] = "Good"
+        comparison_result['message'] = "You're doing well my boy you know what's up so I won't bore you with anything else"
+
+    return comparison_result
 
 def generate_and_send_pdf(data, to_email):
     # Make comparisons and prepare content for the PDF
