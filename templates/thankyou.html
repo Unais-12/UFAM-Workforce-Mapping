@@ -115,17 +115,26 @@
             }
             
             function generatePDF() {
-                const element = document.querySelector('.container'); // Capture the content inside the container
+                const element = document.querySelector('.container');
                 const opt = {
-                    margin: 0,  // Remove all margins
+                    margin: 0,
                     filename: 'audit_report.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },  // Ensure the canvas scales properly
+                    html2canvas: { scale: 2, useCORS: true },
                     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
-
-                html2pdf().from(element).set(opt).save(); // Use html2pdf library to generate and save the PDF
+            
+                // Hide the buttons before generating the PDF
+                document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
+            
+                setTimeout(() => {
+                    html2pdf().from(element).set(opt).save();
+            
+                    // Show buttons back after generating PDF
+                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                }, 100); // Adjust the timeout duration if needed
             }
+            
 
         </script>
         <style>
