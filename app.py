@@ -516,7 +516,7 @@ def generate_custom_pdf(title, row_data):
     custom_pdfs.append(pdf_buffer)  # Store the PDF in the custom_pdfs list
 
 
-@app.route("/download-pdf")
+@app.route("/download-pdf", methods = ["POST"])
 def download_pdf():
     selected_documents = []
     cursor.execute("SELECT * FROM UserScores")
