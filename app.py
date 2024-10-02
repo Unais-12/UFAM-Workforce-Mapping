@@ -506,16 +506,25 @@ def generate_custom_pdf(c, title, row_data, y_position=770):
 
     # Add dynamic content from the database on the same page
     c.setFont("Helvetica", 12)
-    c.drawString(100, y_position - 30, f"User Data: {row_data[3]}")  # Example of dynamic content
+    c.drawString(100, y_position - 30, f"{row_data[3]}")  # Example of dynamic content
 
 
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
-    cursor.execute("SELECT * FROM UserScores WHERE user_id = ? ", (user_id,))
+    user_id = session.get("id")
+    if not user_id:
+        return "User not logged in"
+    cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id))
     rows = cursor.fetchall()
 
-    document_list = ['Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx', ...]
+    document_list = [
+        'Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx',
+        'Word Docs/Document 4.docx', 'Word Docs/Document 5.docx', 'Word Docs/Document 6.docx',
+        'Word Docs/Document 7.docx', 'Word Docs/Document 8.docx', 'Word Docs/Document 9.docx',
+        'Word Docs/Document 10.docx', 'Word Docs/Document 11.docx', 'Word Docs/Document 12.docx'
+    ]
+
 
     pdf_files = []
     pdf_buffer = BytesIO()  # Buffer for the final merged PDF
@@ -540,7 +549,22 @@ def download_pdf():
                 selected_documents.append(document_list[4])
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
-        # Repeat for other categories...
+        elif row[2] == "Stakeholder Management":
+            generate_custom_pdf("Your Score For Stakeholder Management:", row)
+            if row[3] <= 7:
+                selected_documents.append(document_list[6])
+            elif 7 < row[3] <= 18:
+                selected_documents.append(document_list[7])
+            elif 18 < row[3] <= 24:
+                selected_documents.append(document_list[8])
+        elif row[2] == "Resource Management":
+            generate_custom_pdf("Your Score For Resource Management:", row)
+            if row[3] < 11:
+                selected_documents.append(document_list[9])
+            elif 11 < row[3] <= 27:
+                selected_documents.append(document_list[10])
+            elif 27 < row[3] <= 36:
+                selected_documents.append(document_list[11])
 
     for doc in selected_documents:
         # Open the Word document
