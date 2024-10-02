@@ -6,9 +6,8 @@ import csv
 import datetime
 import urllib
 import uuid
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-import pdfkit
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -102,37 +101,36 @@ def register():
         # Input validation
         if not Name:
             flash("Enter a Name")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Industry=Industry)
         elif not Industry:
-            flash("Enter an Industry")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
         elif not Country:
             flash("Enter a Country")
-            return redirect(request.url)
+            return render_template("register.html", Industry=Industry, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
         elif not Internal_Audit:
             flash("Have to enter the number of members in IA department")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Industry=Industry, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
         elif not Company_Size:
             flash("Enter company size")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Industry=Industry, Using_Solution=Using_Solution,Email=Email, Name=Name)
         elif not Using_Solution:
             flash("Have to mention if using solution or not")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Industry=Industry,Email=Email, Name=Name)
         elif not Email:
             flash("Have to enter email")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Industry=Industry, Name=Name)
         elif Industry not in industry:
             flash("Invalid Industry")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
         elif Country not in country:
             flash("Invalid Country")
-            return redirect(request.url)
+            return render_template("register.html", Industry=Industry, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
 
         # Check if email is unique
         emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
         if Email in emails:
             flash("Email must be unique")
-            return redirect(request.url)
+            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Industry=Industry, Name=Name)
 
         # Insert the user into the database
         try:
@@ -461,129 +459,29 @@ def thankyou():
 
     return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
-@app.route("/wait")
-def wait():
-    return render_template("wait.html")
 
-def get_data(user_id):
-    cursor.execute("SELECT * FROM Users WHERE id = ?", (user_id,))
+def get_data():
+    cursor.execute("SELECT * FROM Users WHERE id = ?", (session.get("id")))
     data = cursor.fetchone()
-    #conn.close()
     return data
 
-
-def make_comparisons(data):
-    comparison_result = {}
-    try:
-        if data[8] <= 31:
-            comparison_result['status'] = "Bad"
-            comparison_result['message'] = (
-                "You are amazing just the way you are. But seriously bro you need to lock in. "
-                "Things won't work out like this. Your company will die and you will be a sad loser forever. "
-                "So yeah lock in unlike the Pakistani Government"
-            )
-        elif data[8] >= 31:
-            comparison_result['status'] = "Good"
-            comparison_result['message'] = (
-                "You're doing well my boy you know what's up so I won't bore you with anything else"
-            )
-    except IndexError as e:
-        print(f"Error in comparison: {e}")
-        comparison_result['status'] = "Error"
-        comparison_result['message'] = "Error during comparison."
-
-    return comparison_result
-
-def generate_and_send_pdf(data, to_email):
-    try:
-        # Make comparisons and prepare content for the PDF
-        comparisons = make_comparisons(data)
-
-        # Create a PDF document
-        content = f"""
-        <h1>User Report</h1>
-        <p>Name: {data[1]}</p>
-        <p>Status: {comparisons['status']}</p>
-        <p>Message: {comparisons['message']}</p>
-        """
-
-        # Use pdfkit to generate the PDF
-        try:
-            pdf = pdfkit.from_string(content, False)
-        except Exception as e:
-            print(f"Error generating PDF: {e}")
-            return "Error generating PDF."
-
-        # Send PDF via SendGrid
-        message = Mail(
-            from_email='unaisbinfaheem@gmail.com',
-            to_emails=to_email,
-            subject="Your PDF Report",
-            html_content="Please find your PDF report attached."
-        )
-        
-        # Attach the PDF
-        message.add_attachment(
-            file_content=pdf,
-            file_name="report.pdf",
-            file_type="application/pdf",
-            disposition="attachment"
-        )
-
-        # Send email using SendGrid
-        try:
-            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-            response = sg.send(message)
-            print(f"Email sent: {response.status_code}")
-        except Exception as e:
-            print(f"Error sending email: {e}")
-            return "Error sending email."
-
-    except Exception as e:
-        print(f"Error in generating and sending PDF: {e}")
-        return "An error occurred during the PDF generation or email process."
-
+def generate_pdf(data):
+    pdf_buffer = BytesIO()
+    p = canvas.Canvas(pdf_buffer)
+    p.drawString(100, 750, "Your PDF Title")
+    p.drawString(100, 730, f"Data:{data}")  # Example of dynamic content
+    p.showPage()
+    p.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 @app.route("/choice")
 def choice():
-    try:
-        user_id = session.get('id') 
-        email = session.get('email') 
-        return render_template("choice.html", user_id=user_id, email=email)
-    except Exception as e:
-        print(f"Error in rendering choice page: {e}")
-        return "Error in loading the page."
+    return render_template("choice.html")
 
-@app.route("/send_pdf", methods=["POST"])
-def send_pdf():
-    try:
-        user_id = session.get('id')  # Get the user ID from the session
-        email = session.get('email')  # Get email from the session
-
-        if user_id is None:
-            return "User not registered. Please register first."
-
-        # Fetch user data from the database
-        try:
-            data = get_data(user_id)
-            if data is None:
-                print("No data found for the user.")
-                return "No data found for the user."
-        except Exception as e:
-            print(f"Error fetching data: {e}")
-            return "Error fetching data from the database."
-
-        # Generate and send PDF
-        result = generate_and_send_pdf(data, email)
-        if "Error" in result:
-            return result
-
-        return "PDF sent successfully."
-    except Exception as e:
-        print(f"Error in send_pdf route: {e}")
-        return "An error occurred while sending the PDF."
-
-
+@app.route("/wait")
+def wait():
+    return render_template("wait.html")
 
 @app.route("/premium")
 def premium():
