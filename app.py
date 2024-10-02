@@ -9,8 +9,6 @@ from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 import fitz
-from weasyprint import HTML
-
 
 app = Flask(__name__)
 
