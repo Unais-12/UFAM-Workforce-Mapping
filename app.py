@@ -98,39 +98,60 @@ def register():
         Industry = request.form.get("Industry").strip().lower()
         Country = request.form.get("Country").strip().lower()
 
+        form_data = {
+        "Name": Name,
+        "Industry": Industry,
+        "Country": Country,
+        "Internal_Audit": Internal_Audit,
+        "Company_Size": Company_Size,
+        "Using_Solution": Using_Solution,
+        "Email": Email
+        }
+
         # Input validation
         if not Name:
             flash("Enter a Name")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Industry=Industry)
+            form_data['Name'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Industry:
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            flash("Enter an Industry")
+            form_data['Industry'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Country:
             flash("Enter a Country")
-            return render_template("register.html", Industry=Industry, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            form_data['Country'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Internal_Audit:
-            flash("Have to enter the number of members in IA department")
-            return render_template("register.html", Country=Country, Industry=Industry, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            flash("Enter the number of members in the IA department")
+            form_data['Internal_Audit'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Company_Size:
             flash("Enter company size")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Industry=Industry, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            form_data['Company_Size'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Using_Solution:
-            flash("Have to mention if using solution or not")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Industry=Industry,Email=Email, Name=Name)
+            flash("Mention whether using a solution or not")
+            form_data['Using_Solution'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif not Email:
-            flash("Have to enter email")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Industry=Industry, Name=Name)
+            flash("Enter an email")
+            form_data['Email'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif Industry not in industry:
             flash("Invalid Industry")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            form_data['Industry'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
         elif Country not in country:
             flash("Invalid Country")
-            return render_template("register.html", Industry=Industry, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Email=Email, Name=Name)
+            form_data['Country'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
 
         # Check if email is unique
         emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
         if Email in emails:
             flash("Email must be unique")
-            return render_template("register.html", Country=Country, Internal_Audit=Internal_Audit, Company_Size=Company_Size, Using_Solution=Using_Solution,Industry=Industry, Name=Name)
+            form_data['Email'] = ''  # Clear the specific field
+            return render_template("register.html", **form_data)
 
         # Insert the user into the database
         try:
