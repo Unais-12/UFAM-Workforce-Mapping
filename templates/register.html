@@ -5,17 +5,40 @@
 {% endblock %}
 
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <ul class="flash-messages">
+    {% for message in messages %}
+        <li class="flash-message">{{ message }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endwith %}
 
 <style>
+    .flash-messages {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        background-color: #f8d7da; /* light red background */
+        border: 1px solid #f5c6cb; /* red border */
+        border-radius: 4px;
+        padding: 10px;
+    }
+    
+    .flash-message {
+        color: #721c24; /* dark red text */
+        padding: 5px 10px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        background-color: #f5c6cb; /* lighter red background */
+        border-radius: 3px;
+    }
+    
+    .flash-message:last-child {
+        margin-bottom: 0;
+    }
+    
     .btn-primary:hover{
         background-color: #e64c00; /* Darker orange on hover */
         transform: scale(1.05); /* Slightly enlarge button on hover */
