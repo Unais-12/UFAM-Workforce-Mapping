@@ -8,3 +8,5 @@ docx
 reportlab
 pdfkit
 python-docx
+PyMuPDF
+
