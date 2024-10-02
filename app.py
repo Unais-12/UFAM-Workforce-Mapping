@@ -550,7 +550,7 @@ def download_pdf():
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            generate_custom_pdf("Your Score For Stakeholder Management:", row)
+            generate_custom_pdf(c,"Your Score For Stakeholder Management:", row)
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
             elif 7 < row[3] <= 18:
@@ -558,7 +558,7 @@ def download_pdf():
             elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            generate_custom_pdf("Your Score For Resource Management:", row)
+            generate_custom_pdf(c,"Your Score For Resource Management:", row)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif 11 < row[3] <= 27:
