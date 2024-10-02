@@ -10,6 +10,7 @@ from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 import fitz
 
+
 app = Flask(__name__)
 
 custom_pdfs = []
@@ -569,29 +570,6 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
 
     return y_position
 
-
-def html_to_pdf(html_file_path):
-    """Convert HTML file to PDF using fitz (PyMuPDF)."""
-    pdf_document = fitz.open()  # Create a new PDF document
-
-    # Read the HTML file
-    with open(html_file_path, 'r') as html_file:
-        html_content = html_file.read()
-
-    # Create a PDF page from the HTML content
-    pdf_page = pdf_document.new_page()
-    pdf_page.insert_text((50, 50), html_content)  # Insert HTML content as plain text
-
-    # Save the PDF to a BytesIO object
-    pdf_buffer = BytesIO()
-    pdf_document.save(pdf_buffer)
-    pdf_document.close()
-
-    pdf_buffer.seek(0)
-    return pdf_buffer
-
-
-
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
@@ -617,7 +595,6 @@ def download_pdf():
 
     y_position = 770  # Starting y_position for drawing text
 
-    # Generate the custom PDFs for each score
     for row in rows:
         if row[2] == "Values":
             y_position = generate_custom_pdf(c, "Your Score for Values:", row, y_position)
@@ -672,12 +649,7 @@ def download_pdf():
     pdf_buffer.seek(0)
     pdf_files.append(pdf_buffer)
 
-    # Convert the thankyou.html to PDF using fitz (PyMuPDF)
-    thankyou_html_path = 'templates/thankyou.html'
-    thankyou_pdf_buffer = html_to_pdf(thankyou_html_path)
-    pdf_files.insert(0, thankyou_pdf_buffer)  # Add thank you PDF as the first page
-
-    # Merging PDFs
+    # Merging PDFs (if needed)
     merger = PdfMerger()
     for pdf in pdf_files:
         merger.append(pdf)
@@ -689,7 +661,6 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
-
 
 
 
