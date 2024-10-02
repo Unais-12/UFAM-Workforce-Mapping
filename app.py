@@ -8,7 +8,7 @@ from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 
-config = pdfkit.configuration(wkhtmltopdf='C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+config = pdfkit.configuration(wkhtmltopdf='C:\Program Files\wkhtmltopdf\ bin\wkhtmltopdf.exe')
 
 app = Flask(__name__)
 
