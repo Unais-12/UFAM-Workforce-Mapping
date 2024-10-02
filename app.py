@@ -3,6 +3,7 @@ from flask_session import Session
 import os
 import pyodbc
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
@@ -506,9 +507,11 @@ def generate_custom_pdf(c, title, row_data, y_position=770):
 
     # Add dynamic content (score) from the database on the same page
     c.setFont("Helvetica", 12)
-    c.drawString(100, y_position - 30, f"Score: {row_data[3]}")  # Example of dynamic content
+    c.drawString(100, y_position - 30, f"{row_data[3]}")  # Example of dynamic content
 
     return y_position - 50  # Update y_position after adding content
+
+
 
 
 def wrap_text(text, max_width, c):
@@ -534,6 +537,38 @@ def wrap_text(text, max_width, c):
 
     return wrapped_lines
 
+def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
+    """Add styled text (bold, italic, etc.) from a Word document to the PDF."""
+    for paragraph in doc_paragraphs:
+        for run in paragraph.runs:  # 'runs' are sections with specific formatting
+            text = run.text
+
+            # Check and apply formatting from Word to PDF
+            if run.bold and run.italic:
+                c.setFont("Helvetica-BoldOblique", 12)  # Bold and Italic
+            elif run.bold:
+                c.setFont("Helvetica-Bold", 12)  # Bold
+            elif run.italic:
+                c.setFont("Helvetica-Oblique", 12)  # Italic
+            else:
+                c.setFont("Helvetica", 12)  # Regular text
+
+            # Wrap the text based on the max width
+            wrapped_lines = wrap_text(text, 450, c)
+
+            # Insert the wrapped text into the PDF
+            for line in wrapped_lines:
+                if y_position < 100:
+                    c.showPage()  # Create a new page if the position is too low
+                    y_position = 770  # Reset y_position for the new page
+
+                c.drawString(72, y_position, line)
+                y_position -= 14  # Adjust y_position after each line
+
+        # Add extra spacing between paragraphs
+        y_position -= 10
+
+    return y_position
 
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
@@ -541,7 +576,7 @@ def download_pdf():
     user_id = session.get("id")
     if not user_id:
         return "User not logged in"
-    
+
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
 
@@ -559,7 +594,6 @@ def download_pdf():
     c = canvas.Canvas(pdf_buffer)
 
     y_position = 770  # Starting y_position for drawing text
-    max_width = 450  # Maximum width for text before wrapping
 
     for row in rows:
         if row[2] == "Values":
@@ -594,7 +628,7 @@ def download_pdf():
                 selected_documents.append(document_list[10])
             elif 27 < row[3] <= 36:
                 selected_documents.append(document_list[11])
-        
+
         # Check if y_position is getting too low, and add a new page if necessary
         if y_position < 100:
             c.showPage()  # Create a new page
@@ -604,20 +638,8 @@ def download_pdf():
         # Open the Word document
         word_document = Document(doc)
         
-        # Extract text from the Word document
-        doc_text = '\n'.join([para.text for para in word_document.paragraphs])
-
-        # Wrap the extracted text based on the max width
-        wrapped_text = wrap_text(doc_text, max_width, c)
-
-        # Insert the wrapped text into the PDF
-        for line in wrapped_text:
-            if y_position < 100:
-                c.showPage()  # Create a new page if the position is too low
-                y_position = 770  # Reset y_position for the new page
-            
-            c.drawString(72, y_position, line)
-            y_position -= 14  # Adjust y_position after each line
+        # Add styled text from Word to PDF
+        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
 
     # Finalize and save the PDF after inserting all text
     c.showPage()
@@ -639,6 +661,7 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
 
 
 
