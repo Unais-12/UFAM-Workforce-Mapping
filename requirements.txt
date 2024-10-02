@@ -3,4 +3,7 @@ Flask-Session==0.8.0
 pyodbc
 gunicorn==23.0.0
 reportlab
-
+PyPDF2
+docx
+reportlab
+pdfkit

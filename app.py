@@ -1,16 +1,16 @@
-from flask import session, redirect, render_template, Flask, request, jsonify,flash
+from flask import session, redirect, render_template, Flask, request, jsonify,flash, send_file
 from flask_session import Session
 import os
 import pyodbc
-import csv
-import datetime
-import urllib
-import uuid
 from reportlab.pdfgen import canvas
 from io import BytesIO
+from docx import Document
+from PyPDF2 import PdfMerger, PdfReader, PdfWriter
+import pdfkit
 
 app = Flask(__name__)
 
+custom_pdfs = []
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
@@ -481,20 +481,6 @@ def thankyou():
     return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
 
-def get_data():
-    cursor.execute("SELECT * FROM Users WHERE id = ?", (session.get("id")))
-    data = cursor.fetchone()
-    return data
-
-def generate_pdf(data):
-    pdf_buffer = BytesIO()
-    p = canvas.Canvas(pdf_buffer)
-    p.drawString(100, 750, "Your PDF Title")
-    p.drawString(100, 730, f"Data:{data}")  # Example of dynamic content
-    p.showPage()
-    p.save()
-    pdf_buffer.seek(0)
-    return pdf_buffer
 
 @app.route("/choice")
 def choice():
@@ -507,3 +493,91 @@ def wait():
 @app.route("/premium")
 def premium():
     return render_template("premium.html")
+
+def generate_custom_pdf(title, row_data):
+    """Generate a custom PDF using ReportLab and save it to memory."""
+    pdf_buffer = BytesIO()
+    c = canvas.Canvas(pdf_buffer)
+
+    # Add custom header and content to the PDF
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(100, 800, title)  # Custom title (e.g., "Marketing Content")
+
+    # Add dynamic content from the database
+    c.setFont("Helvetica", 12)
+    c.drawString(100, 770, f"User Data: {row_data[1]}")  # Example of dynamic content
+
+    # Finalize and save the PDF
+    c.showPage()
+    c.save()
+
+    # Add the generated PDF to the list for merging later
+    pdf_buffer.seek(0)
+    custom_pdfs.append(pdf_buffer)  # Store the PDF in the custom_pdfs list
+
+
+@app.route("/download-pdf")
+def download_pdf():
+    selected_documents = []
+    cursor.execute("SELECT * FROM UserScores")
+    rows = cursor.fetchall()
+
+    document_list = ['Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx','Word Docs/Document 4.docx'
+                     ,'Word Docs/Document 5.docx','Word Docs/Document 6.docx','Word Docs/Document 7.docx','Word Docs/Document 8.docx'
+                     ,'Word Docs/Document 9.docx','Word Docs/Document 10.docx','Word Docs/Document 11.docx','Word Docs/Document 12.docx']
+
+    for row in rows:
+        if row[2] == "Values":
+            generate_custom_pdf("Your Score:", row[4])
+            if row[3] <= 6:
+                selected_documents.append(document_list[0])
+            elif row[3] > 6 and row[3] <= 15:
+                selected_documents.append(document_list[1])
+            elif row[3] > 15 and row[3] <=20:
+                selected_documents.append(document_list[2])
+        elif row[2] == "Methodology":
+            generate_custom_pdf("Your Score:", row[4])
+            if row[3] <= 13:
+                selected_documents.append(document_list[3])
+            elif row[3] > 13 and row[3] <= 33:
+                selected_documents.append(document_list[4])
+            elif row[3] > 33 and row[3] <= 44:
+                selected_documents.append(document_list[5])
+        elif row[2] == "Stakeholder Management":
+            generate_custom_pdf("Your Score:", row[4])
+            if row[3] <= 7:
+                selected_documents.append(document_list[6])
+            elif row[3] > 7 and row[3] <= 18:
+                selected_documents.append(document_list[7])
+            elif row[3] > 18 and row[3] <= 24:
+                selected_documents.append(document_list[8])
+        elif row[2] == "Resource Management":
+            generate_custom_pdf("Your Score:", row[4])
+            if row[3] < 11:
+                selected_documents.append(document_list[9])
+            elif row[3] >11 and row[3] <= 27:
+                selected_documents.append(document_list[10])
+            elif row[3] > 27 and row[3] <= 36:
+                selected_documents.append(document_list[11])
+
+    pdf_files = []
+    for doc in selected_documents:
+        pdf_file = doc.replace('.docx', '.pdf')
+        pdfkit.from_file(doc, pdf_file)
+        pdf_files.append(pdf_file)
+    
+    merger = PdfMerger()
+    for pdf in pdf_files:
+        merger.append(pdf)
+
+    for custom_pdf in custom_pdfs:
+        merger.append(custom_pdf)
+    
+    pdf_output = BytesIO()
+    merger.write(pdf_output)
+    merger.close()
+
+    pdf_output.seek(0)
+    return send_file(pdf_output, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
+    
