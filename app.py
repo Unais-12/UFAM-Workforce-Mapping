@@ -523,7 +523,7 @@ def generate_custom_pdf(title, row_data):
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
-    user_id = session.get('user_id')  # Retrieve the user ID from the session
+    user_id = session.get('id')  # Retrieve the user ID from the session
 
     if not user_id:
         return "User not logged in.", 400  # Error if user is not logged in
@@ -531,7 +531,7 @@ def download_pdf():
     # Fetch data for the specific user
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
-    
+
     document_list = [
         'Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx',
         'Word Docs/Document 4.docx', 'Word Docs/Document 5.docx', 'Word Docs/Document 6.docx',
