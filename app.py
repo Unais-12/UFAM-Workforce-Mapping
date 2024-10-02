@@ -566,20 +566,15 @@ def download_pdf():
     for doc in selected_documents:
         pdf_file = doc.replace('.docx', '.pdf')
         pdf_document = fitz.open()
+        with open(doc, 'r') as html_file:
+            html_content = html_file.read()
+        pdf_document.insert_html(html_content)
 
-# Read the HTML file content
-    with open(doc, 'r') as html_file:
-        html_content = html_file.read()
+        pdf_document.save(pdf_file)
 
-    # Insert the HTML content into the PDF document
-    pdf_document.insert_html(html_content)
-
-    # Save the resulting PDF to the desired file
-    pdf_document.save(pdf_file)
-
-    # Close the document to free resources
-    pdf_document.close()
-    pdf_files.append(pdf_file)
+        # Close the document to free resources
+        pdf_document.close()
+        pdf_files.append(pdf_file)
     
     merger = PdfMerger()
     for pdf in pdf_files:
