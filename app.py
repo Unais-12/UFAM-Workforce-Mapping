@@ -496,6 +496,7 @@ def wait():
 def premium():
     return render_template("premium.html")
 
+
 def generate_custom_pdf(title, row_data):
     """Generate a custom PDF using ReportLab and save it to memory."""
     pdf_buffer = BytesIO()
@@ -518,67 +519,77 @@ def generate_custom_pdf(title, row_data):
     custom_pdfs.append(pdf_buffer)  # Store the PDF in the custom_pdfs list
 
 
-@app.route("/download-pdf", methods = ["POST"])
+@app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
     cursor.execute("SELECT * FROM UserScores")
     rows = cursor.fetchall()
 
-    document_list = ['Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx','Word Docs/Document 4.docx'
-                     ,'Word Docs/Document 5.docx','Word Docs/Document 6.docx','Word Docs/Document 7.docx','Word Docs/Document 8.docx'
-                     ,'Word Docs/Document 9.docx','Word Docs/Document 10.docx','Word Docs/Document 11.docx','Word Docs/Document 12.docx']
+    document_list = [
+        'Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx',
+        'Word Docs/Document 4.docx', 'Word Docs/Document 5.docx', 'Word Docs/Document 6.docx',
+        'Word Docs/Document 7.docx', 'Word Docs/Document 8.docx', 'Word Docs/Document 9.docx',
+        'Word Docs/Document 10.docx', 'Word Docs/Document 11.docx', 'Word Docs/Document 12.docx'
+    ]
 
+    # Process user rows and select documents based on the score
     for row in rows:
         if row[2] == "Values":
             generate_custom_pdf("Your Score:", row)
             if row[3] <= 6:
                 selected_documents.append(document_list[0])
-            elif row[3] > 6 and row[3] <= 15:
+            elif 6 < row[3] <= 15:
                 selected_documents.append(document_list[1])
-            elif row[3] > 15 and row[3] <=20:
+            elif 15 < row[3] <= 20:
                 selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
             generate_custom_pdf("Your Score:", row)
             if row[3] <= 13:
                 selected_documents.append(document_list[3])
-            elif row[3] > 13 and row[3] <= 33:
+            elif 13 < row[3] <= 33:
                 selected_documents.append(document_list[4])
-            elif row[3] > 33 and row[3] <= 44:
+            elif 33 < row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
             generate_custom_pdf("Your Score:", row)
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
-            elif row[3] > 7 and row[3] <= 18:
+            elif 7 < row[3] <= 18:
                 selected_documents.append(document_list[7])
-            elif row[3] > 18 and row[3] <= 24:
+            elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
             generate_custom_pdf("Your Score:", row)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
-            elif row[3] >11 and row[3] <= 27:
+            elif 11 < row[3] <= 27:
                 selected_documents.append(document_list[10])
-            elif row[3] > 27 and row[3] <= 36:
+            elif 27 < row[3] <= 36:
                 selected_documents.append(document_list[11])
 
+    # Convert Word documents to PDFs
     pdf_files = []
-
     for doc in selected_documents:
         # Replace .docx extension with .pdf
         pdf_file = doc.replace('.docx', '.pdf')
 
-        # Open the Word document
+        # Open the Word document using python-docx
         word_document = Document(doc)
-        
-        # Create a new PDF document
+
+        # Create a new PDF document using PyMuPDF
         pdf_document = fitz.open()
+
+        # Create a blank page
+        page = pdf_document.new_page()
 
         # Extract text from the Word document
         doc_text = '\n'.join([para.text for para in word_document.paragraphs])
 
-        # Insert the extracted text into the PDF
-        pdf_document.insert_text((72, 72), doc_text, fontsize=12)
+        # Define a rectangle for text insertion (this will act as the page's content area)
+        rect = fitz.Rect(72, 72, 540, 780)  # (left, top, right, bottom) margins
+
+        # Insert the extracted text into the PDF using insert_textbox
+        page.insert_textbox(rect, doc_text, fontsize=12)
 
         # Save the generated PDF file
         pdf_document.save(pdf_file)
@@ -589,19 +600,24 @@ def download_pdf():
         # Add the generated PDF to the list
         pdf_files.append(pdf_file)
 
-        
+    # Merge PDFs using PdfMerger
     merger = PdfMerger()
     for pdf in pdf_files:
         merger.append(pdf)
 
     for custom_pdf in custom_pdfs:
         merger.append(custom_pdf)
-    
+
+    # Create output PDF in memory
     pdf_output = BytesIO()
     merger.write(pdf_output)
     merger.close()
 
+    # Set the pointer to the start of the BytesIO buffer
     pdf_output.seek(0)
+
+    # Send the merged PDF as a response
     return send_file(pdf_output, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
 
     
