@@ -563,22 +563,35 @@ def download_pdf():
                 selected_documents.append(document_list[11])
 
     pdf_files = []
-    for doc in selected_documents:
-        pdf_file = doc.replace('.docx', '.pdf')
-        pdf_document = fitz.open()
-        with open(doc, 'r') as html_file:
-            html_content = html_file.read()
-        pdf_document.insert_html(html_content)
 
+    for doc in selected_documents:
+        # Replace .docx extension with .pdf
+        pdf_file = doc.replace('.docx', '.pdf')
+
+        # Open the Word document
+        word_document = docx.Document(doc)
+        
+        # Create a new PDF document
+        pdf_document = fitz.open()
+
+        # Extract text from the Word document
+        doc_text = '\n'.join([para.text for para in word_document.paragraphs])
+
+        # Insert the extracted text into the PDF
+        pdf_document.insert_text((72, 72), doc_text, fontsize=12)
+
+        # Save the generated PDF file
         pdf_document.save(pdf_file)
 
-        # Close the document to free resources
+        # Close the PDF document to free resources
         pdf_document.close()
+
+        # Add the generated PDF to the list
         pdf_files.append(pdf_file)
-    
-    merger = PdfMerger()
-    for pdf in pdf_files:
-        merger.append(pdf)
+        
+        merger = PdfMerger()
+        for pdf in pdf_files:
+            merger.append(pdf)
 
     for custom_pdf in custom_pdfs:
         merger.append(custom_pdf)
