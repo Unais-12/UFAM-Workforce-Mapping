@@ -9,4 +9,4 @@ reportlab
 pdfkit
 python-docx
 PyMuPDF
-
+weasyprint

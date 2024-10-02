@@ -9,6 +9,7 @@ from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 import fitz
+from weasyprint import HTML
 
 
 app = Flask(__name__)
@@ -570,6 +571,8 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
 
     return y_position
 
+
+
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
@@ -595,6 +598,7 @@ def download_pdf():
 
     y_position = 770  # Starting y_position for drawing text
 
+    # Generate the custom PDFs for each score
     for row in rows:
         if row[2] == "Values":
             y_position = generate_custom_pdf(c, "Your Score for Values:", row, y_position)
@@ -648,6 +652,12 @@ def download_pdf():
     # Add the generated PDF to the list for merging later
     pdf_buffer.seek(0)
     pdf_files.append(pdf_buffer)
+
+    # Convert the thankyou.html to PDF and add it to the beginning
+    thankyou_pdf_buffer = BytesIO()
+    HTML('/thankyou.html').write_pdf(thankyou_pdf_buffer)
+    thankyou_pdf_buffer.seek(0)
+    pdf_files.insert(0, thankyou_pdf_buffer)  # Add thank you PDF as the first page
 
     # Merging PDFs (if needed)
     merger = PdfMerger()
