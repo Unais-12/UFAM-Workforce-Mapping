@@ -655,7 +655,7 @@ def download_pdf():
 
     # Convert the thankyou.html to PDF and add it to the beginning
     thankyou_pdf_buffer = BytesIO()
-    HTML('/thankyou.html').write_pdf(thankyou_pdf_buffer)
+    HTML('/templates/thankyou.html').write_pdf(thankyou_pdf_buffer)
     thankyou_pdf_buffer.seek(0)
     pdf_files.insert(0, thankyou_pdf_buffer)  # Add thank you PDF as the first page
 
