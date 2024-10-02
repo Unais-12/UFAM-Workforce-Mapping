@@ -511,6 +511,30 @@ def generate_custom_pdf(c, title, row_data, y_position=770):
     return y_position - 50  # Update y_position after adding content
 
 
+def wrap_text(text, max_width, c):
+    """Utility function to wrap text based on max width for PDF."""
+    # Initialize a list to hold the wrapped lines
+    wrapped_lines = []
+
+    # Use the PDF canvas object to calculate text width and split lines accordingly
+    lines = text.split('\n')
+    for line in lines:
+        words = line.split(' ')
+        current_line = ""
+
+        for word in words:
+            test_line = current_line + word + " "
+            if c.stringWidth(test_line, "Helvetica", 12) <= max_width:
+                current_line = test_line
+            else:
+                wrapped_lines.append(current_line.strip())
+                current_line = word + " "
+
+        wrapped_lines.append(current_line.strip())
+
+    return wrapped_lines
+
+
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
@@ -535,6 +559,7 @@ def download_pdf():
     c = canvas.Canvas(pdf_buffer)
 
     y_position = 770  # Starting y_position for drawing text
+    max_width = 450  # Maximum width for text before wrapping
 
     for row in rows:
         if row[2] == "Values":
@@ -582,19 +607,17 @@ def download_pdf():
         # Extract text from the Word document
         doc_text = '\n'.join([para.text for para in word_document.paragraphs])
 
-        # Insert the extracted text into the PDF
-        text_objects = c.beginText(72, y_position - 50)  # Leave some space after the score
-        text_objects.setFont("Helvetica", 12)
-        text_objects.textLines(doc_text)
-        c.drawText(text_objects)
+        # Wrap the extracted text based on the max width
+        wrapped_text = wrap_text(doc_text, max_width, c)
 
-        # Adjust y_position based on the number of lines in the Word document text
-        y_position -= len(doc_text.split('\n')) * 14  # Adjust based on line count
-
-        # Add a new page if the y_position gets too low
-        if y_position < 100:
-            c.showPage()  # Create a new page
-            y_position = 770  # Reset y_position for the new page
+        # Insert the wrapped text into the PDF
+        for line in wrapped_text:
+            if y_position < 100:
+                c.showPage()  # Create a new page if the position is too low
+                y_position = 770  # Reset y_position for the new page
+            
+            c.drawString(72, y_position, line)
+            y_position -= 14  # Adjust y_position after each line
 
     # Finalize and save the PDF after inserting all text
     c.showPage()
@@ -616,6 +639,7 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
 
 
 
