@@ -8,6 +8,8 @@ from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 
+config = pdfkit.configuration(wkhtmltopdf='C:\Program Files\wkhtmltopdf\bin')
+
 app = Flask(__name__)
 
 custom_pdfs = []
@@ -563,7 +565,7 @@ def download_pdf():
     pdf_files = []
     for doc in selected_documents:
         pdf_file = doc.replace('.docx', '.pdf')
-        pdfkit.from_file(doc, pdf_file)
+        pdfkit.from_file(doc, pdf_file, configuration=config)
         pdf_files.append(pdf_file)
     
     merger = PdfMerger()
