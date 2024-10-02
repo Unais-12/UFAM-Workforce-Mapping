@@ -504,9 +504,11 @@ def generate_custom_pdf(c, title, row_data, y_position=770):
     c.setFont("Helvetica-Bold", 16)
     c.drawString(100, y_position, title)  # Custom title (e.g., "Your Score:")
 
-    # Add dynamic content from the database on the same page
+    # Add dynamic content (score) from the database on the same page
     c.setFont("Helvetica", 12)
     c.drawString(100, y_position - 30, f"{row_data[3]}")  # Example of dynamic content
+
+    return y_position - 50  # Update y_position after adding content
 
 
 @app.route("/download-pdf", methods=["POST"])
@@ -515,7 +517,8 @@ def download_pdf():
     user_id = session.get("id")
     if not user_id:
         return "User not logged in"
-    cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id))
+    
+    cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
 
     document_list = [
@@ -525,16 +528,17 @@ def download_pdf():
         'Word Docs/Document 10.docx', 'Word Docs/Document 11.docx', 'Word Docs/Document 12.docx'
     ]
 
-
     pdf_files = []
     pdf_buffer = BytesIO()  # Buffer for the final merged PDF
 
     # Initialize the ReportLab canvas for the combined PDF
     c = canvas.Canvas(pdf_buffer)
 
+    y_position = 770  # Starting y_position for drawing text
+
     for row in rows:
         if row[2] == "Values":
-            generate_custom_pdf(c, "Your Score for Values:", row)
+            y_position = generate_custom_pdf(c, "Your Score for Values:", row, y_position)
             if row[3] <= 6:
                 selected_documents.append(document_list[0])
             elif row[3] > 6 and row[3] <= 15:
@@ -542,7 +546,7 @@ def download_pdf():
             elif row[3] > 15 and row[3] <= 20:
                 selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
-            generate_custom_pdf(c, "Your Score for Methodology:", row)
+            y_position = generate_custom_pdf(c, "Your Score for Methodology:", row, y_position)
             if row[3] <= 13:
                 selected_documents.append(document_list[3])
             elif row[3] > 13 and row[3] <= 33:
@@ -550,7 +554,7 @@ def download_pdf():
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            generate_custom_pdf(c,"Your Score For Stakeholder Management:", row)
+            y_position = generate_custom_pdf(c, "Your Score For Stakeholder Management:", row, y_position)
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
             elif 7 < row[3] <= 18:
@@ -558,13 +562,18 @@ def download_pdf():
             elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            generate_custom_pdf(c,"Your Score For Resource Management:", row)
+            y_position = generate_custom_pdf(c, "Your Score For Resource Management:", row, y_position)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif 11 < row[3] <= 27:
                 selected_documents.append(document_list[10])
             elif 27 < row[3] <= 36:
                 selected_documents.append(document_list[11])
+        
+        # Check if y_position is getting too low, and add a new page if necessary
+        if y_position < 100:
+            c.showPage()  # Create a new page
+            y_position = 770  # Reset y_position for the new page
 
     for doc in selected_documents:
         # Open the Word document
@@ -573,9 +582,19 @@ def download_pdf():
         # Extract text from the Word document
         doc_text = '\n'.join([para.text for para in word_document.paragraphs])
 
-        # Insert the extracted text into the current PDF page
-        c.setFont("Helvetica", 12)
-        c.drawString(72, 700, doc_text)
+        # Insert the extracted text into the PDF
+        text_objects = c.beginText(72, y_position - 50)  # Leave some space after the score
+        text_objects.setFont("Helvetica", 12)
+        text_objects.textLines(doc_text)
+        c.drawText(text_objects)
+
+        # Adjust y_position based on the number of lines in the Word document text
+        y_position -= len(doc_text.split('\n')) * 14  # Adjust based on line count
+
+        # Add a new page if the y_position gets too low
+        if y_position < 100:
+            c.showPage()  # Create a new page
+            y_position = 770  # Reset y_position for the new page
 
     # Finalize and save the PDF after inserting all text
     c.showPage()
@@ -597,6 +616,7 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
 
 
 
