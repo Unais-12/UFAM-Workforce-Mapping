@@ -569,7 +569,7 @@ def download_pdf():
         pdf_file = doc.replace('.docx', '.pdf')
 
         # Open the Word document
-        word_document = docx.Document(doc)
+        word_document = Document(doc)
         
         # Create a new PDF document
         pdf_document = fitz.open()
@@ -588,10 +588,11 @@ def download_pdf():
 
         # Add the generated PDF to the list
         pdf_files.append(pdf_file)
+
         
-        merger = PdfMerger()
-        for pdf in pdf_files:
-            merger.append(pdf)
+    merger = PdfMerger()
+    for pdf in pdf_files:
+        merger.append(pdf)
 
     for custom_pdf in custom_pdfs:
         merger.append(custom_pdf)
