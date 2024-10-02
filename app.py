@@ -7,8 +7,8 @@ from io import BytesIO
 from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
+import fitz
 
-config = pdfkit.configuration(wkhtmltopdf='C:\Program Files\wkhtmltopdf\ bin\wkhtmltopdf.exe')
 
 app = Flask(__name__)
 
@@ -565,8 +565,21 @@ def download_pdf():
     pdf_files = []
     for doc in selected_documents:
         pdf_file = doc.replace('.docx', '.pdf')
-        pdfkit.from_file(doc, pdf_file, configuration=config)
-        pdf_files.append(pdf_file)
+        pdf_document = fitz.open()
+
+# Read the HTML file content
+    with open(doc, 'r') as html_file:
+        html_content = html_file.read()
+
+    # Insert the HTML content into the PDF document
+    pdf_document.insert_html(html_content)
+
+    # Save the resulting PDF to the desired file
+    pdf_document.save(pdf_file)
+
+    # Close the document to free resources
+    pdf_document.close()
+    pdf_files.append(pdf_file)
     
     merger = PdfMerger()
     for pdf in pdf_files:
