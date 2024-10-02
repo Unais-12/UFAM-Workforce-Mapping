@@ -528,7 +528,7 @@ def download_pdf():
 
     for row in rows:
         if row[2] == "Values":
-            generate_custom_pdf("Your Score:", row[4])
+            generate_custom_pdf("Your Score:", row[3])
             if row[3] <= 6:
                 selected_documents.append(document_list[0])
             elif row[3] > 6 and row[3] <= 15:
@@ -536,7 +536,7 @@ def download_pdf():
             elif row[3] > 15 and row[3] <=20:
                 selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
-            generate_custom_pdf("Your Score:", row[4])
+            generate_custom_pdf("Your Score:", row[3])
             if row[3] <= 13:
                 selected_documents.append(document_list[3])
             elif row[3] > 13 and row[3] <= 33:
@@ -544,7 +544,7 @@ def download_pdf():
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            generate_custom_pdf("Your Score:", row[4])
+            generate_custom_pdf("Your Score:", row[3])
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
             elif row[3] > 7 and row[3] <= 18:
@@ -552,7 +552,7 @@ def download_pdf():
             elif row[3] > 18 and row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            generate_custom_pdf("Your Score:", row[4])
+            generate_custom_pdf("Your Score:", row[3])
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif row[3] >11 and row[3] <= 27:
