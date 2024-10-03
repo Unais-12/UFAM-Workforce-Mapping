@@ -500,37 +500,49 @@ def premium():
 
 
 
-def generate_custom_pdf(c, title, row_data, max_score, y_position=770):
-    """Generate a custom header on the current PDF page with styled text using ReportLab."""
-    
-    # Title text
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(100, y_position, title) 
-    
-    score = row_data[3]  
-    max_score = max_score  
 
-    # Move down for score display
+
+def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770):
+    """Generate a custom header on the current PDF page with centered title and styled score using ReportLab."""
+
+    page_width, _ = letter
+
+    c.setFont("Helvetica-Bold", 16)
+    title_width = c.stringWidth(title, "Helvetica-Bold", 16)
+    
+
+    title_x_position = (page_width - title_width) / 2
+    
+    c.drawString(title_x_position, y_position, title)  
+    
+  
+    score = row_data[3] 
+    max_score = max_score  
+    
+   
     y_position -= 50
     
+    # Set the font size and colors for the score (e.g., 13/20)
+    c.setFont("Helvetica-Bold", 24)  # Bold and larger for the score
     
-    c.setFont("Helvetica-Bold", 24)  
-    c.setFillColorRGB(1, 1, 0)  
+    # Set a softer yellow color for the score part
+    c.setFillColorRGB(1, 0.85, 0.3)  # Softer shade of yellow
     
     # Draw the score part dynamically
     c.drawString(150, y_position, f"{score}")
     
-
+    # Set a softer green color for the max score part
     c.setFont("Helvetica", 18)
-    c.setFillColorRGB(0, 1, 0)  
+    c.setFillColorRGB(0.3, 0.85, 0.3)  # Softer green
     
     # Draw the max score part
     c.drawString(180, y_position, f"/{max_score}")
     
-    
+    # Reset the color back to black for any subsequent text
     c.setFillColorRGB(0, 0, 0)
-    
-    return y_position - 50  
+
+    return y_position - 50  # Update y_position after adding content
+  
 
 
 
