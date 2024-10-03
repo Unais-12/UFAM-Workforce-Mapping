@@ -502,7 +502,7 @@ def premium():
 
 
 
-def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770, centered = True):
+def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770):
     """Generate a custom header on the current PDF page with centered title and styled score using ReportLab."""
 
     page_width, _ = letter
@@ -573,30 +573,29 @@ def wrap_text(text, max_width, c):
 from docx.shared import RGBColor
 
 def get_rgb_color(color):
-    # Check if color is None or if it has no RGB attribute
-    if color is None or not hasattr(color, 'rgb'):
+    # Check if color is None (no color set)
+    if color is None:
         return (0, 0, 0)  # Default to black if no color is set
 
-    # Extract the RGB value from the color object
-    rgb_value = color.rgb
+    # Extract the RGB values from the color object
+    rgb_value = color.rgb  # This is in the format '0xRRGGBB'
 
-    # Check if rgb_value is not None before processing
+    # Make sure rgb_value is not None before processing
     if rgb_value:
-        # Extract red, green, and blue components from the hex value
-        red = int(rgb_value[0:2], 16)
-        green = int(rgb_value[2:4], 16)
-        blue = int(rgb_value[4:6], 16)
+        # Convert to a hexadecimal string and extract red, green, and blue components
+        hex_value = rgb_value[2:]  # Strip the '0x' prefix
+        red = int(hex_value[0:2], 16)
+        green = int(hex_value[2:4], 16)
+        blue = int(hex_value[4:6], 16)
 
         return (red / 255.0, green / 255.0, blue / 255.0)
     else:
-        return (0, 0, 0)  # Default to black
+        # Default color in case the RGB value is not set
+        return (0, 0, 0)  # Black
 
 
-
-def add_styled_text_to_pdf(c, doc_paragraphs, y_position, centered=False):
-    """Add styled text (bold, italic, etc.) from a Word document to the PDF."""
-    page_width = 595.27  # Standard A4 width in points
-
+def add_styled_text_to_pdf(c, doc_paragraphs, y_position, is_first_page=False):
+    """Add styled text (bold, italic, etc.) from a Word document to the PDF, including styles."""
     for paragraph in doc_paragraphs:
         for run in paragraph.runs:  # 'runs' are sections with specific formatting
             text = run.text
@@ -611,9 +610,16 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position, centered=False):
             else:
                 c.setFont("Helvetica", 12)  # Regular text
 
+            # Set underline if it's applied in the Word doc
+            if run.underline:
+                c.setLineWidth(1)
+                underline_text = True
+            else:
+                underline_text = False
+
             # Set the font color based on the Word document
-            color = get_rgb_color(run.font.color)  # Updated from `run.font.color.rgb`
-            c.setFillColorRGB(*color)
+            color = get_rgb_color(run.font.color.rgb)
+            c.setFillColorRGB(*color)  # Set the fill color for the PDF
 
             # Wrap the text based on the max width
             wrapped_lines = wrap_text(text, 450, c)
@@ -623,11 +629,13 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position, centered=False):
                 if y_position < 100:
                     c.showPage()  # Create a new page if the position is too low
                     y_position = 770  # Reset y_position for the new page
+
+                c.drawString(72, y_position, line)
                 
-                if centered:
-                    c.drawCentredString(page_width / 2, y_position, line)
-                else:
-                    c.drawString(72, y_position, line)
+                # Add underline for underlined text
+                if underline_text:
+                    underline_width = c.stringWidth(line, c._fontname, c._fontsize)
+                    c.line(72, y_position - 2, 72 + underline_width, y_position - 2)
 
                 y_position -= 14  # Adjust y_position after each line
 
@@ -659,42 +667,89 @@ def download_pdf():
 
     document_list = [
         'Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx',
-        # (Other document paths)
+        'Word Docs/Document 4.docx', 'Word Docs/Document 5.docx', 'Word Docs/Document 6.docx',
+        'Word Docs/Document 7.docx', 'Word Docs/Document 8.docx', 'Word Docs/Document 9.docx',
+        'Word Docs/Document 10.docx', 'Word Docs/Document 11.docx', 'Word Docs/Document 12.docx'
     ]
 
+    pdf_files = []
     pdf_buffer = BytesIO()  # Buffer for the final merged PDF
+
+    # Initialize the ReportLab canvas for the combined PDF
     c = canvas.Canvas(pdf_buffer)
+
     y_position = 770  # Starting y_position for drawing text
-    page_width = 595.27  # Standard A4 width
 
-    # Insert the "Global Internal Audit Standards..." header first
-    c.setFont("Helvetica-Bold", 18)
-    c.drawCentredString(page_width / 2, y_position, "Global Internal Audit Standards Readiness Assessment Report")
-    y_position -= 30  # Adjust y_position
+    # Add the text from Document 13, 14, or 15 to the first page
+    if selected_documents:
+        word_document = Document(selected_documents[0])
+        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position, is_first_page=True)
+        c.showPage()  # End the first page after adding the initial document
 
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(page_width / 2, y_position, "Company’s Current Stage: Prime Initiator")
-    y_position -= 40  # Adjust y_position
-
-    # Add sections and scores (centered)
+    # Now add the custom PDF sections
     for row in rows:
         if row[2] == "Values":
-            y_position = generate_custom_pdf(c, "Values:", row, 20, y_position, centered=True)
+            y_position = generate_custom_pdf(c, "Values:", row, 20, y_position)
+            if row[3] <= 6:
+                selected_documents.append(document_list[0])
+            elif row[3] > 6 and row[3] <= 15:
+                selected_documents.append(document_list[1])
+            elif row[3] > 15 and row[3] <= 20:
+                selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
-            y_position = generate_custom_pdf(c, "Methodology:", row, 44, y_position, centered=True)
+            y_position = generate_custom_pdf(c, "Methodology:", row, 44, y_position)
+            if row[3] <= 13:
+                selected_documents.append(document_list[3])
+            elif row[3] > 13 and row[3] <= 33:
+                selected_documents.append(document_list[4])
+            elif row[3] > 33 and row[3] <= 44:
+                selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            y_position = generate_custom_pdf(c, "Stakeholder Management:", row, 24, y_position, centered=True)
+            y_position = generate_custom_pdf(c, "Stakeholder Management:", row, 24, y_position)
+            if row[3] <= 7:
+                selected_documents.append(document_list[6])
+            elif 7 < row[3] <= 18:
+                selected_documents.append(document_list[7])
+            elif 18 < row[3] <= 24:
+                selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            y_position = generate_custom_pdf(c, "Resource Management:", row, 36, y_position, centered=True)
+            y_position = generate_custom_pdf(c, "Resource Management:", row, 36, y_position)
+            if row[3] < 11:
+                selected_documents.append(document_list[9])
+            elif 11 < row[3] <= 27:
+                selected_documents.append(document_list[10])
+            elif 27 < row[3] <= 36:
+                selected_documents.append(document_list[11])
 
         # Check if y_position is getting too low, and add a new page if necessary
         if y_position < 100:
             c.showPage()  # Create a new page
             y_position = 770  # Reset y_position for the new page
 
+    for doc in selected_documents:
+        # Open the Word document
+        word_document = Document(doc)
+        
+        # Add styled text from Word to PDF
+        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
+
     # Finalize and save the PDF after inserting all text
     c.showPage()
     c.save()
 
+    # Add the generated PDF to the list for merging later
     pdf_buffer.seek(0)
-    return send_file(pdf_buffer, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+    pdf_files.append(pdf_buffer)
+
+    # Merging PDFs (if needed)
+    merger = PdfMerger()
+    for pdf in pdf_files:
+        merger.append(pdf)
+
+    # Final output to the user
+    final_pdf = BytesIO()
+    merger.write(final_pdf)
+    merger.close()
+
+    final_pdf.seek(0)
+    return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
