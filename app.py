@@ -623,7 +623,7 @@ def download_pdf():
     if not user_id:
         return "User not logged in"
     
-    cursor.execute("SELECT * FROM Users Where user_id = ?", (id))
+    cursor.execute("SELECT * FROM Users Where user_id = ?", (session.get("Id")))
     user_data = cursor.fetchone()
     if user_data:
         if user_data[8] <= 30:
