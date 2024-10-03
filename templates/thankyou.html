@@ -77,22 +77,17 @@
                 document.getElementById('downloadPdfBtn').onclick = function() {
                     generatePDF();
                 };
-
+                
                 document.getElementById('premiumBtn').onclick = function() {
                     generatePDF();
+                    window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
+                
                 document.getElementById('premiumPlusBtn').onclick = function() {
                     generatePDF();
+                    window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
-            
-                document.getElementById('premiumBtn').onclick = function() {
-                    window.location.href = '/premium';
-                };
-                document.getElementById('premiumPlusBtn').onclick = function() {
-                    window.location.href = '/premium';
-                };
-            };
-            
+                
             function applyMulticolorBackground(slider) {
                 slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
             }
