@@ -573,8 +573,8 @@ def wrap_text(text, max_width, c):
 from docx.shared import RGBColor
 
 def get_rgb_color(color):
-    # Check if color is None (no color set)
-    if color is None or color.rgb is None:
+    # Check if color is None or has no 'rgb' attribute (indicating no color is set)
+    if color is None or not hasattr(color, 'rgb') or color.rgb is None:
         return (0, 0, 0)  # Default to black if no color is set
 
     # Extract the RGB values from the color object (if available)
@@ -587,6 +587,7 @@ def get_rgb_color(color):
 
     # Return RGB values normalized to the range 0-1 for ReportLab's setFillColorRGB
     return (red / 255.0, green / 255.0, blue / 255.0)
+
 
 
 
