@@ -88,54 +88,54 @@
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
                 
-                function applyMulticolorBackground(slider) {
-                    slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
+            function applyMulticolorBackground(slider) {
+                slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
+            }
+            
+            function updateScoreColor(score, scoreElement) {
+                let color;
+                if (score <= 30) {
+                    color = "#E32636";  // Red
+                } else if (score <= 76) {
+                    color = "#FFD700";  // Yellow
+                } else {
+                    color = "#72CC3A";  // Green
                 }
-                
-                function updateScoreColor(score, scoreElement) {
-                    let color;
-                    if (score <= 30) {
-                        color = "#E32636";  // Red
-                    } else if (score <= 76) {
-                        color = "#FFD700";  // Yellow
-                    } else {
-                        color = "#72CC3A";  // Green
-                    }
-                    scoreElement.style.color = color;
+                scoreElement.style.color = color;
+            }
+            
+            function updateCircleScoreColor(percentage, element) {
+                let color;
+                if (percentage <= 30) {
+                    color = "#E32636";  // Red for low percentages
+                } else if (percentage <= 75) {
+                    color = "#FFD700";  // Yellow for moderate percentages
+                } else {
+                    color = "#72CC3A";  // Green for high percentages
                 }
-                
-                function updateCircleScoreColor(percentage, element) {
-                    let color;
-                    if (percentage <= 30) {
-                        color = "#E32636";  // Red for low percentages
-                    } else if (percentage <= 75) {
-                        color = "#FFD700";  // Yellow for moderate percentages
-                    } else {
-                        color = "#72CC3A";  // Green for high percentages
-                    }
-                    element.style.color = color;  // Apply color dynamically
-                }
-                
-                function generatePDF() {
-                    const element = document.querySelector('.container');
-                    const opt = {
-                        margin: 0,
-                        filename: 'audit_report.pdf',
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                    };
-                
-                    // Hide the buttons before generating the PDF
-                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
-                
-                    setTimeout(() => {
-                        html2pdf().from(element).set(opt).save();
-                
-                        // Show buttons back after generating PDF
-                        document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                    }, 100); // Adjust the timeout duration if needed
-                }
+                element.style.color = color;  // Apply color dynamically
+            }
+            
+            function generatePDF() {
+                const element = document.querySelector('.container');
+                const opt = {
+                    margin: 0,
+                    filename: 'audit_report.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+            
+                // Hide the buttons before generating the PDF
+                document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
+            
+                setTimeout(() => {
+                    html2pdf().from(element).set(opt).save();
+            
+                    // Show buttons back after generating PDF
+                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                }, 100); // Adjust the timeout duration if needed
+            }
             
 
         </script>
