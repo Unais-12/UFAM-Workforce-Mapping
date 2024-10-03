@@ -642,7 +642,7 @@ def download_pdf():
             elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            y_position = generate_custom_pdf(c, "Resource Management:", row, 36 y_position)
+            y_position = generate_custom_pdf(c, "Resource Management:", row, 36, y_position)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif 11 < row[3] <= 27:
