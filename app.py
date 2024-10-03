@@ -573,25 +573,24 @@ def wrap_text(text, max_width, c):
 from docx.shared import RGBColor
 
 def get_rgb_color(color):
-    # Check if color is None (no color set)
-    if color is None:
+    # Check if color is None or if it has no RGB attribute
+    if color is None or not hasattr(color, 'rgb'):
         return (0, 0, 0)  # Default to black if no color is set
 
-    # Extract the RGB values from the color object
-    rgb_value = color.rgb  # This is in the format '0xRRGGBB'
+    # Extract the RGB value from the color object
+    rgb_value = color.rgb
 
-    # Make sure rgb_value is not None before processing
+    # Check if rgb_value is not None before processing
     if rgb_value:
-        # Convert to a hexadecimal string and extract red, green, and blue components
-        hex_value = rgb_value[2:]  # Strip the '0x' prefix
-        red = int(hex_value[0:2], 16)
-        green = int(hex_value[2:4], 16)
-        blue = int(hex_value[4:6], 16)
+        # Extract red, green, and blue components from the hex value
+        red = int(rgb_value[0:2], 16)
+        green = int(rgb_value[2:4], 16)
+        blue = int(rgb_value[4:6], 16)
 
         return (red / 255.0, green / 255.0, blue / 255.0)
     else:
-        # Default color in case the RGB value is not set
-        return (0, 0, 0)  # Black
+        return (0, 0, 0)  # Default to black
+
 
 
 def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
