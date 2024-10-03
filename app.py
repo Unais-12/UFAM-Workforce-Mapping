@@ -570,6 +570,14 @@ def wrap_text(text, max_width, c):
 
     return wrapped_lines
 
+from docx.shared import RGBColor
+
+def get_rgb_color(color):
+    """Convert a docx RGBColor to a ReportLab compatible RGB tuple."""
+    if isinstance(color, RGBColor):
+        return (color.red / 255.0, color.green / 255.0, color.blue / 255.0)
+    return (0, 0, 0)  # Default to black if color is not found
+
 def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
     """Add styled text (bold, italic, etc.) from a Word document to the PDF."""
     for paragraph in doc_paragraphs:
@@ -585,6 +593,10 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
                 c.setFont("Helvetica-Oblique", 12)  # Italic
             else:
                 c.setFont("Helvetica", 12)  # Regular text
+
+            # Set the font color based on the Word document
+            color = get_rgb_color(run.font.color.rgb)  # Get color for the current run
+            c.setFillColorRGB(*color)  # Set the fill color for the PDF
 
             # Wrap the text based on the max width
             wrapped_lines = wrap_text(text, 450, c)
@@ -603,12 +615,23 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
 
     return y_position
 
+
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
     user_id = session.get("id")
     if not user_id:
         return "User not logged in"
+    
+    cursor.execute("SELECT * FROM Users Where user_id = ?", (user_id,))
+    user_data = cursor.fetchone()
+    if user_data:
+        if user_data[8] <= 30:
+            selected_documents.append('Word Docs/Document 13.docx')
+        elif user_data[8] > 30 and user_data[8] <= 76:
+            selected_documents.append('Word Docs/Document 14.docx')
+        elif user_data[8] > 76 and user_data[8] <= 124:
+            selected_documents.append('Word Docs/Document 15.docx')
 
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()

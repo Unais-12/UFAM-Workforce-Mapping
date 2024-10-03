@@ -45,53 +45,59 @@
             window.onload = function() {
                 const totalScoreSlider = document.getElementById("changeSlider");
                 const sliderValue = document.getElementById("sliderValue");
-            
+        
                 // Get the total score from the backend
                 const score = {{ total_score }};
-                
+        
                 // Set slider value and displayed score
                 totalScoreSlider.value = score;
-                sliderValue.textContent = score + "/";
-            
+                sliderValue.textContent = `${score}/`;
+        
                 // Apply multicolor background to the slider
                 applyMulticolorBackground(totalScoreSlider);
-                
+        
                 // Update the color of the overall score
                 updateScoreColor(score, sliderValue);
-            
+        
                 // Update each circle's score color based on the percentage of its total score
                 document.querySelectorAll('.circle').forEach(function(circle) {
                     const leftSideElement = circle.querySelector('.left-side');
                     const category = leftSideElement.getAttribute('data-category'); // Use a data attribute for category
-                    const sectionScore = parseInt(leftSideElement.textContent);
-                    const totalSectionScore = parseInt({{ total_cat_score|tojson }}[category]['total']);
-            
+                    const sectionScore = parseInt(leftSideElement.textContent) || 0; // Default to 0 if NaN
+                    const totalSectionScore = parseInt({{ total_cat_score|tojson }}[category]?.total) || 1; // Default to 1 to avoid division by zero
+        
                     // Calculate percentage of the score
                     const percentage = (sectionScore / totalSectionScore) * 100;
-                    
+        
                     // Update the color based on the percentage
                     updateCircleScoreColor(percentage, leftSideElement);
                 });
-            
+        
                 // PDF download functionality
                 document.getElementById('downloadPdfBtn').onclick = function() {
                     generatePDF();
                 };
-                
+        
                 document.getElementById('premiumBtn').onclick = function() {
                     generatePDF();
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
-                
+        
                 document.getElementById('premiumPlusBtn').onclick = function() {
                     generatePDF();
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
-                
+        
                 function applyMulticolorBackground(slider) {
-                    slider.style.background = `linear-gradient(to right, #E32636 0%, red 25%, #FFD700 25%, yellow 62.5%, #009000 62.5%, #009000 100%)`;
+                    slider.style.background = `linear-gradient(to right, 
+                        #E32636 0%, 
+                        red 25%, 
+                        #FFD700 25%, 
+                        yellow 62.5%, 
+                        #009000 62.5%, 
+                        #009000 100%)`;
                 }
-                
+        
                 function updateScoreColor(score, scoreElement) {
                     let color;
                     if (score <= 30) {
@@ -103,7 +109,7 @@
                     }
                     scoreElement.style.color = color;
                 }
-                
+        
                 function updateCircleScoreColor(percentage, element) {
                     let color;
                     if (percentage <= 30) {
@@ -115,7 +121,7 @@
                     }
                     element.style.color = color;  // Apply color dynamically
                 }
-                
+        
                 function generatePDF() {
                     const element = document.querySelector('.container');
                     const opt = {
@@ -125,20 +131,20 @@
                         html2canvas: { scale: 2, useCORS: true },
                         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
                     };
-                
+        
                     // Hide the buttons before generating the PDF
                     document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
-                
+        
                     setTimeout(() => {
-                        html2pdf().from(element).set(opt).save();
-                
-                        // Show buttons back after generating PDF
-                        document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                        html2pdf().from(element).set(opt).save().then(() => {
+                            // Show buttons back after generating PDF
+                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                        });
                     }, 100); // Adjust the timeout duration if needed
                 }
-            
-
+            };
         </script>
+        
         <style>
             .premium-btn-container {
                 text-align: center;
