@@ -574,24 +574,20 @@ from docx.shared import RGBColor
 
 def get_rgb_color(color):
     # Check if color is None (no color set)
-    if color is None:
+    if color is None or color.rgb is None:
         return (0, 0, 0)  # Default to black if no color is set
 
-    # Extract the RGB values from the color object
-    rgb_value = color.rgb  # This is in the format '0xRRGGBB'
+    # Extract the RGB values from the color object (if available)
+    rgb_value = color.rgb  # This returns a `RGBColor` object with raw bytes
 
-    # Make sure rgb_value is not None before processing
-    if rgb_value:
-        # Convert to a hexadecimal string and extract red, green, and blue components
-        hex_value = rgb_value[2:]  # Strip the '0x' prefix
-        red = int(hex_value[0:2], 16)
-        green = int(hex_value[2:4], 16)
-        blue = int(hex_value[4:6], 16)
+    # Convert the RGB value (which is in bytes) to hexadecimal string
+    red = rgb_value[0]
+    green = rgb_value[1]
+    blue = rgb_value[2]
 
-        return (red / 255.0, green / 255.0, blue / 255.0)
-    else:
-        # Default color in case the RGB value is not set
-        return (0, 0, 0)  # Black
+    # Return RGB values normalized to the range 0-1 for ReportLab's setFillColorRGB
+    return (red / 255.0, green / 255.0, blue / 255.0)
+
 
 
 def add_styled_text_to_pdf(c, doc_paragraphs, y_position, is_first_page=False):
