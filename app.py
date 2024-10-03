@@ -502,7 +502,7 @@ def premium():
 
 
 
-def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770):
+def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770, centered = True):
     """Generate a custom header on the current PDF page with centered title and styled score using ReportLab."""
 
     page_width, _ = letter
