@@ -9,6 +9,7 @@ from docx import Document
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 import fitz
+from reportlab.lib import colors
 
 
 app = Flask(__name__)
@@ -499,17 +500,37 @@ def premium():
 
 
 
-def generate_custom_pdf(c, title, row_data, y_position=770):
-    """Generate a custom header on the current PDF page using ReportLab."""
-    # Add custom header and content to the PDF on the same page
+def generate_custom_pdf(c, title, row_data, max_score, y_position=770):
+    """Generate a custom header on the current PDF page with styled text using ReportLab."""
+    
+    # Title text
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(100, y_position, title)  # Custom title (e.g., "Your Score:")
+    c.drawString(100, y_position, title) 
+    
+    score = row_data[3]  
+    max_score = max_score  
 
-    # Add dynamic content (score) from the database on the same page
-    c.setFont("Helvetica", 12)
-    c.drawString(100, y_position - 30, f"{row_data[3]}")  # Example of dynamic content
+    # Move down for score display
+    y_position -= 50
+    
+    
+    c.setFont("Helvetica-Bold", 24)  
+    c.setFillColorRGB(1, 1, 0)  
+    
+    # Draw the score part dynamically
+    c.drawString(150, y_position, f"{score}")
+    
 
-    return y_position - 50  # Update y_position after adding content
+    c.setFont("Helvetica", 18)
+    c.setFillColorRGB(0, 1, 0)  
+    
+    # Draw the max score part
+    c.drawString(180, y_position, f"/{max_score}")
+    
+    
+    c.setFillColorRGB(0, 0, 0)
+    
+    return y_position - 50  
 
 
 
@@ -597,7 +618,7 @@ def download_pdf():
 
     for row in rows:
         if row[2] == "Values":
-            y_position = generate_custom_pdf(c, "Your Score for Values:", row, y_position)
+            y_position = generate_custom_pdf(c, "Values:", row, 20, y_position)
             if row[3] <= 6:
                 selected_documents.append(document_list[0])
             elif row[3] > 6 and row[3] <= 15:
@@ -605,7 +626,7 @@ def download_pdf():
             elif row[3] > 15 and row[3] <= 20:
                 selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
-            y_position = generate_custom_pdf(c, "Your Score for Methodology:", row, y_position)
+            y_position = generate_custom_pdf(c, "Methodology:", row, 44, y_position)
             if row[3] <= 13:
                 selected_documents.append(document_list[3])
             elif row[3] > 13 and row[3] <= 33:
@@ -613,7 +634,7 @@ def download_pdf():
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            y_position = generate_custom_pdf(c, "Your Score For Stakeholder Management:", row, y_position)
+            y_position = generate_custom_pdf(c, "Stakeholder Management:", row, 24, y_position)
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
             elif 7 < row[3] <= 18:
@@ -621,7 +642,7 @@ def download_pdf():
             elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            y_position = generate_custom_pdf(c, "Your Score For Resource Management:", row, y_position)
+            y_position = generate_custom_pdf(c, "Resource Management:", row, 36 y_position)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif 11 < row[3] <= 27:
