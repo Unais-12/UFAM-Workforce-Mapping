@@ -694,10 +694,3 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
-
-
-
-
-
-
-    
