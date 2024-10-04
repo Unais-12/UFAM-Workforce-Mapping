@@ -592,20 +592,23 @@ def get_rgb_color(color):
 
 
 def add_styled_text_to_pdf(c, doc_paragraphs, y_position, is_first_page=False):
-    """Add styled text (bold, italic, etc.) from a Word document to the PDF, including styles."""
+    """Add styled text (bold, italic, underline, font size, color) from a Word document to the PDF."""
     for paragraph in doc_paragraphs:
         for run in paragraph.runs:  # 'runs' are sections with specific formatting
             text = run.text
 
-            # Check and apply formatting from Word to PDF
+            # Determine font size; default to 12 if not specified
+            font_size = run.font.size.pt if run.font.size else 12
+
+            # Determine font style (bold, italic, etc.)
             if run.bold and run.italic:
-                c.setFont("Helvetica-BoldOblique", 12)  # Bold and Italic
+                c.setFont("Helvetica-BoldOblique", font_size)  # Bold and Italic
             elif run.bold:
-                c.setFont("Helvetica-Bold", 12)  # Bold
+                c.setFont("Helvetica-Bold", font_size)  # Bold
             elif run.italic:
-                c.setFont("Helvetica-Oblique", 12)  # Italic
+                c.setFont("Helvetica-Oblique", font_size)  # Italic
             else:
-                c.setFont("Helvetica", 12)  # Regular text
+                c.setFont("Helvetica", font_size)  # Regular text
 
             # Set underline if it's applied in the Word doc
             if run.underline:
@@ -615,7 +618,7 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position, is_first_page=False):
                 underline_text = False
 
             # Set the font color based on the Word document
-            color = get_rgb_color(run.font.color.rgb)
+            color = get_rgb_color(run.font.color)
             c.setFillColorRGB(*color)  # Set the fill color for the PDF
 
             # Wrap the text based on the max width
@@ -682,6 +685,9 @@ def download_pdf():
         word_document = Document(selected_documents[0])
         y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position, is_first_page=True)
         c.showPage()  # End the first page after adding the initial document
+
+        # Remove the first document so it's not added again later
+        selected_documents.pop(0)
 
     # Now add the custom PDF sections
     for row in rows:
