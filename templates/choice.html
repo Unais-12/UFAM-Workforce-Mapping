@@ -39,13 +39,39 @@
             color: #333;
             padding: 20px;
         }
-        .Price{
+        .price-container {
+            position: relative;
+            display: flex; /* Use flexbox to align items horizontally */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .Price {
             font-size: 100px;
             font-weight: bold;
             margin-bottom: 20px;
             text-align: center;
             color: white;
+            position: relative;
+            z-index: 1; /* Ensure the text is above the line */
         }
+        
+        .label {
+            margin-left: 20px; /* Space between the price and the label */
+            font-size: 24px; /* Adjust size as needed */
+            color: white; /* Adjust color to match your design */
+        }
+        
+        .price-container::before {
+            content: "";
+            position: absolute;
+            top: 50%; /* Align to the middle of the container */
+            left: 0;
+            right: 0;
+            height: 1px; /* Line height */
+            background-color: white; /* Line color */
+            transform: rotate(-45deg); /* Diagonal line */
+            z-index: 0; /* Place behind the text */
+        }        
         
         .container {
             max-width: 1300px;
@@ -203,7 +229,10 @@
                     <li>A step-by-step action plan to enhance compliance, efficiency, and risk management.</li>
                     <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
                 </ul>
-                <p class="Price" id="Price">$19</p>
+                <div class="price-container">
+                    <div class="Price">Price</div>
+                    <div class="label">Free for limited time</div>
+                </div>                
                 <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
             </div>
         </div>
