@@ -592,26 +592,67 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position, left_margin=72, right_
             color = get_rgb_color(run.font.color)
             c.setFillColorRGB(*color)
 
-            # Wrap the text based on max width
+            # Wrap the text manually based on max width
             wrapped_lines = wrap_text(text, max_width, c)
 
             for line in wrapped_lines:
-                if y_position < 100:
-                    c.showPage()  # Create a new page if the position is too low
-                    y_position = 770  # Reset y_position for the new page
+                # Measure the width of the current line
+                line_width = c.stringWidth(line, c._fontname, c._fontsize)
+                
+                # Check if line width exceeds the available width
+                if line_width > max_width:
+                    # Break the line if it exceeds max width
+                    words = line.split(' ')
+                    current_line = ""
+                    
+                    for word in words:
+                        test_line = current_line + word + " "
+                        test_line_width = c.stringWidth(test_line, c._fontname, c._fontsize)
+                        
+                        if test_line_width < max_width:
+                            current_line = test_line
+                        else:
+                            # Draw the current line and start a new line
+                            if y_position < 100:
+                                c.showPage()  # Create a new page if position is too low
+                                y_position = 770  # Reset y_position for the new page
+                            
+                            c.drawString(left_margin, y_position, current_line.strip())
+                            
+                            if underline_text:
+                                underline_width = c.stringWidth(current_line.strip(), c._fontname, c._fontsize)
+                                c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
+                            
+                            y_position -= 14  # Adjust the y position after each line
+                            current_line = word + " "  # Start a new line with the word
 
-                # Draw the line respecting the margins
-                c.drawString(left_margin, y_position, line)
+                    # Draw any remaining text in current_line
+                    if current_line.strip():
+                        c.drawString(left_margin, y_position, current_line.strip())
+                        if underline_text:
+                            underline_width = c.stringWidth(current_line.strip(), c._fontname, c._fontsize)
+                            c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
+                        
+                        y_position -= 14  # Adjust the y position for the last line
 
-                if underline_text:
-                    underline_width = c.stringWidth(line, c._fontname, c._fontsize)
-                    c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
+                else:
+                    if y_position < 100:
+                        c.showPage()  # Create a new page if the position is too low
+                        y_position = 770  # Reset y_position for the new page
 
-                y_position -= 14  # Adjust the y position after each line
+                    # Draw the line respecting the margins
+                    c.drawString(left_margin, y_position, line)
+
+                    if underline_text:
+                        underline_width = c.stringWidth(line, c._fontname, c._fontsize)
+                        c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
+
+                    y_position -= 14  # Adjust the y position after each line
 
         y_position -= 10  # Extra space between paragraphs
 
     return y_position
+
 
 
 
