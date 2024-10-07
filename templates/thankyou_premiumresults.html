@@ -7,9 +7,9 @@
 {% block content %}
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
     <div class="container">
-        <h2>Thank You For Choosing Premium Results!</h2>
-        <p>Your detailed insights are prepared, and we have tailored a comprehensive analysis specifically for your organization</p>
-        
+        <h2>Global Internal Audit Standard Readiness Assessment Score </h2>
+        <p>Here’s an overview of how your internal audit function performs based on the survey responses</p>
+
         <!-- Dark background container for the slider -->
         <div class="slider-wrapper">
             <div class="slider-container">
@@ -36,12 +36,10 @@
                 </div>
             {% endfor %}
         </div>
-        <div class = "final-text">
-            <h2>Download Your Premium Report</h2>
-            <p>Please click on the button below to download your Report</p>
-        </div>
-        <div class="premium-btn-container">
-            <button id="premiumBtn" class="prem-btn no-print">Get Premium Results</button>
+        <div class="premium-result">
+            <h2> Download Your Premium Report</h2>
+            <p>Please click on the button below to download your premium results.</p>
+            <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
         </div>        
         <script>
             window.onload = function() {
@@ -75,10 +73,12 @@
                     updateCircleScoreColor(percentage, leftSideElement);
                 });
         
+                // PDF download functionality
                 document.getElementById('premiumBtn').onclick = function() {
                     generatePDF();
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
+    
         
                 function applyMulticolorBackground(slider) {
                     slider.style.background = `linear-gradient(to right, 
@@ -112,15 +112,29 @@
                         color = "#72CC3A";  // Green for high percentages
                     }
                     element.style.color = color;  // Apply color dynamically
-                }                  
+                }
+            }
         </script>
         
         <style>
-            .premium-btn-container {
-                text-align: left; /* Change from center to left */
+            .premium-result {
+                text-align: left;
                 margin-top: 40px;
             }
-            
+            .premium-result h2{
+                color: #FF5508;
+                text-align: left;
+                margin-left: 0;
+                font-size: 30px;
+                font-weight: bold;
+            }
+            .premium-result p{
+                color: #000000
+                font-size: 10px
+                text-align: left
+                margin-left: 0
+            }
+
             .prem-btn {
                 padding: 10px 20px;
                 font-size: 16px;
@@ -130,11 +144,10 @@
                 border-radius: 5px;
                 cursor: pointer;
             }
-            
+
             .prem-btn:hover {
                 background-color: #FF7633;
             }
-            
 
             .container {
                 max-width: 1200px;
@@ -315,57 +328,8 @@
                     page-break-inside: avoid;
                 }
             }
-
-            .premium-btn-container {
-                text-align: left;
-                margin-top: 40px;
-                margin-left: 0;
-            }
-
-            .prem-btn {
-                padding: 10px 20px;
-                font-size: 16px;
-                color: #fff;
-                background-color: #FF5508;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-
-            .prem-btn:hover {
-                background-color: #FF7633;
-            }
-
-            .final-text h2 {
-                font-size: 24px; /* Adjusted to match the size in the image */
-                color: #FF6600;  /* Orange color from the image */
-                font-family: Arial, sans-serif; /* Adjust the font-family as needed */
-                font-weight: bold; /* Makes the text bold */
-                margin-bottom: 8px; /* Adds some space between the heading and the paragraph */
-                text-align: left;
-                margin-left: 0;
-            }
             
-            .final-text p {
-                font-size: 14px; /* Slightly smaller font size */
-                color: #333333;  /* Dark gray text color */
-                font-family: Arial, sans-serif; /* Matches the font of the heading */
-                margin: 0; /* Ensures no extra margin */
-                text-align: left;
-                margin-left: 0;
-            }   
-            .new-text {
-                text-align: left; /* Aligns text inside this container to the left */
-                margin-left: 0;
-                color: #FF5508;
-                margin-top: 50px;
-                font-weight: bold;
-            }
-        
-            .new-text h2 {
-                text-align: left; /* Ensure the heading is also left aligned */
-                margin: 0; /* Remove default margin of h2 */
-            }
+            
         </style>
     </div>
     
