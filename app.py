@@ -499,54 +499,6 @@ def premium():
     return render_template("premium.html")
 
 
-
-
-
-def generate_custom_pdf(c, title, row_data, max_score=20, y_position=770):
-    """Generate a custom header on the current PDF page with centered title and styled score using ReportLab."""
-
-    page_width, _ = letter
-
-    c.setFont("Helvetica-Bold", 16)
-    title_width = c.stringWidth(title, "Helvetica-Bold", 16)
-    
-
-    title_x_position = (page_width - title_width) / 2
-    
-    c.drawString(title_x_position, y_position, title)  
-    
-  
-    score = row_data[3] 
-    max_score = max_score  
-    
-   
-    y_position -= 50
-    
-    # Set the font size and colors for the score (e.g., 13/20)
-    c.setFont("Helvetica-Bold", 24)  # Bold and larger for the score
-    
-    # Set a softer yellow color for the score part
-    c.setFillColorRGB(1, 0.85, 0.3)  # Softer shade of yellow
-    
-    # Draw the score part dynamically
-    c.drawString(150, y_position, f"{score}")
-    
-    # Set a softer green color for the max score part
-    c.setFont("Helvetica", 18)
-    c.setFillColorRGB(0.3, 0.85, 0.3)  # Softer green
-    
-    # Draw the max score part
-    c.drawString(180, y_position, f"/{max_score}")
-    
-    # Reset the color back to black for any subsequent text
-    c.setFillColorRGB(0, 0, 0)
-
-    return y_position - 50  # Update y_position after adding content
-  
-
-
-
-
 def wrap_text(text, max_width, c):
     """Utility function to wrap text based on max width for PDF."""
     # Initialize a list to hold the wrapped lines
@@ -692,7 +644,6 @@ def download_pdf():
     # Now add the custom PDF sections
     for row in rows:
         if row[2] == "Values":
-            y_position = generate_custom_pdf(c, "Values:", row, 20, y_position)
             if row[3] <= 6:
                 selected_documents.append(document_list[0])
             elif row[3] > 6 and row[3] <= 15:
@@ -700,7 +651,6 @@ def download_pdf():
             elif row[3] > 15 and row[3] <= 20:
                 selected_documents.append(document_list[2])
         elif row[2] == "Methodology":
-            y_position = generate_custom_pdf(c, "Methodology:", row, 44, y_position)
             if row[3] <= 13:
                 selected_documents.append(document_list[3])
             elif row[3] > 13 and row[3] <= 33:
@@ -708,7 +658,6 @@ def download_pdf():
             elif row[3] > 33 and row[3] <= 44:
                 selected_documents.append(document_list[5])
         elif row[2] == "Stakeholder Management":
-            y_position = generate_custom_pdf(c, "Stakeholder Management:", row, 24, y_position)
             if row[3] <= 7:
                 selected_documents.append(document_list[6])
             elif 7 < row[3] <= 18:
@@ -716,7 +665,6 @@ def download_pdf():
             elif 18 < row[3] <= 24:
                 selected_documents.append(document_list[8])
         elif row[2] == "Resource Management":
-            y_position = generate_custom_pdf(c, "Resource Management:", row, 36, y_position)
             if row[3] < 11:
                 selected_documents.append(document_list[9])
             elif 11 < row[3] <= 27:
