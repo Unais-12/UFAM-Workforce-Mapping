@@ -39,7 +39,6 @@
         <div class="premium-btn-container">
             <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
             <button id="downloadPdfBtn" class="prem-btn no-print">Download PDF</button>
-            <button id="premiumPlusBtn" class="prem-btn no-print">Get Premium+ Results</button>
         </div>        
         <script>
             window.onload = function() {
@@ -82,11 +81,7 @@
                     generatePDF();
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
                 };
-        
-                document.getElementById('premiumPlusBtn').onclick = function() {
-                    generatePDF();
-                    window.location.href = '/premium'; // Redirect to premium after generating the PDF
-                };
+    
         
                 function applyMulticolorBackground(slider) {
                     slider.style.background = `linear-gradient(to right, 

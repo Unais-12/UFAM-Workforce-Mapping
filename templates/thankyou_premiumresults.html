@@ -10,7 +10,10 @@
         <h2>Thank You For Choosing Premium Results!</h2>
         <p>Your detailed insights are prepared, and we have tailored a comprehensive analysis specifically for your organization</p>
         
-        <h2>Free Results</h2>
+        <div class = "new-text">
+            <h2>Free Results</h2>
+        </div>
+        
         <button id="downloadPdfBtn" class="prem-btn no-print">
             <span class="icon"></span> Download PDF
         </button>
@@ -125,26 +128,46 @@
                 }
         
                 function generatePDF() {
-                    const element = document.querySelector('.container');
-                    const opt = {
-                        margin: 0,
-                        filename: 'audit_report.pdf',
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                    };
-        
-                    // Hide the buttons before generating the PDF
-                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
-        
-                    setTimeout(() => {
-                        html2pdf().from(element).set(opt).save().then(() => {
-                            // Show buttons back after generating PDF
+                    const url = 'thankyou_freeresults.html'; // Specify the page you want to download as PDF
+                
+                    // Fetch the HTML content of the page
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text();
+                        })
+                        .then(html => {
+                            // Create a temporary container to hold the fetched HTML
+                            const tempContainer = document.createElement('div');
+                            tempContainer.innerHTML = html;
+                
+                            const opt = {
+                                margin: 0,
+                                filename: 'audit_report.pdf',
+                                image: { type: 'jpeg', quality: 0.98 },
+                                html2canvas: { scale: 2, useCORS: true },
+                                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                            };
+                
+                            // Hide the buttons before generating the PDF
+                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
+                
+                            setTimeout(() => {
+                                html2pdf().from(tempContainer).set(opt).save().then(() => {
+                                    // Show buttons back after generating PDF
+                                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                                });
+                            }, 100); // Adjust the timeout duration if needed
+                        })
+                        .catch(error => {
+                            console.error('There was a problem fetching the HTML:', error);
+                            // Optionally, show buttons back in case of error
                             document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
                         });
-                    }, 100); // Adjust the timeout duration if needed
                 }
-            };
+            }      
         </script>
         
         <style>
@@ -347,26 +370,23 @@
                 }
             }
 
+            .premium-btn-container {
+                text-align: center;
+                margin-top: 40px;
+            }
+
             .prem-btn {
-                background-color: transparent;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #FF5508;
                 border: none;
-                color: #000;
-                font-size: 14px;
-                font-family: Arial, sans-serif;
-                display: flex;
-                align-items: center;
+                border-radius: 5px;
                 cursor: pointer;
             }
-            
-            .prem-btn .icon {
-                width: 16px;
-                height: 16px;
-                background-size: cover;
-                margin-right: 8px;
-            }
-            
+
             .prem-btn:hover {
-                text-decoration: underline;
+                background-color: #FF7633;
             }
 
             .final-text h2 {
@@ -375,6 +395,8 @@
                 font-family: Arial, sans-serif; /* Adjust the font-family as needed */
                 font-weight: bold; /* Makes the text bold */
                 margin-bottom: 8px; /* Adds some space between the heading and the paragraph */
+                text-align: left;
+                margin-left: 0;
             }
             
             .final-text p {
@@ -382,7 +404,16 @@
                 color: #333333;  /* Dark gray text color */
                 font-family: Arial, sans-serif; /* Matches the font of the heading */
                 margin: 0; /* Ensures no extra margin */
+                text-align: left;
+                margin-left: 0;
             }   
+            .new-text{
+                text-align: left;
+                margin-left: 0;
+                color: #FF5508;
+                margin-top: 50px;
+                font-weight: bold;
+            }
         </style>
     </div>
     
