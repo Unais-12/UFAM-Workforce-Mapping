@@ -492,6 +492,13 @@ def thankyou():
 
     return render_template(template_name, total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
+@app.route("/thankyou_freeresults.html")
+def redirect_free():
+    return redirect("/thankyoufreeresults")
+
+@app.route("/thankyou_premiumresults.html")
+def redirect_premium():
+    return redirect("/thankyoupremiumresults")
 
 @app.route("/choice")
 def choice():
