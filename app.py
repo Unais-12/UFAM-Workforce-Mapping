@@ -459,46 +459,22 @@ def questions():
 
     
 @app.route("/thankyoufreeresults")
-def thankyou():
-    total_cat_score = {
-        'Values' : {'total': 20},
-        'Methodology': {'total': 44},
-        'Stakeholder Management' : {'total': 24},
-        'Resource Management': {'total': 36},
-    }
-    if "id" not in session:
-        return redirect("/register")
-
-    user_id = session["id"]
-
-    # Retrieve total score
-    cursor.execute("""SELECT Score FROM Users WHERE Id = ?""", (user_id))
-    row = cursor.fetchone()
-    total_score = row[0] if row else None
-
-    # Retrieve category-wise scores
-    cursor.execute("""SELECT category, score FROM UserScores WHERE user_id = ?""", (user_id,))
-    category_scores = cursor.fetchall()
-
-    scores_by_category = {row[0]: row[1] for row in category_scores}
-
-    return render_template("thankyou_freeresults.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
-
 @app.route("/thankyoupremiumresults")
 def thankyou():
     total_cat_score = {
-        'Values' : {'total': 20},
+        'Values': {'total': 20},
         'Methodology': {'total': 44},
-        'Stakeholder Management' : {'total': 24},
+        'Stakeholder Management': {'total': 24},
         'Resource Management': {'total': 36},
     }
+    
     if "id" not in session:
         return redirect("/register")
 
     user_id = session["id"]
 
     # Retrieve total score
-    cursor.execute("""SELECT Score FROM Users WHERE Id = ?""", (user_id))
+    cursor.execute("""SELECT Score FROM Users WHERE Id = ?""", (user_id,))
     row = cursor.fetchone()
     total_score = row[0] if row else None
 
@@ -508,7 +484,13 @@ def thankyou():
 
     scores_by_category = {row[0]: row[1] for row in category_scores}
 
-    return render_template("thankyou_premiumresults.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
+    # Determine the template based on the route
+    if request.path == "/thankyoufreeresults":
+        template_name = "thankyou_freeresults.html"
+    else:
+        template_name = "thankyou_premiumresults.html"
+
+    return render_template(template_name, total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
 
 @app.route("/choice")
