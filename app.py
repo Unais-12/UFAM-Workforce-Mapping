@@ -533,8 +533,14 @@ def wrap_text(text, max_width, c):
                     wrapped_lines.append(current_line.strip())
                 current_line = word + " "  # Start a new line with the word
 
-        if current_line:
-            wrapped_lines.append(current_line.strip())  # Add any remaining text
+        # Handle single long words that exceed the max_width
+        if c.stringWidth(current_line, "Helvetica", 12) > max_width:
+            # Break the word character by character
+            word_parts = [current_line[i:i+int(max_width/10)] for i in range(0, len(current_line), int(max_width/10))]
+            wrapped_lines.extend(word_parts)
+        else:
+            if current_line:
+                wrapped_lines.append(current_line.strip())  # Add any remaining text
 
     return wrapped_lines
 
