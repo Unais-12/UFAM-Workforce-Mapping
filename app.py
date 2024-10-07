@@ -515,28 +515,29 @@ def premium():
 
 def wrap_text(text, max_width, c):
     """Utility function to wrap text based on max width for PDF."""
-    # Initialize a list to hold the wrapped lines
     wrapped_lines = []
-
-    # Use the PDF canvas object to calculate text width and split lines accordingly
     lines = text.split('\n')
+    
     for line in lines:
         words = line.split(' ')
         current_line = ""
 
         for word in words:
             test_line = current_line + word + " "
+            # Test if the line fits within the specified max_width
             if c.stringWidth(test_line, "Helvetica", 12) <= max_width:
                 current_line = test_line
             else:
-                if current_line:  # Ensure we don't append an empty line
+                # Add the current line if it exceeds max_width
+                if current_line:
                     wrapped_lines.append(current_line.strip())
-                current_line = word + " "
+                current_line = word + " "  # Start a new line with the word
 
-        if current_line:  # Append the last line if it exists
-            wrapped_lines.append(current_line.strip())
+        if current_line:
+            wrapped_lines.append(current_line.strip())  # Add any remaining text
 
     return wrapped_lines
+
 
 from docx.shared import RGBColor
 
@@ -556,58 +557,56 @@ def get_rgb_color(color):
     # Return RGB values normalized to the range 0-1 for ReportLab's setFillColorRGB
     return (red / 255.0, green / 255.0, blue / 255.0)
 
-def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
-    """Add styled text (bold, italic, underline, font size, color) from a Word document to the PDF."""
-    for paragraph in doc_paragraphs:
-        for run in paragraph.runs:  # 'runs' are sections with specific formatting
-            text = run.text
+def add_styled_text_to_pdf(c, doc_paragraphs, y_position, left_margin=72, right_margin=500):
+    """Add styled text with proper wrapping from Word to PDF, ensuring it respects margins."""
+    max_width = right_margin - left_margin  # Calculate the usable width for text
 
-            # Determine font size; default to 12 if not specified
+    for paragraph in doc_paragraphs:
+        for run in paragraph.runs:
+            text = run.text
             font_size = run.font.size.pt if run.font.size else 12
 
-            # Determine font style (bold, italic, etc.)
+            # Set the font style and size
             if run.bold and run.italic:
-                c.setFont("Helvetica-BoldOblique", font_size)  # Bold and Italic
+                c.setFont("Helvetica-BoldOblique", font_size)
             elif run.bold:
-                c.setFont("Helvetica-Bold", font_size)  # Bold
+                c.setFont("Helvetica-Bold", font_size)
             elif run.italic:
-                c.setFont("Helvetica-Oblique", font_size)  # Italic
+                c.setFont("Helvetica-Oblique", font_size)
             else:
-                c.setFont("Helvetica", font_size)  # Regular text
+                c.setFont("Helvetica", font_size)
 
-            # Set underline if it's applied in the Word doc
+            # Set underline and color
             if run.underline:
                 c.setLineWidth(1)
                 underline_text = True
             else:
                 underline_text = False
 
-            # Set the font color based on the Word document
             color = get_rgb_color(run.font.color)
-            c.setFillColorRGB(*color)  # Set the fill color for the PDF
+            c.setFillColorRGB(*color)
 
-            # Wrap the text based on the max width
-            wrapped_lines = wrap_text(text, 450, c)
+            # Wrap the text based on max width
+            wrapped_lines = wrap_text(text, max_width, c)
 
-            # Insert the wrapped text into the PDF
             for line in wrapped_lines:
                 if y_position < 100:
                     c.showPage()  # Create a new page if the position is too low
                     y_position = 770  # Reset y_position for the new page
 
-                c.drawString(72, y_position, line)
-                
-                # Add underline for underlined text
+                # Draw the line respecting the margins
+                c.drawString(left_margin, y_position, line)
+
                 if underline_text:
                     underline_width = c.stringWidth(line, c._fontname, c._fontsize)
-                    c.line(72, y_position - 2, 72 + underline_width, y_position - 2)
+                    c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
 
-                y_position -= 14  # Adjust y_position after each line
+                y_position -= 14  # Adjust the y position after each line
 
-        # Add extra spacing between paragraphs
-        y_position -= 10
+        y_position -= 10  # Extra space between paragraphs
 
     return y_position
+
 
 
 @app.route("/download-pdf", methods=["POST"])
