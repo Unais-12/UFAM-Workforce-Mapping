@@ -46,7 +46,8 @@
         }
         
         .discounted-price {
-            font-size: 50px; /* Size of the price */
+            color: #FFFFF7;
+            font-size: 30px; /* Size of the price */
             font-weight: bold; /* Bold font for emphasis */
             margin-right: 10px; /* Space between price and label */
             position: relative; /* Needed for the line */
@@ -60,11 +61,13 @@
             top: 50%; /* Center vertically */
             height: 2px; /* Height of the line */
             background-color: white; /* Line color */
-            transform: translateY(-50%); /* Center the line */
+            transform: translateY(-50%) rotate(-45deg); /* Center and rotate the line */
+            transform-origin: left; /* Set rotation point at the left */
         }
         
+        
         .label {
-            font-size: 24px; /* Size of the label */
+            font-size: 20px; /* Size of the label */
         }        
         
         .container {
