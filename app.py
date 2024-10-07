@@ -529,10 +529,12 @@ def wrap_text(text, max_width, c):
             if c.stringWidth(test_line, "Helvetica", 12) <= max_width:
                 current_line = test_line
             else:
-                wrapped_lines.append(current_line.strip())
+                if current_line:  # Ensure we don't append an empty line
+                    wrapped_lines.append(current_line.strip())
                 current_line = word + " "
 
-        wrapped_lines.append(current_line.strip())
+        if current_line:  # Append the last line if it exists
+            wrapped_lines.append(current_line.strip())
 
     return wrapped_lines
 
@@ -554,10 +556,7 @@ def get_rgb_color(color):
     # Return RGB values normalized to the range 0-1 for ReportLab's setFillColorRGB
     return (red / 255.0, green / 255.0, blue / 255.0)
 
-
-
-
-def add_styled_text_to_pdf(c, doc_paragraphs, y_position, is_first_page=False):
+def add_styled_text_to_pdf(c, doc_paragraphs, y_position):
     """Add styled text (bold, italic, underline, font size, color) from a Word document to the PDF."""
     for paragraph in doc_paragraphs:
         for run in paragraph.runs:  # 'runs' are sections with specific formatting
@@ -649,7 +648,7 @@ def download_pdf():
     # Add the text from Document 13, 14, or 15 to the first page
     if selected_documents:
         word_document = Document(selected_documents[0])
-        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position, is_first_page=True)
+        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
         c.showPage()  # End the first page after adding the initial document
 
         # Remove the first document so it's not added again later
