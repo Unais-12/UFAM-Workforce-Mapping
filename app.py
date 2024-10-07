@@ -458,7 +458,7 @@ def questions():
         return render_template("questions.html",current_category=current_category, questions=questions)
 
     
-@app.route("/thankyou_freeresults")
+@app.route("/thankyoufreeresults")
 def thankyou():
     total_cat_score = {
         'Values' : {'total': 20},
@@ -484,7 +484,7 @@ def thankyou():
 
     return render_template("thankyou_freeresults.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
-@app.route("/thankyou_premiumresults")
+@app.route("/thankyoupremiumresults")
 def thankyou():
     total_cat_score = {
         'Values' : {'total': 20},
