@@ -10,14 +10,6 @@
         <h2>Thank You For Choosing Premium Results!</h2>
         <p>Your detailed insights are prepared, and we have tailored a comprehensive analysis specifically for your organization</p>
         
-        <div class = "new-text">
-            <h2>Free Results</h2>
-        </div>
-        
-        <button id="downloadPdfBtn" class="prem-btn no-print">
-            <span class="icon"></span> Download PDF
-        </button>
-        
         <!-- Dark background container for the slider -->
         <div class="slider-wrapper">
             <div class="slider-container">
@@ -83,11 +75,6 @@
                     updateCircleScoreColor(percentage, leftSideElement);
                 });
         
-                // PDF download functionality
-                document.getElementById('downloadPdfBtn').onclick = function() {
-                    generatePDF();
-                };
-        
                 document.getElementById('premiumBtn').onclick = function() {
                     generatePDF();
                     window.location.href = '/premium'; // Redirect to premium after generating the PDF
@@ -125,53 +112,7 @@
                         color = "#72CC3A";  // Green for high percentages
                     }
                     element.style.color = color;  // Apply color dynamically
-                }
-        
-                function generatePDF() {
-                    const url = 'thankyou_freeresults.html'; // Specify the page you want to download as PDF
-                
-                    // Fetch the HTML content of the page
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.text();
-                        })
-                        .then(html => {
-                            // Create a temporary container to hold the fetched HTML
-                            const tempContainer = document.createElement('div');
-                            tempContainer.innerHTML = html;
-                
-                            // Ensure that any required styles are included
-                            const styleTags = Array.from(document.querySelectorAll('link[rel="stylesheet"], style')).map(link => link.outerHTML).join('');
-                            tempContainer.innerHTML = styleTags + tempContainer.innerHTML; // Prepend styles to the fetched HTML
-                
-                            const opt = {
-                                margin: 0,
-                                filename: 'audit_report.pdf',
-                                image: { type: 'jpeg', quality: 0.98 },
-                                html2canvas: { scale: 2, useCORS: true },
-                                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                            };
-                
-                            // Hide the buttons before generating the PDF
-                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
-                
-                            setTimeout(() => {
-                                html2pdf().from(tempContainer).set(opt).save().then(() => {
-                                    // Show buttons back after generating PDF
-                                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                                });
-                            }, 100); // Adjust the timeout duration if needed
-                        })
-                        .catch(error => {
-                            console.error('There was a problem fetching the HTML:', error);
-                            // Optionally, show buttons back in case of error
-                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
-                        });
-                }
-            }                     
+                }                  
         </script>
         
         <style>
@@ -376,8 +317,9 @@
             }
 
             .premium-btn-container {
-                text-align: center;
+                text-align: left;
                 margin-top: 40px;
+                margin-left: 0;
             }
 
             .prem-btn {
