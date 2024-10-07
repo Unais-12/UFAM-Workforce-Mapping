@@ -1,0 +1,389 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Thank You
+{% endblock %}
+
+{% block content %}
+    <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+    <div class="container">
+        <h2>Thank You For Choosing Premium Results!</h2>
+        <p>Your detailed insights are prepared, and we have tailored a comprehensive analysis specifically for your organization</p>
+        
+        <h2>Free Results</h2>
+        <button id="downloadPdfBtn" class="prem-btn no-print">
+            <span class="icon"></span> Download PDF
+        </button>
+        
+        <!-- Dark background container for the slider -->
+        <div class="slider-wrapper">
+            <div class="slider-container">
+                <label for="totalScoreSlider">Your Score: <span id="sliderValue">{{ total_score }}</span><span id = "TotalOutOf">124</span></label>
+                <input type="range" min="0" max="124" step="1" class="slider" id="changeSlider" disabled>
+                
+                <div class="labels">
+                    <span class="label" style="left: 10%;">Potential Explorer</span>
+                    <span class="label" style="left: 45%;">Active Builder</span>
+                    <span class="label" style="left: 90%;">Prime Initiator</span>
+                </div>
+            </div>
+        </div>
+        <h2>Score By Section</h2>
+        <div class="circles">
+            {% for category, score in category_scores.items() %}
+                <div class="container-circle">
+                    <div class="circle">
+                        <span id="score_section" class="score">
+                            <span class="left-side" data-category="{{ category }}">{{ score }}</span>/<span class="right-side">{{ total_cat_score[category]['total'] }}</span>
+                        </span>
+                        <span class="label2">{{ category }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class = "final-text">
+            <h2>Download Your Premium Report</h2>
+            <p>Please click on the button below to download your Report</p>
+        </div>
+        <div class="premium-btn-container">
+            <button id="premiumBtn" class="prem-btn no-print">Get Premium Results</button>
+        </div>        
+        <script>
+            window.onload = function() {
+                const totalScoreSlider = document.getElementById("changeSlider");
+                const sliderValue = document.getElementById("sliderValue");
+        
+                // Get the total score from the backend
+                const score = {{ total_score }};
+        
+                // Set slider value and displayed score
+                totalScoreSlider.value = score;
+                sliderValue.textContent = `${score}/`;
+        
+                // Apply multicolor background to the slider
+                applyMulticolorBackground(totalScoreSlider);
+        
+                // Update the color of the overall score
+                updateScoreColor(score, sliderValue);
+        
+                // Update each circle's score color based on the percentage of its total score
+                document.querySelectorAll('.circle').forEach(function(circle) {
+                    const leftSideElement = circle.querySelector('.left-side');
+                    const category = leftSideElement.getAttribute('data-category'); // Use a data attribute for category
+                    const sectionScore = parseInt(leftSideElement.textContent) || 0; // Default to 0 if NaN
+                    const totalSectionScore = parseInt({{ total_cat_score|tojson }}[category]?.total) || 1; // Default to 1 to avoid division by zero
+        
+                    // Calculate percentage of the score
+                    const percentage = (sectionScore / totalSectionScore) * 100;
+        
+                    // Update the color based on the percentage
+                    updateCircleScoreColor(percentage, leftSideElement);
+                });
+        
+                // PDF download functionality
+                document.getElementById('downloadPdfBtn').onclick = function() {
+                    generatePDF();
+                };
+        
+                document.getElementById('premiumBtn').onclick = function() {
+                    generatePDF();
+                    window.location.href = '/premium'; // Redirect to premium after generating the PDF
+                };
+        
+                function applyMulticolorBackground(slider) {
+                    slider.style.background = `linear-gradient(to right, 
+                        #E32636 0%, 
+                        red 25%, 
+                        #FFD700 25%, 
+                        yellow 62.5%, 
+                        #009000 62.5%, 
+                        #009000 100%)`;
+                }
+        
+                function updateScoreColor(score, scoreElement) {
+                    let color;
+                    if (score <= 30) {
+                        color = "#E32636";  // Red
+                    } else if (score <= 76) {
+                        color = "#FFD700";  // Yellow
+                    } else {
+                        color = "#72CC3A";  // Green
+                    }
+                    scoreElement.style.color = color;
+                }
+        
+                function updateCircleScoreColor(percentage, element) {
+                    let color;
+                    if (percentage <= 30) {
+                        color = "#E32636";  // Red for low percentages
+                    } else if (percentage <= 75) {
+                        color = "#FFD700";  // Yellow for moderate percentages
+                    } else {
+                        color = "#72CC3A";  // Green for high percentages
+                    }
+                    element.style.color = color;  // Apply color dynamically
+                }
+        
+                function generatePDF() {
+                    const element = document.querySelector('.container');
+                    const opt = {
+                        margin: 0,
+                        filename: 'audit_report.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    };
+        
+                    // Hide the buttons before generating the PDF
+                    document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'none');
+        
+                    setTimeout(() => {
+                        html2pdf().from(element).set(opt).save().then(() => {
+                            // Show buttons back after generating PDF
+                            document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
+                        });
+                    }, 100); // Adjust the timeout duration if needed
+                }
+            };
+        </script>
+        
+        <style>
+            .premium-btn-container {
+                text-align: center;
+                margin-top: 40px;
+            }
+
+            .prem-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #FF5508;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            .prem-btn:hover {
+                background-color: #FF7633;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            h2 {
+                text-align: center;
+                color: #FF5508;
+                margin-top: 50px;
+                font-weight: bold;
+            }
+
+            p {
+                text-align: center;
+            }
+            /* New dark background for the slider section */
+            .slider-wrapper {
+                background-color: #333; /* Dark background */
+                padding: 20px;
+                border-radius: 10px;
+                color: #fff; /* White text */
+                margin: 20px 0;
+            }
+
+            .slider-container {
+                margin: 20px 0;
+                width: 90%;
+                margin: 0 auto;
+            }
+
+            input[type="range"] {
+                width: 100%;
+                appearance: none;
+                height: 8px;
+                border-radius: 5px;
+                outline: none;
+                cursor: not-allowed; /* Disabled cursor */
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #007bff; /* Blue thumb */
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #007bff;
+            }
+
+            .labels {
+                position: relative;
+                margin-top: 2px;
+                width: 100%;
+            }
+
+            .label {
+                position: absolute;
+                font-size: 14px;
+                transform: translateX(-50%);
+                color: #ccc; /* Light text for contrast */
+            }
+
+            #sliderValue {
+                font-size: 35px;  /* Increase the font size */
+                color: #72CC3A;   /* Green color for score */
+                font-weight: bold; /* Bold text */
+            }
+            
+            label {
+                font-size: 18px;
+                font-weight: bold;
+                color: #fff; /* White text for better visibility */
+            }
+
+            h2 {
+                margin-top: 60px;
+            }
+              
+            .score {
+                font-size: 24px;
+                color: #fff;
+            }
+              
+            .label {
+                font-size: 12px;
+                color: #fff;
+            }
+            #TotalOutOf{
+                font-size: 25px;
+                color: #31CD63;
+            }
+            body{
+                background-color: #FAF9F6;
+            }
+            .container-circle{
+                background-color: #000000; /* Dark background */
+                padding: 20px;
+                border-radius: 10px;
+                color: #fff; /* White text */
+                margin: 20px 0;
+                height: 180px
+
+            }
+            .circles {
+                display: flex;
+                justify-content: space-around;
+                background-color: #D6D6D6; /* Dark background */
+                padding: 20px;
+                border-radius: 10px;
+                color: #fff; /* White text */
+                margin: 20px 0;
+                max-height: 300px;
+              }
+              
+              .circle {
+                position: relative;
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                background-color: #000000;
+                border: 2px solid #ccc;
+              }
+              
+              .score {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 24px;
+                font-weight: bold;
+              }
+              
+              .label2 {
+                position: absolute;
+                top: 110px; /* Adjust this value to control the distance from the bottom */
+                left: 50%;
+                transform: translate(-50%, 0);
+                font-size: 12px;
+                color: #D6D6D6;
+                font-weight: bold;
+              }
+              .left-side {
+                font-size: 30px; /* Adjust this as necessary */
+                color: #fff; /* Keeps it white */
+            }
+            
+            .right-side {
+                font-size: 18px; /* Smaller size */
+                color: #31CD63; /* Green color */
+            }
+
+            @media print {
+                .no-print {
+                    display: none; /* Hide elements with the 'no-print' class */
+                }
+                body{
+                    margin: 0;
+                    padding: 0;
+                    padding-top: 0;
+                }
+                .container {
+                    page-break-inside: avoid;
+                    padding-top: 0;
+                    margin: 0;
+                }
+                .circles {
+                    page-break-inside: avoid;
+                }
+            }
+
+            .prem-btn {
+                background-color: transparent;
+                border: none;
+                color: #000;
+                font-size: 14px;
+                font-family: Arial, sans-serif;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+            
+            .prem-btn .icon {
+                width: 16px;
+                height: 16px;
+                background-size: cover;
+                margin-right: 8px;
+            }
+            
+            .prem-btn:hover {
+                text-decoration: underline;
+            }
+
+            .final-text h2 {
+                font-size: 24px; /* Adjusted to match the size in the image */
+                color: #FF6600;  /* Orange color from the image */
+                font-family: Arial, sans-serif; /* Adjust the font-family as needed */
+                font-weight: bold; /* Makes the text bold */
+                margin-bottom: 8px; /* Adds some space between the heading and the paragraph */
+            }
+            
+            .final-text p {
+                font-size: 14px; /* Slightly smaller font size */
+                color: #333333;  /* Dark gray text color */
+                font-family: Arial, sans-serif; /* Matches the font of the heading */
+                margin: 0; /* Ensures no extra margin */
+            }   
+        </style>
+    </div>
+    
+{% endblock %}

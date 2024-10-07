@@ -179,7 +179,7 @@
     <div class="container">
         <h1>Choose Your Results</h1>
         <p>Thank you for completing the Internal Audit Survey! Your personalized insights are ready. Now, choose how you'd like to view your results:</p>
-
+    
         <div class="result-options">
             <div class="result-box free-result">
                 <h2>Free Result</h2>
@@ -192,7 +192,7 @@
                 </ul>
                 <button class="btn free-btn" id="freeResultBtn">Get Free Results</button>
             </div>
-
+    
             <div class="result-box premium-result">
                 <h2>Premium Result</h2>
                 <h3>In-Depth Analysis and Action Plan</h3>
@@ -203,33 +203,23 @@
                     <li>A step-by-step action plan to enhance compliance, efficiency, and risk management.</li>
                     <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
                 </ul>
-                <p class = "Price" id = "Price">$19</p>
+                <p class="Price" id="Price">$19</p>
                 <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
             </div>
         </div>
     </div>
-
+    
     <script>
-        // Add click event for Free Result button
+        // Redirect to different versions of /thankyou.html based on the button clicked
         document.getElementById('freeResultBtn').addEventListener('click', function() {
-            window.location.href = '/thankyou'; // Redirect to /thankyou
+            window.location.href = '/thankyou_premiumresults.html'; // Redirect with query parameter 'result=free'
         });
-
-        // Add click event for Premium Result button
+    
         document.getElementById('premiumResultBtn').addEventListener('click', function() {
-            window.location.href = '/premium'; // Redirect to /premium
+            window.location.href = '/thankyou_freeresults.html'; // Redirect with query parameter 'result=premium'
         });
-        document.getElementById('premiumPlusResultBtn').addEventListener('click', function() {
-            window.location.href = '/premium'; // Redirect to /premium
-        });
-        document.getElementById("premiumResultBtn").onclick = function() {
-            fetch('/send_pdf', {
-                method: 'POST'
-            }).then(response => response.text())
-              .then(data => alert(data))
-              .catch(error => alert("Error: " + error));
-        };
     </script>
+    
 
 
 {%endblock%}

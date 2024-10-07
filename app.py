@@ -458,7 +458,7 @@ def questions():
         return render_template("questions.html",current_category=current_category, questions=questions)
 
     
-@app.route("/thankyou")
+@app.route("/thankyou_freeresults")
 def thankyou():
     total_cat_score = {
         'Values' : {'total': 20},
@@ -482,8 +482,33 @@ def thankyou():
 
     scores_by_category = {row[0]: row[1] for row in category_scores}
 
-    return render_template("thankyou.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
+    return render_template("thankyou_freeresults.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
+@app.route("/thankyou_premiumresults")
+def thankyou():
+    total_cat_score = {
+        'Values' : {'total': 20},
+        'Methodology': {'total': 44},
+        'Stakeholder Management' : {'total': 24},
+        'Resource Management': {'total': 36},
+    }
+    if "id" not in session:
+        return redirect("/register")
+
+    user_id = session["id"]
+
+    # Retrieve total score
+    cursor.execute("""SELECT Score FROM Users WHERE Id = ?""", (user_id))
+    row = cursor.fetchone()
+    total_score = row[0] if row else None
+
+    # Retrieve category-wise scores
+    cursor.execute("""SELECT category, score FROM UserScores WHERE user_id = ?""", (user_id,))
+    category_scores = cursor.fetchall()
+
+    scores_by_category = {row[0]: row[1] for row in category_scores}
+
+    return render_template("thankyou_premiumresults.html", total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
 
 
 @app.route("/choice")
