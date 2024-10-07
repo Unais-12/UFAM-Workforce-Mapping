@@ -62,7 +62,9 @@
             height: 2px; /* Height of the line */
             background-color: white; /* Line color */
             transform: translateY(-50%) rotate(-45deg); /* Center and rotate the line */
-            transform-origin: left; /* Set rotation point at the left */
+            transform-origin: center; /* Set rotation point at the center for better alignment */
+            /* Adjust the top value to align it correctly */
+            top: calc(50% - 1px); /* Slightly adjust based on line height */
         }
         
         
