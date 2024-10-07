@@ -143,6 +143,10 @@
                             const tempContainer = document.createElement('div');
                             tempContainer.innerHTML = html;
                 
+                            // Ensure that any required styles are included
+                            const styleTags = Array.from(document.querySelectorAll('link[rel="stylesheet"], style')).map(link => link.outerHTML).join('');
+                            tempContainer.innerHTML = styleTags + tempContainer.innerHTML; // Prepend styles to the fetched HTML
+                
                             const opt = {
                                 margin: 0,
                                 filename: 'audit_report.pdf',
@@ -167,15 +171,15 @@
                             document.querySelectorAll('.no-print').forEach(btn => btn.style.display = 'inline-block');
                         });
                 }
-            }      
+            }                     
         </script>
         
         <style>
             .premium-btn-container {
-                text-align: center;
+                text-align: left; /* Change from center to left */
                 margin-top: 40px;
             }
-
+            
             .prem-btn {
                 padding: 10px 20px;
                 font-size: 16px;
@@ -185,10 +189,11 @@
                 border-radius: 5px;
                 cursor: pointer;
             }
-
+            
             .prem-btn:hover {
                 background-color: #FF7633;
             }
+            
 
             .container {
                 max-width: 1200px;
@@ -407,12 +412,17 @@
                 text-align: left;
                 margin-left: 0;
             }   
-            .new-text{
-                text-align: left;
+            .new-text {
+                text-align: left; /* Aligns text inside this container to the left */
                 margin-left: 0;
                 color: #FF5508;
                 margin-top: 50px;
                 font-weight: bold;
+            }
+        
+            .new-text h2 {
+                text-align: left; /* Ensure the heading is also left aligned */
+                margin: 0; /* Remove default margin of h2 */
             }
         </style>
     </div>
