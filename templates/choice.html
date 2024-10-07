@@ -40,37 +40,31 @@
             padding: 20px;
         }
         .price-container {
-            position: relative;
-            display: flex; /* Use flexbox to align items horizontally */
-            align-items: center; /* Center items vertically */
+            position: relative; /* Relative positioning for absolute children */
+            display: flex; /* Align items in a row */
+            align-items: center; /* Center vertically */
         }
         
-        .Price {
-            font-size: 25px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-            color: white;
-            position: relative;
-            z-index: 1; /* Ensure the text is above the line */
+        .discounted-price {
+            font-size: 50px; /* Size of the price */
+            font-weight: bold; /* Bold font for emphasis */
+            margin-right: 10px; /* Space between price and label */
+            position: relative; /* Needed for the line */
+        }
+        
+        .discounted-price::after {
+            content: ""; /* No content, just the line */
+            position: absolute; /* Absolute positioning to overlap */
+            left: 0; /* Start from the left */
+            right: 0; /* Stretch to the right */
+            top: 50%; /* Center vertically */
+            height: 2px; /* Height of the line */
+            background-color: white; /* Line color */
+            transform: translateY(-50%); /* Center the line */
         }
         
         .label {
-            margin-left: 20px; /* Space between the price and the label */
-            font-size: 15px; /* Adjust size as needed */
-            color: white; /* Adjust color to match your design */
-        }
-        
-        .price-container::before {
-            content: "";
-            position: absolute;
-            top: 50%; /* Align to the middle of the container */
-            left: 0;
-            right: 0;
-            height: 0.1px; /* Line height */
-            background-color: white; /* Line color */
-            transform: rotate(-45deg); /* Diagonal line */
-            z-index: 0; /* Place behind the text */
+            font-size: 24px; /* Size of the label */
         }        
         
         .container {
@@ -230,9 +224,9 @@
                     <li>A follow-up consultation with one of our expert consultants for personalized guidance.</li>
                 </ul>
                 <div class="price-container">
-                    <div class="Price">$19</div>
-                    <div class="label">Free for limited time</div>
-                </div>                
+                    <span class="discounted-price">$19</span>
+                    <span class="label">Free for limited time</span>
+                </div>                           
                 <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
             </div>
         </div>
