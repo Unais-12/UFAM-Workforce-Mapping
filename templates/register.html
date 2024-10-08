@@ -9,7 +9,9 @@
 {% if messages %}
     <ul class="flash-messages">
     {% for message in messages %}
-        <li class="flash-message">{{ message }}</li>
+        <li class="flash-message">
+            <i class="icon-error"></i> {{ message }}
+        </li>
     {% endfor %}
     </ul>
 {% endif %}
@@ -19,25 +21,45 @@
     .flash-messages {
         list-style-type: none;
         padding: 0;
-        margin: 0;
-        background-color: #f8d7da; /* light red background */
-        border: 1px solid #f5c6cb; /* red border */
-        border-radius: 4px;
-        padding: 10px;
+        margin: 20px 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .flash-message {
+        display: flex;
+        align-items: center;
+        background-color: #f8d7da; /* light red background */
+        border: 1px solid #f5c6cb; /* red border */
+        border-radius: 8px; /* rounded corners */
+        padding: 15px 20px; /* increased padding for better readability */
+        margin-bottom: 15px;
         color: #721c24; /* dark red text */
-        padding: 5px 10px;
-        margin-bottom: 5px;
-        font-size: 14px;
-        background-color: #f5c6cb; /* lighter red background */
-        border-radius: 3px;
+        font-size: 16px; /* modern font size */
+        font-family: 'Lato', sans-serif; /* modern font */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* subtle shadow for depth */
     }
     
     .flash-message:last-child {
         margin-bottom: 0;
     }
+    
+    /* Icon styling */
+    .icon-error {
+        background: url('error-icon.svg') no-repeat center; /* Assuming you have an error icon */
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+    }
+    
+    /* Additional hover effect (optional) */
+    .flash-message:hover {
+        background-color: #f5b5b9; /* Slight color change on hover */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+    }
+</style>
+
     
     .btn-primary:hover{
         background-color: #e64c00; /* Darker orange on hover */
