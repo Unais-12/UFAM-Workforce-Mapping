@@ -653,16 +653,19 @@ def add_styled_text_to_pdf(c, doc_paragraphs, y_position, left_margin=72, right_
 
     return y_position
 
-
-
-
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
     user_id = session.get("id")
     if not user_id:
         return "User not logged in"
-    
+
+    # Fetch user's name from the database
+    cursor.execute("SELECT username FROM Users WHERE id = ?", (user_id,))
+    user_name_row = cursor.fetchone()
+    user_name = user_name_row[0] if user_name_row else "User"
+
+    # Load Document 13 (with the placeholder 'xxxx' for the name)
     selected_documents.append('Word Docs/Document 13.docx')
 
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
@@ -685,14 +688,22 @@ def download_pdf():
 
     # Add the text from Document 13, 14, or 15 to the first page
     if selected_documents:
+        # Load the Word document
         word_document = Document(selected_documents[0])
+
+        # Replace 'xxxx' with the user's name in the Word document
+        for paragraph in word_document.paragraphs:
+            if 'xxxx' in paragraph.text:
+                paragraph.text = paragraph.text.replace('xxxx', user_name)
+
+        # Add styled text from the updated Word document to the PDF
         y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
         c.showPage()  # End the first page after adding the initial document
 
         # Remove the first document so it's not added again later
         selected_documents.pop(0)
 
-    # Now add the custom PDF sections
+    # Now add the custom PDF sections based on UserScores
     for row in rows:
         if row[2] == "Values":
             if row[3] <= 6:
