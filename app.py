@@ -663,15 +663,7 @@ def download_pdf():
     if not user_id:
         return "User not logged in"
     
-    cursor.execute("SELECT * FROM Users Where Id = ?", (user_id,))
-    user_data = cursor.fetchone()
-    if user_data:
-        if user_data[8] <= 30:
-            selected_documents.append('Word Docs/Document 13.docx')
-        elif user_data[8] > 30 and user_data[8] <= 76:
-            selected_documents.append('Word Docs/Document 14.docx')
-        elif user_data[8] > 76 and user_data[8] <= 124:
-            selected_documents.append('Word Docs/Document 15.docx')
+    selected_documents.append('Word Docs/Document 13.docx')
 
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
