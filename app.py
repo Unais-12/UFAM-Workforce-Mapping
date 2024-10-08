@@ -661,7 +661,7 @@ def download_pdf():
         return "User not logged in"
 
     # Fetch user's name from the database
-    cursor.execute("SELECT username FROM Users WHERE id = ?", (user_id,))
+    cursor.execute("SELECT Name FROM Users WHERE id = ?", (user_id,))
     user_name_row = cursor.fetchone()
     user_name = user_name_row[0] if user_name_row else "User"
 
