@@ -555,7 +555,7 @@ def download_pdf():
                 modified_content = page.Contents.stream.replace(b'xxxx', user_name.encode())
                 page.Contents.stream = modified_content
             
-            writer.add_page(page)
+            writer.addpage(page)
 
         # Write the modified PDF into memory
         pdf_bytes = BytesIO()
