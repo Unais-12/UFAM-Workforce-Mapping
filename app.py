@@ -513,145 +513,6 @@ def premium():
     return render_template("premium.html")
 
 
-def wrap_text(text, max_width, c):
-    """Utility function to wrap text based on max width for PDF."""
-    wrapped_lines = []
-    lines = text.split('\n')
-    
-    for line in lines:
-        words = line.split(' ')
-        current_line = ""
-
-        for word in words:
-            test_line = current_line + word + " "
-            # Test if the line fits within the specified max_width
-            if c.stringWidth(test_line, "Helvetica", 12) <= max_width:
-                current_line = test_line
-            else:
-                # Add the current line if it exceeds max_width
-                if current_line:
-                    wrapped_lines.append(current_line.strip())
-                current_line = word + " "  # Start a new line with the word
-
-        # Handle single long words that exceed the max_width
-        if c.stringWidth(current_line, "Helvetica", 12) > max_width:
-            # Break the word character by character
-            word_parts = [current_line[i:i+int(max_width/10)] for i in range(0, len(current_line), int(max_width/10))]
-            wrapped_lines.extend(word_parts)
-        else:
-            if current_line:
-                wrapped_lines.append(current_line.strip())  # Add any remaining text
-
-    return wrapped_lines
-
-
-from docx.shared import RGBColor
-
-def get_rgb_color(color):
-    # Check if color is None or has no 'rgb' attribute (indicating no color is set)
-    if color is None or not hasattr(color, 'rgb') or color.rgb is None:
-        return (0, 0, 0)  # Default to black if no color is set
-
-    # Extract the RGB values from the color object (if available)
-    rgb_value = color.rgb  # This returns a `RGBColor` object with raw bytes
-
-    # Convert the RGB value (which is in bytes) to hexadecimal string
-    red = rgb_value[0]
-    green = rgb_value[1]
-    blue = rgb_value[2]
-
-    # Return RGB values normalized to the range 0-1 for ReportLab's setFillColorRGB
-    return (red / 255.0, green / 255.0, blue / 255.0)
-
-def add_styled_text_to_pdf(c, doc_paragraphs, y_position, left_margin=72, right_margin=500):
-    """Add styled text with proper wrapping from Word to PDF, ensuring it respects margins."""
-    max_width = right_margin - left_margin  # Calculate the usable width for text
-
-    for paragraph in doc_paragraphs:
-        for run in paragraph.runs:
-            text = run.text
-            font_size = run.font.size.pt if run.font.size else 12
-
-            # Set the font style and size
-            if run.bold and run.italic:
-                c.setFont("Helvetica-BoldOblique", font_size)
-            elif run.bold:
-                c.setFont("Helvetica-Bold", font_size)
-            elif run.italic:
-                c.setFont("Helvetica-Oblique", font_size)
-            else:
-                c.setFont("Helvetica", font_size)
-
-            # Set underline and color
-            if run.underline:
-                c.setLineWidth(1)
-                underline_text = True
-            else:
-                underline_text = False
-
-            color = get_rgb_color(run.font.color)
-            c.setFillColorRGB(*color)
-
-            # Wrap the text manually based on max width
-            wrapped_lines = wrap_text(text, max_width, c)
-
-            for line in wrapped_lines:
-                # Measure the width of the current line
-                line_width = c.stringWidth(line, c._fontname, c._fontsize)
-                
-                # Check if line width exceeds the available width
-                if line_width > max_width:
-                    # Break the line if it exceeds max width
-                    words = line.split(' ')
-                    current_line = ""
-                    
-                    for word in words:
-                        test_line = current_line + word + " "
-                        test_line_width = c.stringWidth(test_line, c._fontname, c._fontsize)
-                        
-                        if test_line_width < max_width:
-                            current_line = test_line
-                        else:
-                            # Draw the current line and start a new line
-                            if y_position < 100:
-                                c.showPage()  # Create a new page if position is too low
-                                y_position = 770  # Reset y_position for the new page
-                            
-                            c.drawString(left_margin, y_position, current_line.strip())
-                            
-                            if underline_text:
-                                underline_width = c.stringWidth(current_line.strip(), c._fontname, c._fontsize)
-                                c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
-                            
-                            y_position -= 14  # Adjust the y position after each line
-                            current_line = word + " "  # Start a new line with the word
-
-                    # Draw any remaining text in current_line
-                    if current_line.strip():
-                        c.drawString(left_margin, y_position, current_line.strip())
-                        if underline_text:
-                            underline_width = c.stringWidth(current_line.strip(), c._fontname, c._fontsize)
-                            c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
-                        
-                        y_position -= 14  # Adjust the y position for the last line
-
-                else:
-                    if y_position < 100:
-                        c.showPage()  # Create a new page if the position is too low
-                        y_position = 770  # Reset y_position for the new page
-
-                    # Draw the line respecting the margins
-                    c.drawString(left_margin, y_position, line)
-
-                    if underline_text:
-                        underline_width = c.stringWidth(line, c._fontname, c._fontsize)
-                        c.line(left_margin, y_position - 2, left_margin + underline_width, y_position - 2)
-
-                    y_position -= 14  # Adjust the y position after each line
-
-        y_position -= 10  # Extra space between paragraphs
-
-    return y_position
 
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
@@ -665,40 +526,42 @@ def download_pdf():
     user_name_row = cursor.fetchone()
     user_name = user_name_row[0] if user_name_row else "User"
 
-    # Load Document 13 (with the placeholder 'xxxx' for the name)
-    selected_documents.append('Word Docs/Document 13.docx')
+    # Load the base document (PDF) that contains the placeholder 'xxxx' for the name
+    selected_documents.append('PDF Docs/Document 13.pdf')
 
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
 
     document_list = [
-        'Word Docs/Document 1.docx', 'Word Docs/Document 2.docx', 'Word Docs/Document 3.docx',
-        'Word Docs/Document 4.docx', 'Word Docs/Document 5.docx', 'Word Docs/Document 6.docx',
-        'Word Docs/Document 7.docx', 'Word Docs/Document 8.docx', 'Word Docs/Document 9.docx',
-        'Word Docs/Document 10.docx', 'Word Docs/Document 11.docx', 'Word Docs/Document 12.docx'
+        'PDF Docs/Document 1.pdf', 'PDF Docs/Document 2.pdf', 'PDF Docs/Document 3.pdf',
+        'PDF Docs/Document 4.pdf', 'PDF Docs/Document 5.pdf', 'PDF Docs/Document 6.pdf',
+        'PDF Docs/Document 7.pdf', 'PDF Docs/Document 8.pdf', 'PDF Docs/Document 9.pdf',
+        'PDF Docs/Document 10.pdf', 'PDF Docs/Document 11.pdf', 'PDF Docs/Document 12.pdf'
     ]
 
     pdf_files = []
-    pdf_buffer = BytesIO()  # Buffer for the final merged PDF
 
-    # Initialize the ReportLab canvas for the combined PDF
-    c = canvas.Canvas(pdf_buffer)
-
-    y_position = 770  # Starting y_position for drawing text
-
-    # Add the text from Document 13, 14, or 15 to the first page
+    # Modify and merge the first PDF (Document 13) to replace 'xxxx' with the user's name
     if selected_documents:
-        # Load the Word document
-        word_document = Document(selected_documents[0])
+        # Open the base PDF (Document 13)
+        with open(selected_documents[0], "rb") as base_pdf:
+            reader = PdfReader(base_pdf)
+            writer = PdfWriter()
 
-        # Replace 'xxxx' with the user's name in the Word document
-        for paragraph in word_document.paragraphs:
-            if 'xxxx' in paragraph.text:
-                paragraph.text = paragraph.text.replace('xxxx', user_name)
+            # Iterate through the pages
+            for page in reader.pages:
+                # Extract text and replace 'xxxx' with the user's name
+                text = page.extract_text()
+                if 'xxxx' in text:
+                    text = text.replace('xxxx', user_name)
 
-        # Add styled text from the updated Word document to the PDF
-        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
-        c.showPage()  # End the first page after adding the initial document
+                writer.add_page(page)
+
+            # Write the modified PDF into memory
+            pdf_bytes = BytesIO()
+            writer.write(pdf_bytes)
+            pdf_bytes.seek(0)
+            pdf_files.append(pdf_bytes)
 
         # Remove the first document so it's not added again later
         selected_documents.pop(0)
@@ -734,27 +597,12 @@ def download_pdf():
             elif 27 < row[3] <= 36:
                 selected_documents.append(document_list[11])
 
-        # Check if y_position is getting too low, and add a new page if necessary
-        if y_position < 100:
-            c.showPage()  # Create a new page
-            y_position = 770  # Reset y_position for the new page
-
+    # Add selected documents to the merge list
     for doc in selected_documents:
-        # Open the Word document
-        word_document = Document(doc)
-        
-        # Add styled text from Word to PDF
-        y_position = add_styled_text_to_pdf(c, word_document.paragraphs, y_position)
+        with open(doc, "rb") as pdf_file:
+            pdf_files.append(BytesIO(pdf_file.read()))
 
-    # Finalize and save the PDF after inserting all text
-    c.showPage()
-    c.save()
-
-    # Add the generated PDF to the list for merging later
-    pdf_buffer.seek(0)
-    pdf_files.append(pdf_buffer)
-
-    # Merging PDFs (if needed)
+    # Merging all PDFs into one
     merger = PdfMerger()
     for pdf in pdf_files:
         merger.append(pdf)
