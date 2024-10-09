@@ -10,6 +10,7 @@ from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pdfkit
 import fitz
 from reportlab.lib import colors
+from pdfrw import PdfReader, PdfWriter, PageMerge
 
 
 app = Flask(__name__)
@@ -513,7 +514,6 @@ def premium():
     return render_template("premium.html")
 
 
-
 @app.route("/download-pdf", methods=["POST"])
 def download_pdf():
     selected_documents = []
@@ -544,24 +544,24 @@ def download_pdf():
     # Modify and merge the first PDF (Document 13) to replace 'xxxx' with the user's name
     if selected_documents:
         # Open the base PDF (Document 13)
-        with open(selected_documents[0], "rb") as base_pdf:
-            reader = PdfReader(base_pdf)
-            writer = PdfWriter()
+        reader = PdfReader(selected_documents[0])
+        writer = PdfWriter()
 
-            # Iterate through the pages
-            for page in reader.pages:
-                # Extract text and replace 'xxxx' with the user's name
-                text = page.extract_text()
-                if 'xxxx' in text:
-                    text = text.replace('xxxx', user_name)
+        # Iterate through the pages
+        for page in reader.pages:
+            # Use PageMerge to modify the page
+            if 'xxxx' in page.Contents.stream:
+                # Create a new string that replaces 'xxxx' with the user's name
+                modified_content = page.Contents.stream.replace(b'xxxx', user_name.encode())
+                page.Contents.stream = modified_content
+            
+            writer.add_page(page)
 
-                writer.add_page(page)
-
-            # Write the modified PDF into memory
-            pdf_bytes = BytesIO()
-            writer.write(pdf_bytes)
-            pdf_bytes.seek(0)
-            pdf_files.append(pdf_bytes)
+        # Write the modified PDF into memory
+        pdf_bytes = BytesIO()
+        writer.write(pdf_bytes)
+        pdf_bytes.seek(0)
+        pdf_files.append(pdf_bytes)
 
         # Remove the first document so it's not added again later
         selected_documents.pop(0)
