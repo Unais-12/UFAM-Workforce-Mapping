@@ -543,25 +543,25 @@ def download_pdf():
 
     # Modify and merge the first PDF (Document 13) to replace 'xxxx' with the user's name
     if selected_documents:
-        # Open the base PDF (Document 13)
-        reader = PdfReader(selected_documents[0])
-        writer = PdfWriter()
+        # Open the base PDF (Document 13) using PyMuPDF
+        pdf_document = fitz.open(selected_documents[0])
 
         # Iterate through the pages
-        for page in reader.pages:
-            # Use PageMerge to modify the page
-            if 'xxxx' in page.Contents.stream:
-                # Create a new string that replaces 'xxxx' with the user's name
-                modified_content = page.Contents.stream.replace(b'xxxx', user_name.encode())
-                page.Contents.stream = modified_content
-            
-            writer.addpage(page)
+        for page in pdf_document:
+            # Search for the placeholder text 'xxxx' and replace it
+            text_instances = page.search_for('xxxx')
+            for inst in text_instances:
+                # Replace the text at the found location
+                page.insert_text(inst[:2], user_name, fontsize=11, color=(0, 0, 0))  # Adjust fontsize and color as needed
 
-        # Write the modified PDF into memory
+        # Save the modified PDF to a BytesIO object
         pdf_bytes = BytesIO()
-        writer.write(pdf_bytes)
+        pdf_document.save(pdf_bytes)
         pdf_bytes.seek(0)
         pdf_files.append(pdf_bytes)
+
+        # Close the PDF document
+        pdf_document.close()
 
         # Remove the first document so it's not added again later
         selected_documents.pop(0)
@@ -614,3 +614,4 @@ def download_pdf():
 
     final_pdf.seek(0)
     return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
