@@ -1,0 +1,2 @@
+SELECT * FROM Users
+SELECT * FROM UserScores
