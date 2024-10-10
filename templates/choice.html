@@ -51,27 +51,7 @@
             font-weight: bold; /* Bold font for emphasis */
             margin-right: 10px; /* Space between price and label */
             position: relative; /* Needed for the line */
-            filter: blur(0.5px); /* Adjust the value for more or less blur */
-        }
-        
-        .discounted-price::after {
-            content: ""; /* No content, just the line */
-            position: absolute; /* Absolute positioning to overlap */
-            left: 0; /* Start from the left */
-            right: 0; /* Stretch to the right */
-            top: 50%; /* Center vertically */
-            height: 2px; /* Height of the line */
-            background-color: white; /* Line color */
-            transform: translateY(-50%) rotate(-45deg); /* Center and rotate the line */
-            transform-origin: center; /* Set rotation point at the center for better alignment */
-            /* Adjust the top value to align it correctly */
-            top: calc(50% - 1px); /* Slightly adjust based on line height */
-        }
-        
-        
-        .label {
-            font-size: 15px; /* Size of the label */
-        }        
+        }     
         
         .container {
             max-width: 1300px;
@@ -230,7 +210,6 @@
                 </ul>
                 <div class="price-container">
                     <span class="discounted-price">$19</span>
-                    <span class="label">Free for limited time</span>
                 </div>                           
                 <button class="btn premium-btn" id="premiumResultBtn">Get Premium Results</button>
             </div>
