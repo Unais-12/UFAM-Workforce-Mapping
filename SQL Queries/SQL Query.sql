@@ -112,7 +112,7 @@ INSERT INTO Countries (id, Name) VALUES
 (78, 'Iran'),
 (79, 'Iraq'),
 (80, 'Ireland'),
-(81, 'Israel'),
+(81, 'Palestine'),
 (82, 'Italy'),
 (83, 'Jamaica'),
 (84, 'Japan'),
