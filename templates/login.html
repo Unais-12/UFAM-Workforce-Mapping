@@ -7,7 +7,7 @@
 {% block content %}
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <div class="form" id="loginform">
+    <div class="form">
         <h1>Sign In</h1>
         <p>Please login before starting</p>
         <form id="login" action="/login" method="POST" class="login">
@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="login-button">
-                <button type="submit" class="login-button" id="Login">login</button>
+                <button type="submit" class="Login">login</button>
             </div>  
         </form>
 
@@ -44,83 +44,86 @@
                 this.querySelector('i').classList.toggle('fa-eye-slash');
             });
         </script>
-
-        <style>
-            body {
-                font-family: 'Lato', sans-serif;
-                background-color: #f4f4f4;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-            }
-            .form {
-                max-width: 1200px;
-                margin: 40px auto;
-                padding: 20px;
-                background-color: #fff;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-            input[type="email"], input[type="password"] {
-                width: 100%;
-                padding: 10px 40px 10px 15px; /* Added padding-right to accommodate the toggle icon */
-                margin: 8px 0 16px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                background-color: #f9f9f9;
-                font-size: 14px;
-                box-sizing: border-box;
-                transition: all 0.3s ease;
-            }
-            input[type="email"]:focus, input[type="password"]:focus {
-                border-color: #0066cc;
-                background-color: #fff;
-                outline: none;
-            }
-            .password-wrapper {
-                position: relative;
-                width: 100%;
-            }
-            .toggle-password {
-                position: absolute;
-                top: 50%;
-                right: 15px; /* Adjusted to give more space between icon and input text */
-                transform: translateY(-50%);
-                cursor: pointer;
-            }
-            .toggle-password i {
-                font-size: 18px;
-                color: #666;
-            }
-            h1 {
-                text-align: center;
-                margin-bottom: 20px;
-                color: #FF5508;
-            }
-            p {
-                font-size: 13px;
-                text-align: center;
-                color: #666;
-            }
-            .login-button {
-                background-color: #FF5508;
-                color: #000000;
-                padding: 10px 15px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
-                width: 20%;
-                transition: background-color 0.3s ease;
-                margin: 0 auto;
-                display: block;
-            }
-            .login-button:hover {
-                background-color: #FF5733;
-            }
-        </style>
     </div>
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 10px 40px 10px 15px; /* Added padding-right to accommodate the toggle icon */
+            margin: 8px 0 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #0066cc;
+            background-color: #fff;
+            outline: none;
+        }
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 15px; /* Adjusted to give more space between icon and input text */
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .toggle-password i {
+            font-size: 18px;
+            color: #666;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FF5508;
+        }
+        p {
+            font-size: 13px;
+            text-align: center;
+            color: #666;
+        }
+        .Login {
+            background-color: #FF5508;
+            color: #000000;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 20%;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            margin: 0 auto;
+            display: block;
+        }
+        .Login:hover {
+            background-color: #FF5733;
+        }
+            
+    </style>
+    
 
 {% endblock %}
