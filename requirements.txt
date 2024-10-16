@@ -10,3 +10,4 @@ pdfkit
 python-docx
 PyMuPDF
 pdfrw
+bcrypt
