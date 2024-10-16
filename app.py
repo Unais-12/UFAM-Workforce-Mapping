@@ -11,6 +11,7 @@ import pdfkit
 import fitz
 from reportlab.lib import colors
 from pdfrw import PdfReader, PdfWriter, PageMerge
+import bcrypt
 
 
 app = Flask(__name__)
@@ -102,6 +103,8 @@ def register():
         Email = request.form.get("Email")
         Industry = request.form.get("Industry").strip().lower()
         Country = request.form.get("Country").strip().lower()
+        Password = request.form.get("Password")
+        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
 
         form_data = {
         "Name": Name,
@@ -110,7 +113,8 @@ def register():
         "Internal_Audit": Internal_Audit,
         "Company_Size": Company_Size,
         "Using_Solution": Using_Solution,
-        "Email": Email
+        "Email": Email,
+        "Password": Password
         }
 
         # Input validation
@@ -142,6 +146,10 @@ def register():
             flash("Enter an email")
             form_data['Email'] = ''  # Clear the specific field
             return render_template("register.html", **form_data)
+        elif not Password:
+            flash("Enter a Password")
+            form_data['Password'] = ''
+            return render_template("register.html", **form_data)
         elif Industry not in industry:
             flash("Invalid Industry")
             form_data['Industry'] = ''  # Clear the specific field
@@ -157,12 +165,16 @@ def register():
             flash("Email must be unique")
             form_data['Email'] = ''  # Clear the specific field
             return render_template("register.html", **form_data)
+        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM users").fetchall()]
+        if hashed_password in passwords:
+            flash("Choose a better Password")
+        
 
         # Insert the user into the database
         try:
             cursor.execute(
-                """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email)
-                VALUES(?,?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email)
+                """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email, hashed_password)
+                VALUES(?,?,?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email, hashed_password)
             )
             conn.commit()
         except pyodbc.ProgrammingError as e:
@@ -181,6 +193,42 @@ def register():
     else:
         return render_template("register.html")
 
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    # Clear session if redirecting to login
+    user_id = session.get("Id")
+    if user_id:
+        return redirect("/questions")  # Redirect if already logged in
+
+    if request.method == "POST":
+        Email = request.form.get("Email")
+        Password = request.form.get("Password")
+
+        # Validate input
+        if not Email:
+            flash("Enter an Email Address")
+        elif not Password:
+            flash("Enter an Email Address")
+
+        # Fetch the user from the database
+        cursor.execute("SELECT Id, Hashed_password FROM Users WHERE Email = ?", (Email,))
+        row = cursor.fetchone()
+
+        # Check if user exists
+        if row:
+            user_id, hashed_password = row  # Unpack ID and hashed password
+
+            # Check if the provided password matches the hashed password
+            if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
+                session["Id"] = user_id  # Store the integer user ID in session
+                return redirect("/choose_mode")  # Redirect to questions page
+            else:
+                flash("Invalid Password")
+        else:
+            flash("Invalid Email Address")
+    else:
+        return render_template("login.html", email="", password="")
 
 
 @app.route("/")

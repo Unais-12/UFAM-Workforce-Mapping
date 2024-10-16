@@ -16,22 +16,29 @@
 {% endwith %}
 
 <style>
+    .link {
+        margin: 0 auto;
+        text-align: center;
+    }
+    .link .text {
+        margin-top: 10px;
+    }
     .flash-messages {
         list-style-type: none;
         padding: 0;
         margin: 0;
-        background-color: #f8d7da; /* light red background */
-        border: 1px solid #f5c6cb; /* red border */
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
         border-radius: 4px;
         padding: 10px;
     }
     
     .flash-message {
-        color: #721c24; /* dark red text */
+        color: #721c24;
         padding: 5px 10px;
         margin-bottom: 5px;
         font-size: 14px;
-        background-color: #f5c6cb; /* lighter red background */
+        background-color: #f5c6cb;
         border-radius: 3px;
     }
     
@@ -40,8 +47,8 @@
     }
     
     .btn-primary:hover{
-        background-color: #e64c00; /* Darker orange on hover */
-        transform: scale(1.05); /* Slightly enlarge button on hover */
+        background-color: #e64c00;
+        transform: scale(1.05);
     }
     .btn-primary{
         display: block;
@@ -74,6 +81,20 @@
     }
     body{
         background-color: #FAF9F6;
+    }
+
+    /* Style for password toggle icon */
+    .password-wrapper {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 16px;
     }
 </style>
 
@@ -121,17 +142,24 @@
             <select id="Using_Solution" class="form-select" required name="Using_Solution">
                 <option selected>No</option>
                 <option>Yes</option>
-            </select> <!-- Corrected the missing closing tag -->
+            </select>
         </div>
+        <div class="col-md-6 password-wrapper">
+            <label for="Password" class="form-label">Password</label>
+            <input type="password" id="Password" class="form-control" required name="Password">
+            <i class="toggle-password">👁️</i>
+        </div>
+                
         <div class="col-12">
             <button type="submit" class="btn btn-primary">To The Survey</button>
+        </div>
+        <div class="link">
+            <p class="text">Already registered?</p>
+            <a href="/login">Sign In</a>
         </div>
     </form>
 
     <script>
-      function submitForm() {
-        document.getElementById("yourFormId").submit();
-    }
         $(document).ready(function () {
             // Autocomplete for Industry
             $("#Industry").autocomplete({
@@ -160,7 +188,22 @@
                 },
                 minLength: 2
             });
+
+            // Toggle password visibility
+            $(".toggle-password").click(function() {
+                let input = $("#Password");
+                let inputType = input.attr("type");
+
+                if (inputType === "password") {
+                    input.attr("type", "text");
+                    $(this).text("🙈");
+                } else {
+                    input.attr("type", "password");
+                    $(this).text("👁️");
+                }
+            });
         });
     </script>
 </div>
 {% endblock %}
+
