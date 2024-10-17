@@ -117,7 +117,7 @@ def start():
             # Fetch the newly created user's ID
             rows = cursor.execute("SELECT Id FROM Users WHERE Email = ?", (Email,)).fetchall()
             if rows:
-                session["Id"] = rows[0][0]  # Save the user ID to the session
+                session["id"] = rows[0][0]  # Save the user ID to the session
             else:
                 return "Failed to retrieve user ID after registration."
 
