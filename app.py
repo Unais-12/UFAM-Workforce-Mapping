@@ -608,8 +608,8 @@ def download_pdf():
     rows = cursor.fetchall()
 
     document_list = [
-        'PDF Docs/Document 1.pdf', r'PDF Docs/Document 2.pdf', r'PDF Docs/Document 3.pdf',
-        'PDF Docs/Document 4.pdf', r'PDF Docs/Document 5.pdf', r'PDF Docs/Document 6.pdf',
+        r'PDF Docs/Document 1.pdf', r'PDF Docs/Document 2.pdf', r'PDF Docs/Document 3.pdf',
+        r'PDF Docs/Document 4.pdf', r'PDF Docs/Document 5.pdf', r'PDF Docs/Document 6.pdf',
         r'PDF Docs/Document 7.pdf', r'PDF Docs/Document 8.pdf', r'PDF Docs/Document 9.pdf',
         r'PDF Docs/Document 10.pdf', r'PDF Docs/Document 11.pdf', r'PDF Docs/Document 12.pdf'
     ]
