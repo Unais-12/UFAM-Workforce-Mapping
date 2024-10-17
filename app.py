@@ -80,36 +80,52 @@ def autocomplete_industries():
     return jsonify([])
 
 
-@app.route("/start", methods = ["POST", "GET"])
+@app.route("/start", methods=["POST", "GET"])
 def start():
     session['category'] = 'Values'
     session['total_score'] = 0
     session['category_scores'] = {}
+
     if request.method == "POST":
         Email = request.form.get("Email")
         Password = request.form.get("Password")
-        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt()) 
+
+        # Password hashing
+        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
+
+        # Input validation
         if not Email:
             flash("You have to enter an Email")
+            return render_template("start.html")
         elif not Password:
             flash("You have to enter a Password")
+            return render_template("start.html")
+
+        # Check for unique email
         emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
         if Email in emails:
             flash("Email must be unique")
-        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM users").fetchall()]
-        if hashed_password in passwords:
-            flash("Choose a better Password")
-        cursor.execute("INSERT INTO Users (Email, hashed_password), VALUES(?,?)", (Email, hashed_password))
+            return render_template("start.html")
 
-        rows = cursor.execute("SELECT Id FROM users WHERE Email = ?", Email).fetchall()
+        # Password uniqueness check (This should be password strength, not hashed comparison)
+        # You could add a password strength validation here instead.
+
+        # Insert new user into the database
+        cursor.execute("INSERT INTO Users (Email, hashed_password) VALUES (?, ?)", (Email, hashed_password))
+
+        # Fetch the newly created user's ID
+        rows = cursor.execute("SELECT Id FROM users WHERE Email = ?", (Email,)).fetchall()
         if rows:
             session["Id"] = rows[0][0]  # Save the user ID to the session
         else:
             conn.close()
             return "Failed to retrieve user ID after registration."
+
         return redirect("/questions")
+
     else:
         return render_template("start.html")
+
 
 
 @app.route("/register", methods=["GET", "POST"])
