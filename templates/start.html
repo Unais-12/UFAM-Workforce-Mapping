@@ -21,36 +21,39 @@
         <h1>Register</h1>
         <p>Please fill this quick form before starting</p>
         <form id="login" action="/start" method="POST" class="login">
-            <div class="form-group">
-                <label for="email" class="label">Email</label>
-                <input type="email" class="input" id="email" name="email" required>
+            <div class="Email">
+                <label for="Email" class="Email">Email</label>
+                <input type="email" class="Email" id="Email" Name="Email">
             </div>
-            <div class="form-group">
-                <label for="password" class="label">Password</label>
+            <div class="Password">
+                <label for="Password" class="Password">Password</label>
                 <div class="password-wrapper">
-                    <input type="password" class="input" id="password" name="password" required>
+                    <input type="password" class="Password" id="Password" Name="Password">
                     <span id="togglePassword" class="toggle-password">
                         <i class="far fa-eye"></i> <!-- Eye icon -->
                     </span>
                 </div>
             </div>
             <div class="login-button">
-                <button type="submit" class="register-button">Register</button>
+                <button type="submit" class="Register">Register</button>
             </div> 
-            <div class="link">
-                <p class="text">Already Registered?</p>
-                <a href="/login">Sign In</a>
+            <div class = "link">
+                <p class = "text">Already Registered?</p>
+                <a href = "/login">Sign In</a>
             </div> 
         </form>
 
         <script>
             // Toggle Password Visibility
             const togglePassword = document.querySelector('#togglePassword');
-            const passwordField = document.querySelector('#password');
+            const passwordField = document.querySelector('#Password');
 
             togglePassword.addEventListener('click', function (e) {
+                // Toggle the type attribute
                 const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordField.setAttribute('type', type);
+                
+                // Toggle the eye icon
                 this.querySelector('i').classList.toggle('fa-eye');
                 this.querySelector('i').classList.toggle('fa-eye-slash');
             });
@@ -67,19 +70,17 @@
             margin: 0;
         }
         .form {
-            max-width: 400px; /* Adjusted for better mobile layout */
+            max-width: 1200px;
             margin: 40px auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .input {
+        input[type="email"], input[type="password"], input[type="text"] {
             width: 100%;
-            padding: 10px 15px; 
+            padding: 10px 40px 10px 15px; /* Added padding-right to accommodate the toggle icon */
+            margin: 8px 0 16px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background-color: #f9f9f9;
@@ -88,7 +89,7 @@
             transition: all 0.3s ease;
         }
         
-        .input:focus {
+        input[type="email"]:focus, input[type="password"]:focus {
             border-color: #0066cc;
             background-color: #fff;
             outline: none;
@@ -100,7 +101,7 @@
         .toggle-password {
             position: absolute;
             top: 50%;
-            right: 15px;
+            right: 15px; /* Adjusted to give more space between icon and input text */
             transform: translateY(-50%);
             cursor: pointer;
         }
@@ -118,7 +119,7 @@
             text-align: center;
             color: #666;
         }
-        .register-button {
+        .Register {
             background-color: #FF5508;
             color: #000000;
             padding: 10px 15px;
@@ -126,18 +127,19 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            width: 100%; /* Full width */
+            width: 20%;
             transition: background-color 0.3s ease;
-            display: block;
+            text-align: center;
             margin: 0 auto;
+            display: block;
         }
-        .register-button:hover {
+        .Register:hover {
             background-color: #FF5733;
         }
         .flash-messages {
             list-style-type: none;
             padding: 0;
-            margin: 0 0 20px; /* Added margin for spacing */
+            margin: 0;
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
             border-radius: 4px;
@@ -157,12 +159,14 @@
             margin-bottom: 0;
         }
         .link {
-            margin: 10px 0 0; /* Added margin for spacing */
+            margin: 0 auto;
             text-align: center;
         }
         .link .text {
             margin-top: 10px;
         }
+            
     </style>
     
+
 {% endblock %}

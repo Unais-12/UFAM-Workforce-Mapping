@@ -121,9 +121,8 @@ def start():
             return "Failed to retrieve user ID after registration."
 
         return redirect("/questions")
-
-    else:
-        return render_template("start.html")
+    
+    return render_template("start.html")
 
 
 
