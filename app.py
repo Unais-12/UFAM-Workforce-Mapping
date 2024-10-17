@@ -145,8 +145,12 @@ def register():
     
     if request.method == "POST":
         # Fetch valid countries and industries from the database
-        country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
-        industry = [i[0].lower().strip() for i in cursor.execute("SELECT Name FROM industries ORDER BY id").fetchall()]
+        try:
+            country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
+            industry = [i[0].lower().strip() for i in cursor.execute("SELECT Name FROM industries ORDER BY id").fetchall()]
+        except Exception as e:
+            print(f"Error fetching countries or industries: {e}")
+            return "There was an error fetching valid countries or industries."
 
         # Retrieve form data
         Name = request.form.get("Name")
@@ -168,59 +172,48 @@ def register():
         # Input validation
         if not Name:
             flash("Enter a Name")
-            form_data['Name'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif not Industry:
             flash("Enter an Industry")
-            form_data['Industry'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif not Country:
             flash("Enter a Country")
-            form_data['Country'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif not Internal_Audit:
             flash("Enter the number of members in the IA department")
-            form_data['Internal_Audit'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif not Company_Size:
             flash("Enter company size")
-            form_data['Company_Size'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif not Using_Solution:
             flash("Mention whether using a solution or not")
-            form_data['Using_Solution'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif Industry not in industry:
             flash("Invalid Industry")
-            form_data['Industry'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
         elif Country not in country:
             flash("Invalid Country")
-            form_data['Country'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
-
-        # Insert the user into the database
-        try:
-            cursor.execute(
-                """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
-                VALUES(?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
-            )
-            conn.commit()
-        except pyodbc.ProgrammingError as e:
-            print(f"Database Error: {e}")
-            return "There was an error with the database operation."
-
-        # Redirect to different results pages based on the result type stored in the session
-        result_type = session.get('result_type', 'free')  # Default to 'free' if not found
-        if result_type == 'free':
-            return redirect("/thankyoufreeresults")
-        elif result_type == 'premium':
-            return redirect("/thankyoupremiumresults")
         else:
-            return redirect("/thankyoufreeresults")  # Fallback if something goes wrong
+            # Insert the user into the database
+            try:
+                cursor.execute(
+                    """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                    VALUES(?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                )
+                conn.commit()
+
+                # Redirect to different results pages based on the result type stored in the session
+                result_type = session.get('result_type', 'free')  # Default to 'free' if not found
+                if result_type == 'free':
+                    return redirect("/thankyoufreeresults")
+                elif result_type == 'premium':
+                    return redirect("/thankyoupremiumresults")
+            except pyodbc.ProgrammingError as e:
+                print(f"Database Error: {e}")
+                return "There was an error with the database operation."
+            except Exception as e:
+                print(f"Unexpected Error: {e}")
+                return "An unexpected error occurred."
+
+        # Render the registration page with error messages
+        return render_template("register.html", **form_data)
     
     # Render the registration page for GET request
     return render_template("register.html")
+
 
 
 
