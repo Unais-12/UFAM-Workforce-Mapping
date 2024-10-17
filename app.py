@@ -213,11 +213,11 @@ def register():
         # Redirect to different results pages based on the result type stored in the session
         result_type = session.get('result_type', 'free')  # Default to 'free' if not found
         if result_type == 'free':
-            return redirect("/thankyou_freeresults")
+            return redirect("/thankyoufreeresults")
         elif result_type == 'premium':
-            return redirect("/thankyou_premiumresults")
+            return redirect("/thankyoupremiumresults")
         else:
-            return redirect("/thankyou_freeresults")  # Fallback if something goes wrong
+            return redirect("/thankyoufreeresults")  # Fallback if something goes wrong
     
     # Render the registration page for GET request
     return render_template("register.html")
