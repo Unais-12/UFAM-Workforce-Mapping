@@ -141,9 +141,10 @@ def register():
     if result_type:
         session['result_type'] = result_type
     
-    user_id = session.get("id")
+    
     
     if request.method == "POST":
+        user_id = session.get("id")
         # Fetch valid countries and industries from the database
         try:
             country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
@@ -486,20 +487,25 @@ def questions():
     }
     if request.method == "POST":
         user_id = session.get("id")
+        if not user_id:
+            return "User not logged in or session expired", 403  # Handle the case where user is not logged in
+
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
         total_score = ("total_score", 0)
         category_scores = session.get('category_scores', {})
 
+        # Calculate scores
         for question, option in user_answers.items():
             score = categories[current_category].get(option, 0)
             category_scores[current_category] = category_scores.get(current_category, 0) + score
-            
+
         session['category_scores'] = category_scores
         total_score = sum(category_scores.values())
         session['total_score'] = total_score
-            # Insert user's answers into the Questions table
+
+        # Insert user's answers into the Questions table
         for question, option in user_answers.items():
             cursor.execute(
                 """INSERT INTO Questions(Question, Answer, Category) VALUES (?,?,?)""",
@@ -509,22 +515,22 @@ def questions():
 
         # Update or insert the category score into the UserScores table
         cursor.execute(
-    """
-    MERGE INTO UserScores AS target
-    USING (VALUES (?, ?, ?)) AS source (user_id, category, Score)
-    ON target.user_id = source.user_id AND target.category = source.category
-    WHEN MATCHED THEN 
-        UPDATE SET Score = source.Score
-    WHEN NOT MATCHED THEN 
-        INSERT (user_id, category, Score) 
-        VALUES (source.user_id, source.category, source.Score);
-    """, (user_id, current_category, category_scores[current_category])
-)
-
+            """
+            MERGE INTO UserScores AS target
+            USING (VALUES (?, ?, ?)) AS source (user_id, category, Score)
+            ON target.user_id = source.user_id AND target.category = source.category
+            WHEN MATCHED THEN 
+                UPDATE SET Score = source.Score
+            WHEN NOT MATCHED THEN 
+                INSERT (user_id, category, Score) 
+                VALUES (source.user_id, source.category, source.Score);
+            """, (user_id, current_category, category_scores[current_category])
+        )
         conn.commit()
+
         # Update total score for the user in Users table
         cursor.execute(
-            """UPDATE Users SET Score = ? WHERE id = ?""",
+            """UPDATE Users SET Score = ? WHERE Id = ?""",
             (total_score, user_id)
         )
         conn.commit()
@@ -540,7 +546,8 @@ def questions():
     else:
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
-        return render_template("questions.html",current_category=current_category, questions=questions)
+        return render_template("questions.html", current_category=current_category, questions=questions)
+
 
     
 @app.route("/thankyoufreeresults")
