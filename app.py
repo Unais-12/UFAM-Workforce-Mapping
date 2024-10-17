@@ -100,29 +100,35 @@ def start():
             return render_template("start.html")
 
         # Check for unique email
-        emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
-        if Email in emails:
+        existing_email = cursor.execute("SELECT email FROM Users WHERE email = ?", (Email,)).fetchone()
+        if existing_email:
             flash("Email must be unique")
             return render_template("start.html")
 
-        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM Users").fetchone()]
-        if hashed_password in passwords:
+        # Check for password quality
+        if len(Password) < 8:  # Example condition for password quality
             flash("Enter a better password")
             return render_template("start.html")
-        # Insert new user into the database
-        cursor.execute("INSERT INTO Users (Email, hashed_password) VALUES (?, ?)", (Email, hashed_password))
 
-        # Fetch the newly created user's ID
-        rows = cursor.execute("SELECT Id FROM users WHERE Email = ?", (Email,)).fetchall()
-        if rows:
-            session["Id"] = rows[0][0]  # Save the user ID to the session
-        else:
-            conn.close()
-            return "Failed to retrieve user ID after registration."
+        try:
+            # Insert new user into the database
+            cursor.execute("INSERT INTO Users (Email, hashed_password) VALUES (?, ?)", (Email, hashed_password))
 
-        return redirect("/questions")
+            # Fetch the newly created user's ID
+            rows = cursor.execute("SELECT Id FROM Users WHERE Email = ?", (Email,)).fetchall()
+            if rows:
+                session["Id"] = rows[0][0]  # Save the user ID to the session
+            else:
+                return "Failed to retrieve user ID after registration."
+
+            conn.commit()  # Commit changes to the database
+            return redirect("/questions")
+        except Exception as e:
+            conn.rollback()  # Rollback on error
+            return f"An error occurred: {str(e)}"
     
     return render_template("start.html")
+
 
 
 
