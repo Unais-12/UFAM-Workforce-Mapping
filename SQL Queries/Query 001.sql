@@ -1,0 +1,6 @@
+SELECT * FROM Users
+
+ALTER TABLE Users
+ADD hashed_password VARCHAR(255)
+
+ALTER TABLE Users ADD Last_Page INT DEFAULT 1;

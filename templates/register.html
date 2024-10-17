@@ -16,13 +16,6 @@
 {% endwith %}
 
 <style>
-    .link {
-        margin: 0 auto;
-        text-align: center;
-    }
-    .link .text {
-        margin-top: 10px;
-    }
     .flash-messages {
         list-style-type: none;
         padding: 0;
@@ -105,15 +98,11 @@
 
 <div class="form">
     <h1>One More Step</h1>
-    <p>Kindly fill out this form to begin the survey<p>
+    <p>Kindly fill out this form to get your results<p>
     <form id="register" action="/register" method="post" class="row g-3">
         <div class="col-md-6">
             <label for="Name" class="form-label">Name</label>
             <input type="text" class="form-control" id="Name" name="Name" required>
-        </div>
-        <div class="col-md-6">
-            <label for="Email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="Email" name="Email" required>
         </div>
         <div class="col-12">
             <label for="Industry" class="form-label">Industry</label>
@@ -143,19 +132,9 @@
                 <option selected>No</option>
                 <option>Yes</option>
             </select>
-        </div>
-        <div class="col-md-6 password-wrapper">
-            <label for="Password" class="form-label">Password</label>
-            <input type="password" id="Password" class="form-control" required name="Password">
-            <i class="toggle-password">👁️</i>
-        </div>
-                
+        </div>     
         <div class="col-12">
-            <button type="submit" class="btn btn-primary">To The Survey</button>
-        </div>
-        <div class="link">
-            <p class="text">Already registered?</p>
-            <a href="/login">Sign In</a>
+            <button type="submit" class="btn btn-primary">Get Results</button>
         </div>
     </form>
 

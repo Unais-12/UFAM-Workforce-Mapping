@@ -80,15 +80,48 @@ def autocomplete_industries():
     return jsonify([])
 
 
+@app.route("/start", methods = ["POST", "GET"])
+def start():
+    session['category'] = 'Values'
+    session['total_score'] = 0
+    session['category_scores'] = {}
+    if request.method == "POST":
+        Email = request.form.get("Email")
+        Password = request.form.get("Password")
+        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt()) 
+        if not Email:
+            flash("You have to enter an Email")
+        elif not Password:
+            flash("You have to enter a Password")
+        emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
+        if Email in emails:
+            flash("Email must be unique")
+        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM users").fetchall()]
+        if hashed_password in passwords:
+            flash("Choose a better Password")
+        cursor.execute("INSERT INTO Users (Email, hashed_password), VALUES(?,?)", (Email, hashed_password))
 
+        rows = cursor.execute("SELECT Id FROM users WHERE Email = ?", Email).fetchall()
+        if rows:
+            session["Id"] = rows[0][0]  # Save the user ID to the session
+        else:
+            conn.close()
+            return "Failed to retrieve user ID after registration."
+        return redirect("/questions")
+    else:
+        return render_template("start.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # Initialize session for the new user
-    session['category'] = 'Values'  # Start with the first category
-    session['total_score'] = 0
-    session['category_scores'] = {}
+    # Check if the result type (free or premium) is passed as a query parameter
+    result_type = request.args.get("result")
+    
+    # Store the result type in session if it's passed as a query parameter
+    if result_type:
+        session['result_type'] = result_type
+    
+    user_id = session.get("Id")
     
     if request.method == "POST":
         # Fetch valid countries and industries from the database
@@ -100,21 +133,16 @@ def register():
         Internal_Audit = request.form.get("Internal_Audit")
         Company_Size = request.form.get("Company_Size")
         Using_Solution = request.form.get("Using_Solution")
-        Email = request.form.get("Email")
         Industry = request.form.get("Industry").strip().lower()
         Country = request.form.get("Country").strip().lower()
-        Password = request.form.get("Password")
-        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
 
         form_data = {
-        "Name": Name,
-        "Industry": Industry,
-        "Country": Country,
-        "Internal_Audit": Internal_Audit,
-        "Company_Size": Company_Size,
-        "Using_Solution": Using_Solution,
-        "Email": Email,
-        "Password": Password
+            "Name": Name,
+            "Industry": Industry,
+            "Country": Country,
+            "Internal_Audit": Internal_Audit,
+            "Company_Size": Company_Size,
+            "Using_Solution": Using_Solution,
         }
 
         # Input validation
@@ -142,14 +170,6 @@ def register():
             flash("Mention whether using a solution or not")
             form_data['Using_Solution'] = ''  # Clear the specific field
             return render_template("register.html", **form_data)
-        elif not Email:
-            flash("Enter an email")
-            form_data['Email'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
-        elif not Password:
-            flash("Enter a Password")
-            form_data['Password'] = ''
-            return render_template("register.html", **form_data)
         elif Industry not in industry:
             flash("Invalid Industry")
             form_data['Industry'] = ''  # Clear the specific field
@@ -159,76 +179,29 @@ def register():
             form_data['Country'] = ''  # Clear the specific field
             return render_template("register.html", **form_data)
 
-        # Check if email is unique
-        emails = [email[0] for email in cursor.execute("SELECT email FROM users").fetchall()]
-        if Email in emails:
-            flash("Email must be unique")
-            form_data['Email'] = ''  # Clear the specific field
-            return render_template("register.html", **form_data)
-        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM users").fetchall()]
-        if hashed_password in passwords:
-            flash("Choose a better Password")
-        
-
         # Insert the user into the database
         try:
             cursor.execute(
-                """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email, hashed_password)
-                VALUES(?,?,?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, Email, hashed_password)
+                """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                VALUES(?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
             )
             conn.commit()
         except pyodbc.ProgrammingError as e:
             print(f"Database Error: {e}")
             return "There was an error with the database operation."
-        
-        # Fetch the user's ID after insertion
-        rows = cursor.execute("SELECT id FROM users WHERE Name = ?", Name).fetchall()
-        if rows:
-            session["id"] = rows[0][0]  # Save the user ID to the session
+
+        # Redirect to different results pages based on the result type stored in the session
+        result_type = session.get('result_type', 'free')  # Default to 'free' if not found
+        if result_type == 'free':
+            return redirect("/thankyou_freeresults")
+        elif result_type == 'premium':
+            return redirect("/thankyou_premiumresults")
         else:
-            conn.close()
-            return "Failed to retrieve user ID after registration."
+            return redirect("/thankyou_freeresults")  # Fallback if something goes wrong
+    
+    # Render the registration page for GET request
+    return render_template("register.html")
 
-        return redirect("/questions")
-    else:
-        return render_template("register.html")
-
-
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    # Clear session if redirecting to login
-    user_id = session.get("Id")
-    if user_id:
-        return redirect("/questions")  # Redirect if already logged in
-
-    if request.method == "POST":
-        Email = request.form.get("Email")
-        Password = request.form.get("Password")
-
-        # Validate input
-        if not Email:
-            flash("Enter an Email Address")
-        elif not Password:
-            flash("Enter an Email Address")
-
-        # Fetch the user from the database
-        cursor.execute("SELECT Id, Hashed_password FROM Users WHERE Email = ?", (Email,))
-        row = cursor.fetchone()
-
-        # Check if user exists
-        if row:
-            user_id, hashed_password = row  # Unpack ID and hashed password
-
-            # Check if the provided password matches the hashed password
-            if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
-                session["Id"] = user_id  # Store the integer user ID in session
-                return redirect("/questions")  # Redirect to questions page
-            else:
-                flash("Invalid Password")
-        else:
-            flash("Invalid Email Address")
-    else:
-        return render_template("login.html", email="", password="")
 
 
 @app.route("/")
