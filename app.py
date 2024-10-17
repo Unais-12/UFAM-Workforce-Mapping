@@ -208,9 +208,9 @@ def register():
                 # Redirect to different results pages based on the result type stored in the session
                 result_type = session.get('result_type', 'free')  # Default to 'free' if not found
                 if result_type == 'free':
-                    return redirect("/thankyoufreeresults")
+                    return redirect("/thankyou_freeresults.html")
                 elif result_type == 'premium':
-                    return redirect("/thankyoupremiumresults")
+                    return redirect("/thankyou_premiumresults.html")
             except pyodbc.ProgrammingError as e:
                 print(f"Database Error: {e}")
                 return "There was an error with the database operation."
