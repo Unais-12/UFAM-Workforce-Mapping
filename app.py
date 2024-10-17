@@ -134,13 +134,6 @@ def start():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # Check if the result type (free or premium) is passed as a query parameter
-    result_type = request.args.get("result")
-    
-    # Store the result type in session if it's passed as a query parameter
-    if result_type:
-        session['result_type'] = result_type
-    
     user_id = session.get("Id")
     
     if request.method == "POST":
@@ -194,13 +187,7 @@ def register():
                     VALUES(?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
                 )
                 conn.commit()
-
-                # Redirect to different results pages based on the result type stored in the session
-                result_type = session.get('result_type', 'free')  # Default to 'free' if not found
-                if result_type == 'free':
-                    return redirect("/thankyoufreeresults")
-                elif result_type == 'premium':
-                    return redirect("/thankyoupremiumresults")
+                return redirect("/thankyoufreeresults")
             except pyodbc.ProgrammingError as e:
                 print(f"Database Error: {e}")
                 return "There was an error with the database operation."
