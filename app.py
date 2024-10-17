@@ -89,8 +89,6 @@ def start():
     if request.method == "POST":
         Email = request.form.get("Email")
         Password = request.form.get("Password")
-
-        # Password hashing
         hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
 
         # Input validation
@@ -107,9 +105,10 @@ def start():
             flash("Email must be unique")
             return render_template("start.html")
 
-        # Password uniqueness check (This should be password strength, not hashed comparison)
-        # You could add a password strength validation here instead.
-
+        passwords = [Password[0] for Password in cursor.execute("SELECT hashed_password FROM Users").fetchone()]
+        if hashed_password in passwords:
+            flash("Enter a better password")
+            return render_template("start.html")
         # Insert new user into the database
         cursor.execute("INSERT INTO Users (Email, hashed_password) VALUES (?, ?)", (Email, hashed_password))
 
@@ -234,8 +233,10 @@ def login():
         # Validate input
         if not Email:
             flash("Enter an Email Address")
+            return render_template("login.html", Email = "")
         elif not Password:
             flash("Enter an Email Address")
+            return render_template("login.html", Password = "")
 
         # Fetch the user from the database
         cursor.execute("SELECT Id, Hashed_password FROM Users WHERE Email = ?", (Email,))
@@ -254,7 +255,7 @@ def login():
         else:
             flash("Invalid Email Address")
     else:
-        return render_template("login.html", email="", password="")
+        return render_template("login.html", Email="", Password="")
 
 
 @app.route("/")
