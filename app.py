@@ -134,7 +134,14 @@ def start():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    user_id = session.get("Id")
+    # Check if the result type (free or premium) is passed as a query parameter
+    result_type = request.args.get("result")
+    
+    # Store the result type in session if it's passed as a query parameter
+    if result_type:
+        session['result_type'] = result_type
+    
+    user_id = session.get("id")
     
     if request.method == "POST":
         # Fetch valid countries and industries from the database
@@ -180,14 +187,30 @@ def register():
         elif Country not in country:
             flash("Invalid Country")
         else:
-            # Insert the user into the database
+            # Check if user_id is present and update or insert accordingly
             try:
-                cursor.execute(
-                    """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
-                    VALUES(?,?,?,?,?,?)""", (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
-                )
+                if user_id:  # If user_id is available, update the existing user
+                    cursor.execute(
+                        """UPDATE Users
+                        SET Name = ?, Industry = ?, Country = ?, Internal_Audit = ?, Company_Size = ?, Using_Solution = ?
+                        WHERE Id = ?""",
+                        (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, user_id)
+                    )
+                else:  # If user_id is not available, insert a new user
+                    cursor.execute(
+                        """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                        VALUES(?,?,?,?,?,?)""",
+                        (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                    )
+
                 conn.commit()
-                return redirect("/thankyoufreeresults")
+
+                # Redirect to different results pages based on the result type stored in the session
+                result_type = session.get('result_type', 'free')  # Default to 'free' if not found
+                if result_type == 'free':
+                    return redirect("/thankyoufreeresults")
+                elif result_type == 'premium':
+                    return redirect("/thankyoupremiumresults")
             except pyodbc.ProgrammingError as e:
                 print(f"Database Error: {e}")
                 return "There was an error with the database operation."
@@ -204,10 +227,11 @@ def register():
 
 
 
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     # Clear session if redirecting to login
-    user_id = session.get("Id")
+    user_id = session.get("id")
     if user_id:
         return redirect("/questions")  # Redirect if already logged in
 
