@@ -204,6 +204,43 @@ def register():
 
 
 
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    # Clear session if redirecting to login
+    user_id = session.get("Id")
+    if user_id:
+        return redirect("/questions")  # Redirect if already logged in
+
+    if request.method == "POST":
+        Email = request.form.get("Email")
+        Password = request.form.get("Password")
+
+        # Validate input
+        if not Email:
+            flash("Enter an Email Address")
+        elif not Password:
+            flash("Enter an Email Address")
+
+        # Fetch the user from the database
+        cursor.execute("SELECT Id, Hashed_password FROM Users WHERE Email = ?", (Email,))
+        row = cursor.fetchone()
+
+        # Check if user exists
+        if row:
+            user_id, hashed_password = row  # Unpack ID and hashed password
+
+            # Check if the provided password matches the hashed password
+            if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
+                session["Id"] = user_id  # Store the integer user ID in session
+                return redirect("/questions")  # Redirect to questions page
+            else:
+                flash("Invalid Password")
+        else:
+            flash("Invalid Email Address")
+    else:
+        return render_template("login.html", email="", password="")
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
