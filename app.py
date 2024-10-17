@@ -602,16 +602,16 @@ def download_pdf():
     user_name = user_name_row[0] if user_name_row else "User"
 
     # Load the base document (PDF) that contains the placeholder 'xxxx' for the name
-    selected_documents.append('PDF Docs/Document 13.pdf')
+    selected_documents.append(r'PDF Docs/Document 13.pdf')
 
     cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
     rows = cursor.fetchall()
 
     document_list = [
-        'PDF Docs/Document 1.pdf', 'PDF Docs/Document 2.pdf', 'PDF Docs/Document 3.pdf',
-        'PDF Docs/Document 4.pdf', 'PDF Docs/Document 5.pdf', 'PDF Docs/Document 6.pdf',
-        'PDF Docs/Document 7.pdf', 'PDF Docs/Document 8.pdf', 'PDF Docs/Document 9.pdf',
-        'PDF Docs/Document 10.pdf', 'PDF Docs/Document 11.pdf', 'PDF Docs/Document 12.pdf'
+        r'PDF Docs/Document 1.pdf', r'PDF Docs/Document 2.pdf', r'PDF Docs/Document 3.pdf',
+        r'PDF Docs/Document 4.pdf', r'PDF Docs/Document 5.pdf', r'PDF Docs/Document 6.pdf',
+        r'PDF Docs/Document 7.pdf', r'PDF Docs/Document 8.pdf', r'PDF Docs/Document 9.pdf',
+        r'PDF Docs/Document 10.pdf', r'PDF Docs/Document 11.pdf', r'PDF Docs/Document 12.pdf'
     ]
 
     pdf_files = []
