@@ -174,11 +174,11 @@ def start():
         elif not Password:
             flash("You have to enter a Password")
             return render_template("start.html")
-        elif not re_password:
+        elif not Repassword:
             flash("You have to Re-Enter Your Password")
             return render_template("start.html")
 
-        if Password != re_password:
+        if Password != Repassword:
             flash("Passwords must match")
             return render_template("start.html")
 
