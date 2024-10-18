@@ -59,7 +59,7 @@ def health_check():
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form.get('email')
         token = serializer.dumps(email, salt='password-reset-salt')
         
         # Generate the reset URL
@@ -87,7 +87,7 @@ def reset_password(token):
         email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
     except SignatureExpired:
         flash('The password reset link has expired.', 'danger')
-        return redirect(url_for('forgot_password'))
+        return redirect('/forgot-password')
     
     if request.method == 'POST':
         new_password = request.form['password']
