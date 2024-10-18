@@ -165,7 +165,7 @@ def start():
     if request.method == "POST":
         Email = request.form.get("Email")
         Password = request.form.get("Password")
-        re_password = request.form.get("re_password")
+        re_password = request.form.get("Repassword")
 
         # Input validation
         if not Email:
