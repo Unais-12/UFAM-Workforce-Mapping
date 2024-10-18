@@ -165,7 +165,7 @@ def start():
     if request.method == "POST":
         Email = request.form.get("Email")
         Password = request.form.get("Password")
-        Repassword = request.form.get("Repassword")
+        RePassword = request.form.get("RePassword")
 
         # Input validation
         if not Email:
@@ -174,11 +174,11 @@ def start():
         elif not Password:
             flash("You have to enter a Password")
             return render_template("start.html")
-        elif not Repassword:
+        elif not RePassword:
             flash("You have to Re-Enter Your Password")
             return render_template("start.html")
 
-        if Password != Repassword:
+        if Password != RePassword:
             flash("Passwords must match")
             return render_template("start.html")
 
