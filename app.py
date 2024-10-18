@@ -54,7 +54,7 @@ serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 def health_check():
     return "Healthy", 200
 
-@app.route('/forgot_password', methods=['GET', 'POST'])
+@app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
