@@ -321,6 +321,7 @@ def login():
     # Clear session if redirecting to login
     user_id = session.get("id")
     if user_id:
+        print(f"User {user_id} is already logged in, redirecting to /questions")
         return redirect("/questions")  # Redirect if already logged in
 
     if request.method == "POST":
@@ -330,10 +331,12 @@ def login():
         # Validate input
         if not Email:
             flash("Enter an Email Address")
+            print("No email provided")
             return render_template("login.html", Email="")
         elif not Password:
             flash("Enter a Password")
-            return render_template("login.html", Password="")
+            print("No password provided")
+            return render_template("login.html", Email=Email)
 
         # Fetch the user from the database
         cursor.execute("SELECT Id, hashed_password FROM Users WHERE Email = ?", (Email,))
@@ -342,26 +345,33 @@ def login():
         # Check if user exists
         if row is None:
             flash("Invalid Email Address")
+            print(f"No user found with email: {Email}")
             return render_template("login.html", Email=Email)
 
         # Unpack ID and hashed password
         user_id, hashed_password = row
+        print(f"User found: {user_id}, hashed_password: {hashed_password}")
 
         # Check if hashed_password is valid
         if not hashed_password:
-            flash("Error: Hashed password not found.")
+            flash("Error: password not found.")
+            print("Hashed password not found")
             return render_template("login.html", Email=Email)
 
         # Check if the provided password matches the hashed password
         if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
             session["id"] = user_id  # Store the integer user ID in session
+            print(f"Login successful for user {user_id}, redirecting to /questions")
             return redirect("/questions")  # Redirect to questions page
         else:
             flash("Invalid Password")
+            print("Password does not match")
             return render_template("login.html", Email=Email)
 
     # Render login page for GET request
+    print("Rendering login page")
     return render_template("login.html", Email="", Password="")
+
 
 
 
