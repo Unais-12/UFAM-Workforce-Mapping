@@ -96,7 +96,7 @@ def reset_password(token):
         # Update the user's password in the database
         with cursor:
             cursor.execute("""
-                UPDATE Users SET password = %s WHERE email = %s
+                UPDATE Users SET hashed_password = %s WHERE Email = %s
             """, (hashed_password, email))
             cursor.commit()
         
