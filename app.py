@@ -92,7 +92,7 @@ def reset_password(token):
         email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
     except SignatureExpired:
         flash('The password reset link has expired.', 'danger')
-        return redirect('/forgot-password')
+        return redirect('/forgot_password')
     
     if request.method == 'POST':
         new_password = request.form['password']
