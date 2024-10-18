@@ -74,10 +74,14 @@ def forgot_password():
         try:
             sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
             response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
             flash('A password reset link has been sent to your email.', 'info')
         except Exception as e:
             flash(f'Error sending email: {str(e)}', 'danger')
             app.logger.error(f'Error sending email: {str(e)}')  # Log the error for debugging
+            print(str(e))
             
         return redirect('/login')
 
