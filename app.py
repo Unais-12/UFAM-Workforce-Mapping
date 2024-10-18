@@ -336,7 +336,7 @@ def login():
             return render_template("login.html", Password="")
 
         # Fetch the user from the database
-        cursor.execute("SELECT Id, Hashed_password FROM Users WHERE Email = ?", (Email,))
+        cursor.execute("SELECT Id, hashed_password FROM Users WHERE Email = ?", (Email,))
         row = cursor.fetchone()
 
         # Check if user exists
