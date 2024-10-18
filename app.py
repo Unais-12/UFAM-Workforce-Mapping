@@ -75,7 +75,7 @@ def forgot_password():
         except Exception as e:
             flash(f'Error sending email: {str(e)}', 'danger')
         
-        return redirect(url_for('login'))
+        return redirect('/login')
 
     return render_template('forgot_password.html')
 
