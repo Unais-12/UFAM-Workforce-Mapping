@@ -7,6 +7,20 @@
 {% block content %}
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Flash Messages Section -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="flash-{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
     <div class="form">
         <h1>Sign In</h1>
         <p>Please login before starting</p>
@@ -26,7 +40,7 @@
             </div>
             <div class="link">
                 <button type="submit" class="Login">login</button>
-                <a href = "/forgot_password">Forgot Password?</a>
+                <a href="/forgot_password">Forgot Password?</a>
             </div>  
         </form>
 
@@ -46,6 +60,7 @@
             });
         </script>
     </div>
+
     <style>
         body {
             font-family: 'Lato', sans-serif;
@@ -56,6 +71,7 @@
             height: 100vh;
             margin: 0;
         }
+
         .form {
             max-width: 1200px;
             margin: 40px auto;
@@ -64,9 +80,10 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         input[type="email"], input[type="password"], input[type="text"] {
             width: 100%;
-            padding: 10px 40px 10px 15px; /* Added padding-right to accommodate the toggle icon */
+            padding: 10px 40px 10px 15px;
             margin: 8px 0 16px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -75,37 +92,43 @@
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
-        
+
         input[type="email"]:focus, input[type="password"]:focus {
             border-color: #0066cc;
             background-color: #fff;
             outline: none;
         }
+
         .password-wrapper {
             position: relative;
             width: 100%;
         }
+
         .toggle-password {
             position: absolute;
             top: 50%;
-            right: 15px; /* Adjusted to give more space between icon and input text */
+            right: 15px;
             transform: translateY(-50%);
             cursor: pointer;
         }
+
         .toggle-password i {
             font-size: 18px;
             color: #666;
         }
+
         h1 {
             text-align: center;
             margin-bottom: 20px;
             color: #FF5508;
         }
+
         p {
             font-size: 13px;
             text-align: center;
             color: #666;
         }
+
         .Login {
             background-color: #FF5508;
             color: #000000;
@@ -120,15 +143,53 @@
             margin: 0 auto;
             display: block;
         }
+
         .Login:hover {
             background-color: #FF5733;
         }
+
         .link {
             margin: 0 auto;
             text-align: center;
         }
-            
+
+        /* Flash messages styling */
+        .flash-messages {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .flashes li {
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .flash-success {
+            background-color: #28a745;
+        }
+
+        .flash-danger {
+            background-color: #dc3545;
+        }
+
+        .flash-info {
+            background-color: #17a2b8;
+        }
+
+        .flash-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
     </style>
-    
 
 {% endblock %}
+
