@@ -72,7 +72,7 @@ def forgot_password():
         )
 
         try:
-            sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
+            sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
