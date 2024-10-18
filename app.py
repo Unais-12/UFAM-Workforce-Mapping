@@ -56,7 +56,7 @@ def forgot_password():
         
         if not email:  # Check if the email field is empty
             flash('Email is required!', 'danger')
-            return redirect(url_for('forgot_password'))
+            return redirect('/forgot_password')
         
         token = serializer.dumps(email, salt='password-reset-salt')
         
