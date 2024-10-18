@@ -53,6 +53,11 @@ def health_check():
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
+        
+        if not email:  # Check if the email field is empty
+            flash('Email is required!', 'danger')
+            return redirect(url_for('forgot_password'))
+        
         token = serializer.dumps(email, salt='password-reset-salt')
         
         # Generate the reset URL
@@ -72,10 +77,12 @@ def forgot_password():
             flash('A password reset link has been sent to your email.', 'info')
         except Exception as e:
             flash(f'Error sending email: {str(e)}', 'danger')
-        
+            app.logger.error(f'Error sending email: {str(e)}')  # Log the error for debugging
+            
         return redirect('/login')
 
     return render_template('forgot_password.html')
+
 
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
