@@ -12,15 +12,14 @@ import fitz
 from reportlab.lib import colors
 from pdfrw import PdfReader, PdfWriter, PageMerge
 import bcrypt
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-from flask_mail import Mail, Message
-
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from itsdangerous import SignatureExpired, URLSafeTimedSerializer
 
 
 
 app = Flask(__name__)
 
-mail = Mail(app)
 
 custom_pdfs = []
 
@@ -35,15 +34,9 @@ app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'hyphen_survey:'
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.sendgrid.net' )
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT', '587')
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', 'apikey')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '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')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'unais.faheem@hyphenconsultancy.com')
-app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
-serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 Session(app)
 
 
@@ -65,12 +58,17 @@ def forgot_password():
         # Generate the reset URL
         reset_url = url_for('reset_password', token=token, _external=True)
         
-        # Send the reset email
-        msg = Message('Password Reset Request', recipients=[email])
-        msg.body = f"Please click the link to reset your password: {reset_url}"
-        
+        # Send the reset email using SendGrid
+        message = Mail(
+            from_email='unais.faheem@hyphenconsultancy.com',
+            to_emails=email,
+            subject='Password Reset Request',
+            html_content=f"Please click the link to reset your password: <a href='{reset_url}'>{reset_url}</a>"
+        )
+
         try:
-            mail.send(msg)
+            sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+            response = sg.send(message)
             flash('A password reset link has been sent to your email.', 'info')
         except Exception as e:
             flash(f'Error sending email: {str(e)}', 'danger')

@@ -11,5 +11,5 @@ python-docx
 PyMuPDF
 pdfrw
 bcrypt
-flask_mail
+sendgrid
 itsdangerous
