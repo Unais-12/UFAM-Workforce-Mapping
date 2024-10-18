@@ -40,7 +40,7 @@ app.config['MAIL_PORT'] = os.getenv('MAIL_PORT', '587')
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', 'apikey')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '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')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME', 'apikey')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'unais.faheem@hyphenconsultancy.com')
 app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
