@@ -42,6 +42,7 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', 'apikey')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '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')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME', 'apikey')
 app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 Session(app)
 
@@ -49,7 +50,6 @@ Session(app)
 conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
-serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 
 @app.route('/health')
