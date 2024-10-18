@@ -35,13 +35,13 @@ app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'hyphen_survey:'
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.sendgrid.net' )
+app.config['MAIL_PORT'] = os.getenv('MAIL_PORT', '587')
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
-app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME')
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME', 'apikey')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD', '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')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME', 'apikey')
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 
 Session(app)
 
