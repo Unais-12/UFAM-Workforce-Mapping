@@ -340,7 +340,7 @@ def login():
 
             # Check if the provided password matches the hashed password
             if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
-                session["Id"] = user_id  # Store the integer user ID in session
+                session["id"] = user_id  # Store the integer user ID in session
                 return redirect("/questions")  # Redirect to questions page
             else:
                 flash("Invalid Password")
