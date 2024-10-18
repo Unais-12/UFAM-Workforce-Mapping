@@ -166,11 +166,6 @@ def start():
         Email = request.form.get("Email")
         Password = request.form.get("Password")
         re_password = request.form.get("re_password")
-        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
-        hashed_re_password = bcrypt.hashpw(re_password.encode('utf-8'), bcrypt.gensalt())
-        
-        
-
         # Input validation
         if not Email:
             flash("You have to enter an Email")
@@ -181,10 +176,10 @@ def start():
         elif not re_password:
             flash("You have to Re-Enter Your Password")
             return render_template("start.html")
-        elif Password != re_password:
-            flash("Both passwords have to match")
+        if Password != re_password:
+            flash("Passwords must match")
             return render_template("start.html")
-
+        hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
         # Check for unique email
         existing_email = cursor.execute("SELECT email FROM Users WHERE email = ?", (Email,)).fetchone()
         if existing_email:
