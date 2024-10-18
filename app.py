@@ -34,7 +34,7 @@ app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'hyphen_survey:'
-app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
+app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY', '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')
 
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 Session(app)
