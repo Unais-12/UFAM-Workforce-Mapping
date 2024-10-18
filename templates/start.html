@@ -23,22 +23,22 @@
         <form id="login" action="/start" method="POST" class="login">
             <div class="Email">
                 <label for="Email" class="Email">Email</label>
-                <input type="email" class="Email" id="Email" Name="Email">
+                <input type="email" class="Email" id="Email" name="Email" required>
             </div>
             <div class="Password">
                 <label for="Password" class="Password">Password</label>
                 <div class="password-wrapper">
-                    <input type="password" class="Password" id="Password" Name="Password">
+                    <input type="password" class="Password" id="Password" name="Password" required>
                     <span id="togglePassword" class="toggle-password">
                         <i class="far fa-eye"></i> <!-- Eye icon -->
                     </span>
                 </div>
             </div>
             <div class="Password">
-                <label for="Password" class="Password">Re-Enter Password</label>
+                <label for="RePassword" class="Password">Re-Enter Password</label>
                 <div class="password-wrapper">
-                    <input type="password" class="Password" id="Password" Name="Password">
-                    <span id="togglePassword" class="toggle-password">
+                    <input type="password" class="Password" id="RePassword" name="RePassword" required>
+                    <span id="toggleRePassword" class="toggle-password">
                         <i class="far fa-eye"></i> <!-- Eye icon -->
                     </span>
                 </div>
@@ -46,23 +46,31 @@
             <div class="login-button">
                 <button type="submit" class="Register">Register</button>
             </div> 
-            <div class = "link">
-                <p class = "text">Already Registered?</p>
-                <a href = "/login">Sign In</a>
+            <div class="link">
+                <p class="text">Already Registered?</p>
+                <a href="/login">Sign In</a>
             </div> 
         </form>
 
         <script>
-            // Toggle Password Visibility
+            // Toggle Password Visibility for the main password field
             const togglePassword = document.querySelector('#togglePassword');
             const passwordField = document.querySelector('#Password');
 
             togglePassword.addEventListener('click', function (e) {
-                // Toggle the type attribute
                 const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordField.setAttribute('type', type);
-                
-                // Toggle the eye icon
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+
+            // Toggle Password Visibility for the re-enter password field
+            const toggleRePassword = document.querySelector('#toggleRePassword');
+            const rePasswordField = document.querySelector('#RePassword');
+
+            toggleRePassword.addEventListener('click', function (e) {
+                const type = rePasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                rePasswordField.setAttribute('type', type);
                 this.querySelector('i').classList.toggle('fa-eye');
                 this.querySelector('i').classList.toggle('fa-eye-slash');
             });
@@ -172,9 +180,7 @@
         }
         .link .text {
             margin-top: 10px;
-        }
-            
+        }    
     </style>
-    
 
 {% endblock %}
