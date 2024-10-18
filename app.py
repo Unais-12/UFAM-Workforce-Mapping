@@ -14,6 +14,8 @@ from pdfrw import PdfReader, PdfWriter, PageMerge
 import bcrypt
 
 
+
+
 app = Flask(__name__)
 
 custom_pdfs = []
@@ -40,6 +42,9 @@ cursor = conn.cursor()
 @app.route('/health')
 def health_check():
     return "Healthy", 200
+
+
+
 
 
 def determine_next_category(current_category, current_question_index, questions_per_category):
@@ -89,7 +94,11 @@ def start():
     if request.method == "POST":
         Email = request.form.get("Email")
         Password = request.form.get("Password")
+        re_password = request.form.get("re_password")
         hashed_password = bcrypt.hashpw(Password.encode('utf-8'), bcrypt.gensalt())
+        hashed_re_password = bcrypt.hashpw(re_password.encode('utf-8'), bcrypt.gensalt())
+        
+        
 
         # Input validation
         if not Email:
@@ -97,6 +106,12 @@ def start():
             return render_template("start.html")
         elif not Password:
             flash("You have to enter a Password")
+            return render_template("start.html")
+        elif not re_password:
+            flash("You have to Re-Enter Your Password")
+            return render_template("start.html")
+        elif Password != re_password:
+            flash("Both passwords have to match")
             return render_template("start.html")
 
         # Check for unique email
@@ -107,7 +122,7 @@ def start():
 
         # Check for password quality
         if len(Password) < 8:  # Example condition for password quality
-            flash("Enter a better password")
+            flash("Your Password is too weak")
             return render_template("start.html")
 
         try:
@@ -266,6 +281,8 @@ def login():
             flash("Invalid Email Address")
     else:
         return render_template("login.html", Email="", Password="")
+
+
 
 
 @app.route("/")
