@@ -1,4 +1,4 @@
-from flask import session, redirect, render_template, Flask, request, jsonify,flash, send_file
+from flask import session, redirect, render_template, Flask, request, jsonify,flash, send_file, url_for
 from flask_session import Session
 import os
 import pyodbc
@@ -12,11 +12,15 @@ import fitz
 from reportlab.lib import colors
 from pdfrw import PdfReader, PdfWriter, PageMerge
 import bcrypt
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from flask_mail import Mail, Message
 
 
 
 
 app = Flask(__name__)
+
+mail = Mail(app)
 
 custom_pdfs = []
 
@@ -31,19 +35,75 @@ app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'hyphen_survey:'
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 Session(app)
 
 
 conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 
 @app.route('/health')
 def health_check():
     return "Healthy", 200
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        token = serializer.dumps(email, salt='password-reset-salt')
+        
+        # Generate the reset URL
+        reset_url = url_for('reset_password', token=token, _external=True)
+        
+        # Send the reset email
+        msg = Message('Password Reset Request', recipients=[email])
+        msg.body = f"Please click the link to reset your password: {reset_url}"
+        
+        try:
+            mail.send(msg)
+            flash('A password reset link has been sent to your email.', 'info')
+        except Exception as e:
+            flash(f'Error sending email: {str(e)}', 'danger')
+        
+        return redirect(url_for('login'))
 
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        # Validate the token (expires after 1 hour)
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+    except SignatureExpired:
+        flash('The password reset link has expired.', 'danger')
+        return redirect(url_for('forgot_password'))
+    
+    if request.method == 'POST':
+        new_password = request.form['password']
+        
+        # Hash the new password using bcrypt
+        hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Update the user's password in the database
+        with cursor:
+            cursor.execute("""
+                UPDATE Users SET password = %s WHERE email = %s
+            """, (hashed_password, email))
+            cursor.commit()
+        
+        flash('Your password has been successfully reset.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('reset_password.html')
 
 
 
