@@ -49,7 +49,7 @@ cursor = conn.cursor()
 def health_check():
     return "Healthy", 200
 
-@app.route('/forgot-password', methods=['GET', 'POST'])
+@app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -67,7 +67,7 @@ def forgot_password():
         )
 
         try:
-            sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+            sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
             response = sg.send(message)
             flash('A password reset link has been sent to your email.', 'info')
         except Exception as e:
