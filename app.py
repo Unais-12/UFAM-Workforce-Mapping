@@ -99,7 +99,7 @@ def reset_password(token):
         return redirect('/forgot_password')
     
     if request.method == 'POST':
-        new_password = request.form['password']
+        new_password = request.form.get('password')
         
         # Hash the new password using bcrypt
         hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
@@ -112,7 +112,7 @@ def reset_password(token):
             cursor.commit()
         
         flash('Your password has been successfully reset.', 'success')
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     return render_template('reset_password.html')
 
