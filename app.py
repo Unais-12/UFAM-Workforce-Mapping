@@ -104,12 +104,11 @@ def reset_password(token):
         # Hash the new password using bcrypt
         hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
         
-        # Update the user's password in the database
-        with cursor:
-            cursor.execute("""
-                UPDATE Users SET hashed_password = ? WHERE Email = ?
-            """, (hashed_password, email))
-            cursor.commit()
+        cursor.execute("""
+            UPDATE Users SET hashed_password = ? WHERE Email = ?
+        """, (hashed_password, email))
+        conn.commit()
+        conn.close
         
         flash('Your password has been successfully reset.', 'success')
         return redirect('/login')
