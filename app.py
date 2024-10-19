@@ -110,9 +110,10 @@ def reset_password(token):
         conn.commit()
         conn.close
         
+        flash('Your password has been successfully reset.', 'success')
         return redirect('/login')
     
-    return render_template('reset_password.html')
+    return render_template('reset_password.html', token=token)
 
 
 
