@@ -378,8 +378,8 @@ def login():
 
             # Redirect based on Last_Page (whether they completed the questionnaire)
             if last_page == 0:
-                print(f"User {user_id} has completed the questionnaire, redirecting to /wait")
-                return redirect("/wait")
+                print(f"User {user_id} has completed the questionnaire, redirecting to /freeresults")
+                return redirect("/thankyoufreeresults")
             else:
                 print(f"User {user_id} has not completed the questionnaire, redirecting to /questions")
                 return redirect("/questions")  # Redirect to questions page
