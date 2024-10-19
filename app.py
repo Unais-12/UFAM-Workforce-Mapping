@@ -352,7 +352,7 @@ def login():
             return render_template("login.html", Email=Email)
 
         # Fetch the user from the database
-        cursor.execute("SELECT Id, hashed_password FROM Users WHERE Email = ?", (Email,))
+        cursor.execute("SELECT Id, hashed_password, Last_Page FROM Users WHERE Email = ?", (Email,))
         row = cursor.fetchone()
 
         # Check if user exists
@@ -361,9 +361,9 @@ def login():
             print(f"No user found with email: {Email}")
             return render_template("login.html", Email=Email)
 
-        # Unpack ID and hashed password
-        user_id, hashed_password = row
-        print(f"User found: {user_id}, hashed_password: {hashed_password}")
+        # Unpack ID, hashed password, and Last_Page status
+        user_id, hashed_password, last_page = row
+        print(f"User found: {user_id}, hashed_password: {hashed_password}, last_page: {last_page}")
 
         # Check if hashed_password is valid
         if not hashed_password:
@@ -374,8 +374,15 @@ def login():
         # Check if the provided password matches the hashed password
         if bcrypt.checkpw(Password.encode('utf-8'), hashed_password.encode('utf-8')):
             session["id"] = user_id  # Store the integer user ID in session
-            print(f"Login successful for user {user_id}, redirecting to /questions")
-            return redirect("/questions")  # Redirect to questions page
+            print(f"Login successful for user {user_id}")
+
+            # Redirect based on Last_Page (whether they completed the questionnaire)
+            if last_page == 0:
+                print(f"User {user_id} has completed the questionnaire, redirecting to /wait")
+                return redirect("/wait")
+            else:
+                print(f"User {user_id} has not completed the questionnaire, redirecting to /questions")
+                return redirect("/questions")  # Redirect to questions page
         else:
             flash("Invalid Password")
             print("Password does not match")
@@ -384,6 +391,7 @@ def login():
     # Render login page for GET request
     print("Rendering login page")
     return render_template("login.html", Email="", Password="")
+
 
 
 
@@ -610,12 +618,12 @@ def questions():
     if request.method == "POST":
         user_id = session.get("id")
         if not user_id:
-            return "User not logged in or session expired", 403  # Handle the case where user is not logged in
+            return "User not logged in or session expired", 403  # Handle case where user is not logged in
 
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
-        total_score = ("total_score", 0)
+        total_score = session.get("total_score", 0)
         category_scores = session.get('category_scores', {})
 
         # Calculate scores
@@ -659,16 +667,24 @@ def questions():
 
         # Determine next category (if applicable)
         next_category, next_question = determine_next_category(current_category, 1, questions_per_category)
+
         if next_category:
             session['category'] = next_category
             return redirect("/questions")
         else:
+            # Mark the questionnaire as completed in the Users table (Last_Page = 1)
+            cursor.execute(
+                """UPDATE Users SET Last_Page = 0 WHERE Id = ?""",
+                (user_id,)
+            )
+            conn.commit()
             return redirect("/wait")
 
     else:
         current_category = session.get("category", "Values")
         questions = questions_data.get(current_category, [])
         return render_template("questions.html", current_category=current_category, questions=questions)
+
 
 
     
