@@ -97,23 +97,37 @@ def reset_password(token):
     except SignatureExpired:
         flash('The password reset link has expired.', 'danger')
         return redirect('/forgot_password')
-    
+
     if request.method == 'POST':
         new_password = request.form.get('password')
-        
-        # Hash the new password using bcrypt
+
+        # Hash the new password using bcrypt (ensure it's in UTF-8 format for storage)
         hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-        
-        cursor.execute("""
-            UPDATE Users SET hashed_password = ? WHERE Email = ?
-        """, (hashed_password, email))
-        conn.commit()
-        conn.close
-        
+
+        try:
+            # Update the user's password in the database
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE Users SET hashed_password = ? WHERE Email = ?
+                """, (hashed_password.decode('utf-8'), email))  # Convert hashed_password to a string
+                conn.commit()
+        except Exception as e:
+            # Handle any potential database errors
+            flash(f"An error occurred: {str(e)}", 'danger')
+            return redirect('/forgot_password')
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
+        # Flash success message and redirect to the login page
         flash('Your password has been successfully reset.', 'success')
         return redirect('/login')
-    
+
     return render_template('reset_password.html', token=token)
+
 
 
 
