@@ -135,7 +135,7 @@ def reset_password(token):
 
         # Flash success message and redirect to the login page
         flash('Your password has been successfully reset.', 'success')
-        return redirect('/')
+        return redirect('/login')
 
     return render_template('reset_password.html', token=token)
 
