@@ -65,23 +65,22 @@ def forgot_password():
         
         # Send the reset email using SendGrid
         message = Mail(
-    from_email=('Reset Password Hyphen', 'unais.faheem@hyphenconsultancy.com'),
-    to_emails=email,
-    subject='Password Reset Request',
-    html_content=f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-            <div style="background-color: #ffffff; padding: 20px; border-radius: 5px; max-width: 600px; margin: auto;">
-                <h2 style="color: #333333;">Password Reset Request</h2>
-                <p style="color: #555555;">We received a request to reset your password. Please click the button below to proceed:</p>
-                <a href="{reset_url}" style="display: inline-block; padding: 10px 20px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Reset Password</a>
-                <p style="color: #555555; margin-top: 20px;">If you did not request a password reset, please ignore this email.</p>
-                <p style="color: #555555;">Best regards,<br>Hyphen Consultancy</p>
-            </div>
-        </body>
-    </html>
-    """
-)
+            from_email=('Reset Link Hyphen','unais.faheem@hyphenconsultancy.com'),
+            to_emails=email,
+            subject='Password Reset Request',
+            html_content=f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+                    <div style="background-color: #ffffff; padding: 20px; border-radius: 5px; max-width: 600px; margin: auto;">
+                        <h2 style="color: #333333;">Password Reset Request</h2>
+                        <p style="color: #555555;">We received a request to reset your password. Please click the button below to proceed:</p>
+                        <a href="{reset_url}" style="display: inline-block; padding: 10px 20px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                        <p style="color: #555555; margin-top: 20px;">If you did not request a password reset, please ignore this email.</p>
+                        <p style="color: #555555;">Best regards,<br>Hyphen Consultancy</p>
+                    </div>
+                </body>
+            </html> """
+        )
 
         try:
             sg = SendGridAPIClient(app.config['SENDGRID_API_KEY'])
