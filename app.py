@@ -65,7 +65,7 @@ def forgot_password():
         
         # Send the reset email using SendGrid
         message = Mail(
-            from_email=('Reset Link Hyphen','unais.faheem@hyphenconsultancy.com'),
+            from_email=('unais.faheem@hyphenconsultancy.com'),
             to_emails=email,
             subject='Password Reset Request',
             html_content=f"""
