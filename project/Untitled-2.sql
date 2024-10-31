@@ -1,0 +1,8 @@
+SELECT * FROM Users
+SELECT * FROM UserScores
+
+SELECT Email FROM 
+
+DELETE FROM Users WHERE Id = 182
+
+SELECT * FROM Questions

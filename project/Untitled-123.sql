@@ -1,0 +1,2 @@
+SELECT * FROM Users
+DELETE FROM Users WHERE Id>=187
