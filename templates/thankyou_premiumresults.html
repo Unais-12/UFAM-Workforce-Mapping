@@ -74,24 +74,9 @@
                 });
         
                 // PDF download functionality
-                <script>
-                    (function (document, src, libName, config) {
-                        var script             = document.createElement('script');
-                        script.src             = src;
-                        script.async           = true;
-                        var firstScriptElement = document.getElementsByTagName('script')[0];
-                        script.onload          = function () {
-                            for (var namespace in config) {
-                                if (config.hasOwnProperty(namespace)) {
-                                    window[libName].setup.setConfig(namespace, config[namespace]);
-                                }
-                            }
-                            window[libName].register();
-                        };
-                
-                        firstScriptElement.parentNode.insertBefore(script, firstScriptElement);
-                    })(document, 'https://secure.2checkout.com/checkout/client/twoCoInlineCart.js', 'TwoCoInlineCart',{"app":{"merchant":"255263705451","iframeLoad":"checkout"},"cart":{"host":"https:\/\/secure.2checkout.com","customization":"inline-one-step"}});
-                </script>
+                document.getElementById('premiumBtn').onclick = function() {
+                    window.location.href = 'https://secure.2checkout.com/checkout/buy?merchant=255263705451&tpl=one-column&return-type=redirect&return-url=https%3A%2F%2Fhyphensurvey-dgb5g8d8gbfabser.eastasia-01.azurewebsites.net%2Fpremium&prod=3452345&qty=1&signature=0c4f27b30285bc2aa76717bc319f3e5c717426d120f96495699546fa0de8508b'; // Redirect to premium after generating the PDF
+                };
     
         
                 function applyMulticolorBackground(slider) {
