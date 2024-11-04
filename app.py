@@ -33,7 +33,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
 app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_KEY_PREFIX'] = 'hyphen_survey:'
+app.config['SESSION_KEY_PREFIX'] = 'gias_survey:'
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
