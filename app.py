@@ -338,9 +338,6 @@ def register():
 def login():
     # Clear session if redirecting to login
     user_id = session.get("id")
-    if user_id:
-        print(f"User {user_id} is already logged in, redirecting to /questions")
-        return redirect("/questions")  # Redirect if already logged in
 
     if request.method == "POST":
         Email = request.form.get("Email")
