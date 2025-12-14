@@ -1,17 +1,208 @@
-# Hyphen Consultancy Survey
-### Video URL: https://youtu.be/mKI4_RU01RE
-### Description
+# UFAM Workforce Mapping
 
-This project is a survey I have built with a specific scoring system for each question and as the Users answer the questions they are given their score per each of the four sections and then ultimately their total score as well. They can then download their scoring report as a pdf and/or get more premium results with a very detailed assessment report that they can use to analyze where they are weak and how to improve.
+## Overview
 
-Let's Start with the main file in this project.
+UFAM Workforce Mapping is a Flask-based web application designed to assess users through a structured survey and map them to suitable career domains and job roles. The system evaluates users across **four core dimensions**, calculates weighted scores, and generates **free** or **premium** results, including a dynamically generated **PDF report** for premium users.
 
-# app.py:
-    Inside this file I have the python code for the website I have built. There are many different modules inside of this file and each module is designed for a particular purpose. The index function just shows them what they are about to see ahead and what they will gain from completing the survey. In the python code for index I only return a render template for index.html. Next we have the start function where we will request form data from the front-end code where I ask the user to enter their email and password and then I will store that data in the Users database to be able to match each users score with their Email and Password. An important point is that in the code I hash the password to allow the password to be stored securely. Once this info is entered The users are redirected to the questions page when they click the register button. The qustions are divided into four different sections and the scoring system for each question is pre-defined inside a directory the same way the sections and the number of questions in each section as well as the questions themselves are pre-defined inside their own directories. When the user is doing the questions they have to more buttons at their disposal. These are the next and the previous button. These buttons allow the user to go to the next set of questions after they have completed the questions on the current page and go to the previous set of questions if they want to change their answers. The questions module then stores the scores per section inside a table called UserScores and once all the sections are completed the total score is stored inside the Users Table. In order to determine when a section ends and when another begins I use the directory that stores the number of questions per each section in another function called determine_next_category which I then call inside the questions function to determine if the next function has started or not. Once the questions are completed the Users are redirected to a wait page. And inside this code I simply returned a render_template for the "wait.html" file. when they can clicked a button they were re-directed to a choice page where they can pick which of the results they want. The free or the premium. Again the only thing in the code was returning the render_template for choice.html file. No matter which option they click they will first be redirected to a register page. Inside this function I basically take form data from the front end and after putting the relevant validation checks in place I store this data in the Users table in the same row where the user had their email and password stored. This page is like a second registration page and the purpose is simply to get extra info from them. Once they are done and they click a button they will be redirected to either the free or the premium results page depending upon which option they had clicked before. If they clicked the free results button they will be redirected to the results page. The code for this page basically used SQL to bring back all the results for each section and then the total as well and simply presented them infront of the user by returning the section scores and the total score with the template for the results.html file. Here they can download the pdf if they want and they can also now choose the premium results. The premium results gives them a report which is esentially a pdf created by merging specific pdfs together out of the 12 pdfs I have depending upon the score for each of the 4 sections. 
-#   Important note: I use Session to be able to store the progress of each user throughout the website and store the right info in  the right place inside the database
+The application includes full user authentication, session-based progress tracking, scoring logic, role-matching algorithms, and PDF generation.
 
-# Front - End: 
-    Now for the front end of my code. The index.html file simply contains all of the info I wanted to give to the Users when they first came across the website. I have used CSS within the file itself using the <style> tags to style the page better and I have used javascript in order to program the button to redirect to the "Register" Page when the users clicked it. As for the register.html file I basically created a form and then stylized it using css and again I used JS to redirect but this time I didnt use the redirect function I used the onclick function and since the button was of type submit by clicking the button I would be redirected to wherever the python code redirected at the end. Next I have the questions.html file and here I used jinja templates to be able to dynamically render the questions since they were stored in a directory inside the main app.py file. Using CSS I was able to style the questions properly and was able to create seperate boxes for each questions and different lines to seperate different things. Once the questions were finished the wait.html file came into play and here again I basically just had the text I wanted and the button which was programmed using a simple redirect function in javascript. The Choice page is basically same thing and then the free results page is where I used the data I got from the python code and displayed it in a nice way using CSS and I also had a very important function here which was the function for downloading a pdf and the way I made that work is that I used javascript to esentially take a screenshot of the HTML page infront of me and just render that as a pdf document. The final page I had was a premium page which was esentially just a page with a a lot of content thanking the Users for picking this result and telling them what they will get here with a button which they can click to then activate the python code for downloading the final pdf. 
+---
 
-# Another Feature:
-    Another feature that I have here is the login page and the forgot password feature. The login code in the backend just takes the the form data and makes comparisons to ensure that the user exists and that the email and password are correct. If that is the case the User is redirected to the questions page. And if they get something wrong they will be given a flash message to fix it first then move on. If the user forgets their password they can click a link and they will redirected to a forgot-password url where they can enter their email and then when they click the button they will be redirected to the login page and given a flash message that an email with the password reset link has been set. When they open the email and click on the link they are redirected to the password reset link and here they can enter their new password. Once they have entered their new password it is now stored in the database in place of the old password and they are redirected to the login page where they can now login with this new password. I use sendgrid Web API to send to emails and I also use a concept called tokenization so that the user only has access to the password reset link for an hour and no more than that.
+## Tech Stack
+
+* **Backend**: Python, Flask
+* **Database**: Microsoft SQL Server (via `pyodbc`)
+* **Authentication & Security**:
+
+  * Password hashing using `bcrypt`
+  * Tokenized password reset using `itsdangerous`
+  * Server-side sessions using `Flask-Session`
+* **Email Service**: SendGrid Web API
+* **PDF Handling**:
+
+  * `PyPDF2`, `fitz (PyMuPDF)`, `reportlab`
+* **Frontend**:
+
+  * HTML, CSS (inline and file-based)
+  * JavaScript
+  * Jinja2 templating
+
+---
+
+## Application Flow
+
+### 1. Landing Page (`/`)
+
+* Displays an introduction to the UFAM Workforce Mapping assessment.
+* Explains what users will gain from completing the survey.
+
+### 2. Registration & Survey Start (`/start`)
+
+* Users register using **email and password**.
+* Passwords are validated and securely hashed using **bcrypt**.
+* Each user is assigned a unique `user_id`, stored in the session.
+* Survey progress is initialized using session variables.
+
+### 3. Questionnaire (`/questions`)
+
+The survey consists of **4 categories**, each containing **5 questions**:
+
+1. **Skills and Career Orientation**
+2. **Soft Skills**
+3. **Professional Expectations**
+4. **Physchological Profile**
+
+* Each question has four options (A–D), mapped to a predefined score.
+* Scores are calculated per category and stored in the `UserScores` table.
+* The cumulative score is stored in the `Users` table.
+* Survey navigation is handled category-by-category using session state.
+* Once completed, the user is marked as finished (`Last_Page = 0`).
+
+---
+
+## Session Management
+
+User progress is maintained using **Flask sessions**, including:
+
+* Logged-in user ID
+* Current question category
+* Category-wise scores
+* Total score
+* Selected result type (free or premium)
+
+This ensures users can resume progress securely and prevents data mismatches.
+
+---
+
+## Waiting & Choice Flow
+
+### 4. Wait Page (`/wait`)
+
+* Displayed immediately after completing the questionnaire.
+
+### 5. Result Choice (`/choice`)
+
+* Users choose between:
+
+  * **Free Results**
+  * **Premium Results**
+
+---
+
+## Secondary Registration (`/register`)
+
+After choosing a result type, users provide additional information:
+
+* Name
+* Age
+* Country (validated against database)
+* Qualification
+* Job preference
+
+This data is stored in the same `Users` table row created during initial registration.
+
+---
+
+## Results Processing
+
+### Free & Premium Results (`/thankyoufreeresults`, `/thankyoupremiumresults`)
+
+* Category scores are normalized.
+* A **weighted role-matching algorithm** determines:
+
+  * Best broader career category
+  * Top 3 job roles within that category
+
+### Broader Career Categories
+
+* Technology and Development
+* Product and Design
+* Business & Strategy
+* Marketing & Sales
+* Support & Operations
+
+### Stored Outputs
+
+* `UserResults`: total score + selected broader category
+* `UserTopRoles`: top 3 recommended roles with ranking
+
+---
+
+## PDF Generation
+
+### Free Results
+
+* Displayed directly on the results page.
+
+### Premium Results (`/download-pdf`)
+
+* A personalized PDF report is generated dynamically:
+
+  * A base cover PDF is customized with the user’s name.
+  * A category-specific PDF is selected based on results.
+  * PDFs are merged into a single final report.
+
+* Delivered as a downloadable file: `UFAM_Premium_Report.pdf`
+
+---
+
+## Authentication System
+
+### Login (`/login`)
+
+* Validates credentials using bcrypt password comparison.
+* Redirects users based on completion state.
+
+### Forgot Password (`/forgot_password`)
+
+* Users request a reset link via email.
+* A time-limited token (1 hour) is generated.
+
+### Reset Password (`/reset_password/<token>`)
+
+* Token is verified securely.
+* Password is re-hashed and updated in the database.
+
+---
+
+## Database Overview
+
+Key tables used in the system:
+
+* `Users` – account details, hashed passwords, total score
+* `UserScores` – category-wise scores
+* `Questions` – stored responses
+* `UserResults` – final evaluation outcome
+* `UserTopRoles` – ranked job role recommendations
+* `Countries` – country validation and autocomplete
+
+---
+
+## Additional Endpoints
+
+* `/health` – health check endpoint
+* `/autocomplete/countries` – country search for forms
+* `/payment` – placeholder for payment integration
+
+---
+
+## Key Features Summary
+
+* Secure authentication & password recovery
+* Session-based survey progression
+* Dynamic question rendering
+* Weighted career role matching
+* Free and premium result flows
+* Automated PDF generation
+* SQL Server–backed persistent storage
+
+---
+
+## Notes
+
+* All sensitive credentials (e.g., SendGrid API key) are loaded via environment variables.
+* The application is designed to be extensible, allowing additional questions, categories, and role mappings to be added easily.
+
+---
+
+**UFAM Workforce Mapping** provides a complete, data-driven career assessment pipeline—from user onboarding to actionable career insights.
