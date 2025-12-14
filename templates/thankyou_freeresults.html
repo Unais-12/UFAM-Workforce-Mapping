@@ -7,20 +7,16 @@
 {% block content %}
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
     <div class="container">
-        <h2>Global Internal Audit Standard Readiness Assessment Score </h2>
-        <p>Here’s an overview of how your internal audit function performs based on the survey responses</p>
+        <h2>Workforce Mapping Report </h2>
+        <p>Here’s an overview of the perfect Job for you based on your Answers</p>
 
         <!-- Dark background container for the slider -->
         <div class="slider-wrapper">
             <div class="slider-container">
-                <label for="totalScoreSlider">Your Score: <span id="sliderValue">{{ total_score }}</span><span id = "TotalOutOf">124</span></label>
-                <input type="range" min="0" max="124" step="1" class="slider" id="changeSlider" disabled>
+                <label for="totalScoreSlider">Score: <span id="sliderValue">{{ total_score }}</span><span id = "TotalOutOf">80</span></label>
+                <input type="range" min="0" max="80" step="1" class="slider" id="changeSlider" disabled>
                 
-                <div class="labels">
-                    <span class="label" style="left: 10%;">Potential Explorer</span>
-                    <span class="label" style="left: 45%;">Active Builder</span>
-                    <span class="label" style="left: 90%;">Prime Initiator</span>
-                </div>
+                
             </div>
         </div>
         <h2>Score By Section</h2>
@@ -36,6 +32,22 @@
                 </div>
             {% endfor %}
         </div>
+        <h2>Your Job Type</h2>
+        <hr>
+        <div class="broader-category-box">
+            <p>{{ broader_category }}</p>
+        </div>
+        <h2>Top 3 Highest Compatibility Roles</h2>
+        <hr>
+        <div class="roles-container">
+            {% for role, score in top_3_roles %}
+                <div class="role-box">
+                    <span class="role-name">{{ role }}</span>
+                    <span class="role-score">{{ (score * 100) | round(3) }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+
         <div class="premium-btn-container">
             <button id="premiumBtn" class="prem-btn no-print">Get Premium Result</button>
             <button id="downloadPdfBtn" class="prem-btn no-print">Download PDF</button>
@@ -84,37 +96,30 @@
     
         
                 function applyMulticolorBackground(slider) {
-                    slider.style.background = `linear-gradient(to right, 
-                        #E32636 0%, 
-                        red 25%, 
-                        #FFD700 25%, 
-                        yellow 62.5%, 
-                        #009000 62.5%, 
-                        #009000 100%)`;
+                    const min = slider.min || 0;
+                    const max = slider.max || 100;
+                    const value = slider.value;
+
+                    const percentage = ((value - min) / (max - min)) * 100;
+
+                    slider.style.background = `
+                        linear-gradient(
+                            to right,
+                            #6CA0FF 0%,
+                            #6CA0FF ${percentage}%,
+                            #D6D6D6 ${percentage}%,
+                            #D6D6D6 100%
+                        )
+                    `;
                 }
+
         
                 function updateScoreColor(score, scoreElement) {
-                    let color;
-                    if (score <= 30) {
-                        color = "#E32636";  // Red
-                    } else if (score <= 76) {
-                        color = "#FFD700";  // Yellow
-                    } else {
-                        color = "#72CC3A";  // Green
-                    }
-                    scoreElement.style.color = color;
+                    scoreElement.style.color = "#7D94D1";
                 }
         
                 function updateCircleScoreColor(percentage, element) {
-                    let color;
-                    if (percentage <= 30) {
-                        color = "#E32636";  // Red for low percentages
-                    } else if (percentage <= 75) {
-                        color = "#FFD700";  // Yellow for moderate percentages
-                    } else {
-                        color = "#72CC3A";  // Green for high percentages
-                    }
-                    element.style.color = color;  // Apply color dynamically
+                    element.style.color = "#7D94D1";  
                 }
         
                 function generatePDF() {
@@ -141,6 +146,16 @@
         </script>
         
         <style>
+            body {
+                background-color: #c7c7c7ff;
+            }
+            hr {
+                border: none;
+                height: 1px;
+                background-color: #000000ff;
+                margin: 40px 0;
+            }
+
             .premium-btn-container {
                 text-align: center;
                 margin-top: 40px;
@@ -150,28 +165,28 @@
                 padding: 10px 20px;
                 font-size: 16px;
                 color: #fff;
-                background-color: #FF5508;
+                background-color: #000000;
                 border: none;
                 border-radius: 5px;
                 cursor: pointer;
             }
 
             .prem-btn:hover {
-                background-color: #FF7633;
+                background-color: #000063;
             }
 
             .container {
                 max-width: 1200px;
                 margin: 40px auto;
                 padding: 20px;
-                background-color: #fff;
+                background-color: #c9c9c9ff;
                 border-radius: 10px;
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
 
             h2 {
                 text-align: center;
-                color: #FF5508;
+                color: #000000ff;
                 margin-top: 50px;
                 font-weight: bold;
             }
@@ -181,7 +196,7 @@
             }
             /* New dark background for the slider section */
             .slider-wrapper {
-                background-color: #333; /* Dark background */
+                background-color: #090f65ff; /* Dark background */
                 padding: 20px;
                 border-radius: 10px;
                 color: #fff; /* White text */
@@ -265,23 +280,33 @@
                 background-color: #FAF9F6;
             }
             .container-circle{
-                background-color: #000000; /* Dark background */
+                background-color: #001652; /* Dark background */
                 padding: 20px;
                 border-radius: 10px;
                 color: #fff; /* White text */
                 margin: 20px 0;
-                height: 180px
+                height: 200px;
+                width: 160px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                box-sizing: border-box;
+                border-radius: 12px;
 
             }
             .circles {
                 display: flex;
-                justify-content: space-around;
+                justify-content: space-evenly;
                 background-color: #D6D6D6; /* Dark background */
-                padding: 20px;
+                padding: 30px;
                 border-radius: 10px;
                 color: #fff; /* White text */
                 margin: 20px 0;
                 max-height: 300px;
+                gap: 20px;
+                align-items: center;
+
               }
               
               .circle {
@@ -289,8 +314,12 @@
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
-                background-color: #000000;
+                background-color: #001652;
                 border: 2px solid #ccc;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
               }
               
               .score {
@@ -338,6 +367,53 @@
                 .circles {
                     page-break-inside: avoid;
                 }
+            }
+
+            .broader-category-box {
+                background-color: #090f65ff; /* Dark background similar to slider */
+                color: #fff;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                margin: 30px 0;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            /* Roles container */
+            .roles-container {
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                margin: 20px 0;
+            }
+
+            /* Individual role box */
+            .role-box {
+                background-color: #001652; /* Dark background like circles */
+                color: #fff;
+                width: 30%;
+                min-width: 200px;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                margin: 10px 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            }
+
+            /* Role name and score styling */
+            .role-name {
+                display: block;
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #ffffffff; /* Golden color to highlight role */
+            }
+
+            .role-score {
+                display: block;
+                font-size: 16px;
+                color: #31CD63; /* Green percentage */
             }
             
             

@@ -31,7 +31,7 @@ if __name__ == "__main__":
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
 app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
+app.config['SECRET_KEY'] = 'bdkfhjdfgdnjgiohijrogjeiougekjnkjndbgkvndkjbgkdfngjb'
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'gias_survey:'
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
@@ -39,8 +39,12 @@ app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 Session(app)
 
-
-conn_str = os.getenv('AZURE_SQL_CONNECTION_STRING')
+conn_str = (
+    r'DRIVER={SQL Server};'
+    r'SERVER=LITERALLYME;'
+    r'DATABASE=Survey;'
+    r'trusted_connection = yes'
+)
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
@@ -176,7 +180,7 @@ def autocomplete_industries():
 
 @app.route("/start", methods=["POST", "GET"])
 def start():
-    session['category'] = 'Values'
+    session['category'] = 'Skills and Career Orientation'
     session['total_score'] = 0
     session['category_scores'] = {}
 
@@ -253,60 +257,55 @@ def register():
         # Fetch valid countries and industries from the database
         try:
             country = [c[0].lower().strip() for c in cursor.execute("SELECT Name FROM Countries ORDER BY ID").fetchall()]
-            industry = [i[0].lower().strip() for i in cursor.execute("SELECT Name FROM industries ORDER BY id").fetchall()]
         except Exception as e:
             print(f"Error fetching countries or industries: {e}")
             return "There was an error fetching valid countries or industries."
 
         # Retrieve form data
         Name = request.form.get("Name")
-        Internal_Audit = request.form.get("Internal_Audit")
-        Company_Size = request.form.get("Company_Size")
-        Using_Solution = request.form.get("Using_Solution")
-        Industry = request.form.get("Industry").strip().lower()
+        Age = request.form.get("Age")
+        Qualification = request.form.get("Qualification")
+        Job = request.form.get("Job")
         Country = request.form.get("Country").strip().lower()
+
 
         form_data = {
             "Name": Name,
-            "Industry": Industry,
             "Country": Country,
-            "Internal_Audit": Internal_Audit,
-            "Company_Size": Company_Size,
-            "Using_Solution": Using_Solution,
+            "Age" : Age,
+            "Qualification" : Qualification,
+            "Job": Job,
+
         }
 
         # Input validation
         if not Name:
             flash("Enter a Name")
-        elif not Industry:
-            flash("Enter an Industry")
         elif not Country:
             flash("Enter a Country")
-        elif not Internal_Audit:
-            flash("Enter the number of members in the IA department")
-        elif not Company_Size:
-            flash("Enter company size")
-        elif not Using_Solution:
-            flash("Mention whether using a solution or not")
-        elif Industry not in industry:
-            flash("Invalid Industry")
+        elif not Age:
+            flash("Enter Your Age")
+        elif not Qualification:
+            flash("Select a Qualification")
         elif Country not in country:
             flash("Invalid Country")
+        elif not Job:
+            flash("Choose an Option"),
         else:
             # Check if user_id is present and update or insert accordingly
             try:
                 if user_id:  # If user_id is available, update the existing user
                     cursor.execute(
                         """UPDATE Users
-                        SET Name = ?, Industry = ?, Country = ?, Internal_Audit = ?, Company_Size = ?, Using_Solution = ?
+                        SET Name = ?, Country = ?, Age = ?, Qualification = ?, Job = ?
                         WHERE Id = ?""",
-                        (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution, user_id)
+                        (Name, Country, Age, Qualification ,Job, user_id)
                     )
                 else:  # If user_id is not available, insert a new user
                     cursor.execute(
-                        """INSERT INTO Users (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                        """INSERT INTO Users (Name, Country, Age, Qualification, Job)
                         VALUES(?,?,?,?,?,?)""",
-                        (Name, Industry, Country, Internal_Audit, Company_Size, Using_Solution)
+                        (Name, Country, Age, Qualification, Job)
                     )
 
                 conn.commit()
@@ -409,220 +408,158 @@ def index():
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
     categories = {
-        'Values': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
-        'Methodology': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
-        'Stakeholder Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
-        'Resource Management': {'A': 0, 'B': 1, 'C': 3, 'D': 4},
+        'Skills and Career Orientation': {'A': 4, 'B': 3, 'C': 2, 'D': 1},
+        'Soft Skills': {'A': 4, 'B': 3, 'C': 2, 'D': 1},
+        'Professional Expectations': {'A': 4, 'B': 3, 'C': 2, 'D': 1},
+        'Physchological Profile': {'A': 4, 'B': 3, 'C': 2, 'D': 1},
     }
     
     questions_per_category = {
-        'Values': 5,
-        'Methodology': 11,
-        'Stakeholder Management': 6,
-        'Resource Management': 9,
+        'Skills and Career Orientation': 5,
+        'Soft Skills': 5,
+        'Professional Expectations': 5,
+        'Physchological Profile': 5,
     }
     questions_data = {
-        'Values' : [
-            {'id': 'q1', 'text': "Question 1: On the scale of 1 -4 how  would you rate the Internal Audit department's ability to always do the right thing and tell the truth even when it is uncomfortable or difficult. (1 being lowest and 4 highest)", 'options':[
-                {'label': '1', 'value': 'A'},
-                {'label': '2', 'value': 'B'},
-                {'label': '3', 'value': 'C'},
-                {'label': '4', 'value': 'D'},
-            ]},
-            {'id': 'q2', 'text': 'Question 2: On a scale of 1-4  how would you rate the environment created by CAE where Internal Auditors feel supported when expressing legitimate, evidence-based engagement results.' , 'options': [
-                {'label': '1', 'value': 'A'},
-                {'label': '2', 'value': 'B'},
-                {'label': '3', 'value': 'C'},
-                {'label': '4', 'value': 'D'},
-            ]},
-            {'id': 'q3', 'text': 'Question 3: Is there a practice in place to document the disclosure of potential conflict of interest (of internal audit team member) or other impairments to objectivity', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Very Rare', 'value': 'B'},
-                {'label': 'Ocassioanlly', 'value': 'C'},
-                {'label': 'Always', 'value': 'D'},
-            ]},
-            {'id': 'q4', 'text': 'Question 4: How often do you assess ethical related risks and controls during individual engagements', 'options':[
-                {'label': 'Never', 'value': 'A'},
-                {'label': 'Very Rare', 'value': 'B'},
-                {'label': 'Ocassionally', 'value': 'C'},
-                {'label': 'Always considered where relevant', 'value': 'D'},
-            ]},
-            {'id': 'q5', 'text': 'Question 5: Is there  a documented methodology established by an Internal Audit function for handling illegal and discreditable behavior by Internal Auditors', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Development', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]}
-        ],
-        'Methodology': [
-            {'id' : 'q1', 'text': 'Question 6: As part of your audit engagements or otherwise in addition to providing assurance and insight do you also provide the foresight to better protect and create value for the entity.', 'options': [
-                {'label': 'Never', 'value': 'A'},
-                {'label': 'Very Rare', 'value': 'B'},
-                {'label': 'Occasionally', 'value': 'C'},
-                {'label': 'Always considered where relevant', 'value': 'D'},
-            ]},
-            {'id': 'q2', 'text' : 'Question 7: Is the internal audit strategy developed in line with charter, organization strategy and expectation of board and senior management', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q3', 'text': 'Question 8: Has the Internal Audit function established Internal Audit methodology  according to the Global internal audit standards', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},     
-            ]},
-            {'id': 'q4', 'text': 'Question 9: Has the Internal Audit function identified any requirement of Global Internal Audit Standards that is not in conformance with any application regulation.', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'}, 
-            ]},
-            {'id': 'q5', 'text': 'Question 10: Is there a mechanism in place whereby CAE document and communicate the circumstances, alternative action taken and their impact, if internal auditor cannot meet the standard requirement', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q6', 'text': 'Question 11: Does the internal audit charter comply with global internal audit standards?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q7', 'text': 'Questions 12: Does Internal Audit function conduct Surveys, interviews and workshops for the input on fraud and risks from internal stakeholders?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q8', 'text': 'Question 13: Does the CAE evaluate, update and train auditors on methodology', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q9', 'text': 'Question 14 : Is there a mechanism in place through which maturity of organization’s governance structure, risk management and control processes is assessed in comparison with leading principles and globally accepted framework.', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q10', 'text': "Question 15: Is the Audit plan developed based on assessment of organization’s strategy, objectives and risks", 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q11', 'text': 'Question 16: Are there controls in place that restrict information access and its disclosure to unauthorized party?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-        ],
-        'Stakeholder Management': [
-            {'id': 'q1', 'text': 'Question 17: Does the internal audit function has unrestricted access to the board as well as to all the activities across the organization', 'options': [
-                {'label' : 'No', 'value': 'A'},
-                {'label' : 'Partly', 'value': 'B'},
-                {'label' : 'On most occasions', 'value': 'C'},
-                {'label' : 'Absolute', 'value': 'D'},
-            ]},
-            {'id' : 'q2', 'text': 'Question 18: Has the CAE held a meeting with the Board apprising it of the way Board should support Internal Audit Functions as per the Global Internal Audit Standards', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q3', 'text': 'Question 19: Is the board helped by CAE in order to understand qualification requirements of CAE?', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q4', 'text': 'Question 20: Is there a practice in place whereby the CAE conduct Meetings with senior executives and board members to build relationship and identify their concerns?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q5', 'text': 'Question 21: Does Internal Audit Function use Newsletters, presentations and other form of communication for sharing internal audit role and benefit with stakeholders', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q6', 'text': 'Question 22: For the development of Internal Audit performance objectives, does CAE incorporate input from board and senior management', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-        ],
-        'Resource Management': [
-            {'id': 'q1', 'text': 'Question 23: Is there a practice in place through which further Education plans of chief audit executive are developed?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q2', 'text': 'Question 24: Does CAE allocate Sufficient budget for the successful implementation of audit plan including training and acquisition of technological tools?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q3', 'text': 'Question 25: Has the CAE developed approach to recruit, develop and retain competent internal auditors?','options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q4', 'text': 'Questions 26: Is there a practice in place whereby Gap analysis between competency of internal auditor on staff and those required is carried out?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q5', 'text': 'Question 27: Does CAE collaborate with internal auditors to develop individual competencies through trainings?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q6', 'text': 'Question 28: Is there a practice in place, whereby, In case of insufficient resources, the board is timely informed about the impact of limitations?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q7', 'text': 'Question 29: Does the CAE evaluate the technology used by internal audit function and ensure that it support internal audit process?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q8', 'text': 'Question 30:  Does CAE collaborate with organization’s IT and IS to implement technological resources properly?', 'options': [
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-            {'id': 'q9', 'text': 'Question 31: Does Internal Audit function use any Software to track progress of auditors recommendations?', 'options':[
-                {'label': 'No', 'value': 'A'},
-                {'label': 'Under Consideration', 'value': 'B'},
-                {'label': 'Under Implementation', 'value': 'C'},
-                {'label': 'Yes', 'value': 'D'},
-            ]},
-        ] 
-    }
+    'Skills and Career Orientation': [
+        {'id': 'q1', 'text': 'Question 1: Which field do you feel most confident working in?', 'options': [
+            {'label': 'Coding/Programming', 'value': 'A'},
+            {'label': 'Design (UI/UX, Graphics)', 'value': 'B'},
+            {'label': 'Business/Management', 'value': 'C'},
+            {'label': 'Marketing/Content Creation', 'value': 'D'},
+        ]},
+        {'id': 'q2', 'text': 'Question 2: How comfortable are you with learning new software or technical tools?', 'options': [
+            {'label': 'Very comfortable, I enjoy exploring new tech', 'value': 'A'},
+            {'label': 'Comfortable, I can learn when needed', 'value': 'B'},
+            {'label': 'Somewhat comfortable, prefer familiar tools', 'value': 'C'},
+            {'label': 'Not very comfortable, I prefer non-technical work', 'value': 'D'},
+        ]},
+        {'id': 'q3', 'text': 'Question 3: What is your dominant strength?', 'options': [
+            {'label': 'Solving logical problems & analyzing data', 'value': 'A'},
+            {'label': 'Building/creating things (products, systems)', 'value': 'B'},
+            {'label': 'Dealing with people & communication', 'value': 'C'},
+            {'label': 'Creative thinking & ideation', 'value': 'D'},
+        ]},
+        {'id': 'q4', 'text': 'Question 4: How frequently do you take initiative in projects or tasks?', 'options': [
+            {'label': 'Always – I lead and drive projects forward', 'value': 'A'},
+            {'label': 'Often – I volunteer when I see opportunities', 'value': 'B'},
+            {'label': 'Sometimes – when asked or necessary', 'value': 'C'},
+            {'label': 'Rarely – I prefer following established plans', 'value': 'D'},
+        ]},
+        {'id': 'q5', 'text': 'Question 5: What is your ideal working state?', 'options': [
+            {'label': 'Behind a computer, coding/analyzing', 'value': 'A'},
+            {'label': 'In a meeting room, collaborating on projects', 'value': 'B'},
+            {'label': 'Meeting clients, presenting solutions', 'value': 'C'},
+            {'label': 'On-site, hands-on field work', 'value': 'D'},
+        ]},
+    ],
+
+    'Soft Skills': [
+        {'id': 'q1', 'text': 'Question 6: How would you react if a coworker disagrees with your idea during a meeting?', 'options': [
+            {'label': 'Present data/logic to support my position', 'value': 'A'},
+            {'label': 'Listen and find a middle ground solution', 'value': 'B'},
+            {'label': 'Discuss openly and ask for team input', 'value': 'C'},
+            {'label': 'Defer to their experience or seniority', 'value': 'D'},
+        ]},
+        {'id': 'q2', 'text': 'Question 7: What would you do if you have multiple tasks to finish in limited time?', 'options': [
+            {'label': 'Prioritize by impact, use productivity systems', 'value': 'A'},
+            {'label': 'Break down tasks and tackle systematically', 'value': 'B'},
+            {'label': 'Ask for help or delegate where possible', 'value': 'C'},
+            {'label': 'Work on what feels most urgent first', 'value': 'D'},
+        ]},
+        {'id': 'q3', 'text': 'Question 8: If a team member is not completing their part of the work, how do you handle it?', 'options': [
+            {'label': 'Address it directly and find the root cause', 'value': 'A'},
+            {'label': 'Offer help and see if they need support', 'value': 'B'},
+            {'label': 'Discuss with the team to redistribute work', 'value': 'C'},
+            {'label': 'Report to supervisor or wait for instructions', 'value': 'D'},
+        ]},
+        {'id': 'q4', 'text': 'Question 9: How do you usually deal with sudden changes in plans or deadlines?', 'options': [
+            {'label': 'Quickly reassess and create a new action plan', 'value': 'A'},
+            {'label': 'Stay calm and adapt my approach', 'value': 'B'},
+            {'label': 'Consult with team on how to adjust', 'value': 'C'},
+            {'label': 'Feel stressed but try to manage', 'value': 'D'},
+        ]},
+        {'id': 'q5', 'text': 'Question 10: If you make a mistake at work, what is your first response?', 'options': [
+            {'label': 'Analyze what went wrong and fix it immediately', 'value': 'A'},
+            {'label': 'Inform relevant people and propose solutions', 'value': 'B'},
+            {'label': 'Apologize and ask for guidance', 'value': 'C'},
+            {'label': 'Feel bad and try to avoid similar situations', 'value': 'D'},
+        ]},
+    ],
+
+    'Professional Expectations': [
+        {'id': 'q1', 'text': 'Question 11: What salary package are you looking for in your first job?', 'options': [
+            {'label': 'PKR 80,000+ (High expectations)', 'value': 'A'},
+            {'label': 'PKR 60,000–80,000', 'value': 'B'},
+            {'label': 'PKR 40,000–60,000', 'value': 'C'},
+            {'label': 'PKR 25,000–40,000', 'value': 'D'},
+        ]},
+        {'id': 'q2', 'text': 'Question 12: What job type do you prefer?', 'options': [
+            {'label': 'Remote job', 'value': 'A'},
+            {'label': 'Hybrid job', 'value': 'B'},
+            {'label': 'On-site job', 'value': 'C'},
+            {'label': 'Flexible / no strong preference', 'value': 'D'},
+        ]},
+        {'id': 'q3', 'text': 'Question 13: How many weekly working hours do you feel comfortable with?', 'options': [
+            {'label': '45+ hours', 'value': 'A'},
+            {'label': '40–45 hours', 'value': 'B'},
+            {'label': '35–40 hours', 'value': 'C'},
+            {'label': 'Less than 35 hours', 'value': 'D'},
+        ]},
+        {'id': 'q4', 'text': 'Question 14: Do you want a job with:', 'options': [
+            {'label': 'Strong growth opportunities', 'value': 'A'},
+            {'label': 'Both growth and stability', 'value': 'B'},
+            {'label': 'Stable, predictable role', 'value': 'C'},
+            {'label': 'Fresh experience to start', 'value': 'D'},
+        ]},
+        {'id': 'q5', 'text': 'Question 15: What is most important in terms of benefits?', 'options': [
+            {'label': 'Performance bonuses & stock options', 'value': 'A'},
+            {'label': 'Healthcare & insurance', 'value': 'B'},
+            {'label': 'Paid leaves & work-life balance', 'value': 'C'},
+            {'label': 'Basic benefits are fine', 'value': 'D'},
+        ]},
+    ],
+
+    'Physchological Profile': [
+        {'id': 'q1', 'text': 'Question 16: What is your favorite color?', 'options': [
+            {'label': 'Blue/Black', 'value': 'A'},
+            {'label': 'Green/Purple', 'value': 'B'},
+            {'label': 'Red/Orange', 'value': 'C'},
+            {'label': 'Yellow/Pink', 'value': 'D'},
+        ]},
+        {'id': 'q2', 'text': 'Question 17: First thing that comes to mind when your boss asks for an answer?', 'options': [
+            {'label': 'Think about logic/data first', 'value': 'A'},
+            {'label': 'Provide a structured response', 'value': 'B'},
+            {'label': 'Check what others think', 'value': 'C'},
+            {'label': 'Hope I understood correctly', 'value': 'D'},
+        ]},
+        {'id': 'q3', 'text': 'Question 18: What is your ideal work environment?', 'options': [
+            {'label': 'Quiet, focused space', 'value': 'A'},
+            {'label': 'Collaborative with quiet areas', 'value': 'B'},
+            {'label': 'Lively office', 'value': 'C'},
+            {'label': 'Flexible, casual environment', 'value': 'D'},
+        ]},
+        {'id': 'q4', 'text': 'Question 19: Which emotion do you experience most during work?', 'options': [
+            {'label': 'Focused determination / flow state', 'value': 'A'},
+            {'label': 'Calm confidence', 'value': 'B'},
+            {'label': 'Excitement & energy', 'value': 'C'},
+            {'label': 'Mix of stress and satisfaction', 'value': 'D'},
+        ]},
+        {'id': 'q5', 'text': 'Question 20: What do you rely on while making decisions?', 'options': [
+            {'label': 'Logic, data, systematic analysis', 'value': 'A'},
+            {'label': 'Logic + experience', 'value': 'B'},
+            {'label': 'Others’ advice and consensus', 'value': 'C'},
+            {'label': 'Instinct and gut feeling', 'value': 'D'},
+        ]},
+    ],
+}
+
     if request.method == "POST":
         user_id = session.get("id")
         if not user_id:
             return "User not logged in or session expired", 403  # Handle case where user is not logged in
 
-        current_category = session.get("category", "Values")
+        current_category = session.get("category", "Skills and Career Orientation")
         questions = questions_data.get(current_category, [])
         user_answers = request.form.to_dict()
         total_score = session.get("total_score", 0)
@@ -693,11 +630,289 @@ def questions():
 @app.route("/thankyoufreeresults")
 @app.route("/thankyoupremiumresults")
 def thankyou():
+    top_3_roles = []
+    role_weights = {
+        "Technology and Developement" : {
+            "Software Developer" : {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.15,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Frontend Developer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.25,
+            },
+            "Backend Developer": {
+                "Skills and Career Orientation": 0.45,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Mobile App Developer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Data Analyst": {
+                "Skills and Career Orientation": 0.45,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.25,
+            },
+            "Data Scientist": {
+                "Skills and Career Orientation": 0.50,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "DevOps Engineer": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.15,
+                "Professional Expectations": 0.30,
+                "Physchological Profile": 0.15,
+            },
+            "QA/Testing Engineer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.30,
+            },
+            "Database Administrator": {
+                "Skills and Career Orientation": 0.45,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Cloud Solutions Architect": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.30,
+                "Physchological Profile": 0.10,
+            },
+        },
+        "Product and Design": {
+            "Product Manager": {
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.30,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "UI/UX Designer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.25,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.25,
+            },
+            "Product Designer": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.25,
+            },
+            "UX Researcher": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.30,
+            },
+            "Graphic Designer":{
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.15,
+                "Professional Expectations": 0.10,
+                "Physchological Profile": 0.45,
+            },
+            "Motion Graphic Designer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.40,
+            },
+            "Game Designer": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.30,
+            },
+            "3D Designer/Animator": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.35,
+            },
+        },
+        "Business & Strategy": {
+            "Business Analyst": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Management Consultant": {
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.30,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Project Manager": {
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.15,
+            },
+            "Operations Manager": {
+                "Skills and Career Orientation": 0.35,
+                "Soft Skills": 0.20,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Financial Analyst": {
+                "Skills and Career Orientation": 0.45,
+                "Soft Skills": 0.10,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.20,
+            },
+            "Business Development Executive": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.10,
+            },
+            "Strategy Analyst": {
+                "Skills and Career Orientation": 0.45,
+                "Soft Skills": 0.15,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Market Research Analyst": {
+                "Skills and Career Orientation": 0.40,
+                "Soft Skills": 0.15,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.30,
+            },
+        },
+        "Marketing & Sales": {
+            "Digital Marketing Specialist": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Social Media Manager": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Content Marketing Manager": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.25,
+            },
+            "SEO/SEM Specialist": {
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.30,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Brand Manager": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Sales Executive": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Account Manager": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Customer Success Manager": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Public Relations Specialist": {
+                "Skills and Career Orientation": 0.15,
+                "Soft Skills": 0.45,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Growth Hacker": {
+                "Skills and Career Orientation": 0.30,
+                "Soft Skills": 0.30,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+        },
+        "Support & Operations": {
+            "HR Specialist/Coordinator": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Administrative Manager": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Office Manager": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Customer Support Specialist": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.20,
+                "Physchological Profile": 0.20,
+            },
+            "Content Writer/Creator": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.15,
+                "Physchological Profile": 0.25,
+            },
+            "Executive Assistant": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Operations Coordinator": {
+                "Skills and Career Orientation": 0.25,
+                "Soft Skills": 0.35,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            },
+            "Talent Acquisition Specialist": {
+                "Skills and Career Orientation": 0.20,
+                "Soft Skills": 0.40,
+                "Professional Expectations": 0.25,
+                "Physchological Profile": 0.15,
+            }
+        }
+
+    }
     total_cat_score = {
-        'Values': {'total': 20},
-        'Methodology': {'total': 44},
-        'Stakeholder Management': {'total': 24},
-        'Resource Management': {'total': 36},
+        'Skills and Career Orientation': {'total': 20},
+        'Soft Skills': {'total': 20},
+        'Professional Expectations': {'total': 20},
+        'Physchological Profile': {'total': 20},
     }
     
     if "id" not in session:
@@ -710,11 +925,66 @@ def thankyou():
     row = cursor.fetchone()
     total_score = row[0] if row else None
 
+
     # Retrieve category-wise scores
     cursor.execute("""SELECT category, score FROM UserScores WHERE user_id = ?""", (user_id,))
     category_scores = cursor.fetchall()
 
     scores_by_category = {row[0]: row[1] for row in category_scores}
+    skills_score = scores_by_category.get('Skills and Career Orientation', 0) / total_cat_score['Skills and Career Orientation']['total']
+    soft_skills_score = scores_by_category.get('Soft Skills', 0) / total_cat_score['Soft Skills']['total']
+    professional_score = scores_by_category.get('Professional Expectations', 0) / total_cat_score['Professional Expectations']['total']
+    psych_score = scores_by_category.get('Physchological Profile', 0) / total_cat_score['Physchological Profile']['total']
+
+
+    
+
+
+    broader_category_scores = {}
+    for category_name, roles in role_weights.items():
+        temp_scores = []
+        for role, weights in roles.items():
+            score = (
+                skills_score * weights["Skills and Career Orientation"] +
+                soft_skills_score * weights["Soft Skills"] +
+                professional_score * weights["Professional Expectations"] +
+                psych_score * weights["Physchological Profile"]
+            )
+            temp_scores.append(score)
+        # Average over all roles in the category
+        broader_category_scores[category_name] = sum(temp_scores) / len(temp_scores)
+
+    # Step 2: Determine best broader category
+    best_broader_category = max(broader_category_scores, key=broader_category_scores.get)
+    
+
+        
+    role_scores = {}
+    for role, weights in role_weights[best_broader_category].items():
+        role_scores[role] = (
+            skills_score * weights["Skills and Career Orientation"] +
+            soft_skills_score * weights["Soft Skills"] +
+            professional_score * weights["Professional Expectations"] +
+            psych_score * weights["Physchological Profile"]
+        )
+
+    # Step 4: Pick top 3 roles
+    best_weights = role_weights[best_broader_category]
+
+    top_3_roles = sorted(
+        role_scores.items(),
+        key=lambda x: (
+            x[1],  # main weighted score
+            # tie-breakers: multiply each category score by the role's weights
+            scores_by_category.get('Skills and Career Orientation', 0) * role_weights[best_broader_category][x[0]]["Skills and Career Orientation"],
+            scores_by_category.get('Soft Skills', 0) * role_weights[best_broader_category][x[0]]["Soft Skills"],
+            scores_by_category.get('Professional Expectations', 0) * role_weights[best_broader_category][x[0]]["Professional Expectations"],
+            scores_by_category.get('Physchological Profile', 0) * role_weights[best_broader_category][x[0]]["Physchological Profile"]
+        ),
+        reverse=True
+    )[:3]
+
+
 
     # Determine the template based on the route
     if request.path == "/thankyoufreeresults":
@@ -722,7 +992,8 @@ def thankyou():
     else:
         template_name = "thankyou_premiumresults.html"
 
-    return render_template(template_name, total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score)
+    return render_template(template_name, total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score, broader_category=best_broader_category,
+        top_3_roles=top_3_roles)
 
 @app.route("/thankyou_freeresults.html")
 def redirect_free():
