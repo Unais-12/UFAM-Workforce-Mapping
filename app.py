@@ -165,17 +165,7 @@ def autocomplete_countries():
         return jsonify(countries)
     return jsonify([])
 
-@app.route("/autocomplete/industries", methods=["GET"])
-def autocomplete_industries():
-    query = request.args.get("q", "").lower().strip()
-    if query:
-        result = cursor.execute(
-            "SELECT Name FROM Industries WHERE LOWER(Name) LIKE ? ORDER BY ID",
-            ('%' + query + '%',)
-        ).fetchall()
-        industries = [r[0] for r in result]
-        return jsonify(industries)
-    return jsonify([])
+
 
 
 @app.route("/start", methods=["POST", "GET"])
