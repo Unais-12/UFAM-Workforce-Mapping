@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Wait
+    Payment Page
 {% endblock %}
 
 {% block content %}
@@ -86,12 +86,12 @@
     </style>
 
     <div class = "container">
-        <h2>Almost There!</h2>
-        <p>Thank you for completing the Internal Audit Survey. Your responses are being processed, and we’re preparing your personalized insights.</p>
+        <h2>Payment Done!</h2>
+        <p>Thank you for completing the payment. To get the premium pdf with industry approved interview tips <strong>Press the button below</strong></p>
         <button id = "submit" class="view-results-btn">View My Results
             <script>
                 document.getElementById("submit").addEventListener("click", function() {
-                    window.location.href = "/choice";
+                    window.location.href = "/download-pdf";
                 });
             </script>
         </button>

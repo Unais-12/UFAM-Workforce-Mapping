@@ -992,6 +992,27 @@ def thankyou():
     else:
         template_name = "thankyou_premiumresults.html"
 
+
+    cursor.execute("""
+            INSERT INTO UserResults (user_id, total_score, broader_category)
+            OUTPUT INSERTED.id
+            VALUES (?, ?, ?)
+        """, (user_id, total_score, best_broader_category))
+
+    result_id = cursor.fetchone()[0]
+
+    if not result_id:
+        raise Exception("Failed to retrieve result_id from UserResults insert")
+
+    conn.commit()
+
+    for rank, (role_name, role_score) in enumerate(top_3_roles, start=1):
+        cursor.execute("""
+            INSERT INTO UserTopRoles (result_id, role_name, role_score, rank)
+            VALUES (?, ?, ?, ?)
+        """, (result_id, role_name, role_score, rank))
+
+
     return render_template(template_name, total_score=total_score, category_scores=scores_by_category, total_cat_score=total_cat_score, broader_category=best_broader_category,
         top_3_roles=top_3_roles)
 
@@ -1016,104 +1037,89 @@ def premium():
     return render_template("premium.html")
 
 
-@app.route("/download-pdf", methods=["POST"])
+@app.route("/download-pdf", methods=["GET"])
 def download_pdf():
-    selected_documents = []
     user_id = session.get("id")
     if not user_id:
         return "User not logged in"
 
-    # Fetch user's name from the database
+    # Fetch user's name
     cursor.execute("SELECT Name FROM Users WHERE id = ?", (user_id,))
     user_name_row = cursor.fetchone()
     user_name = user_name_row[0] if user_name_row else "User"
 
-    # Load the base document (PDF) that contains the placeholder 'xxxx' for the name
-    selected_documents.append(r'PDF Docs/Document 13.pdf')
+    # Fetch latest broader category for this user
+    cursor.execute("""
+    SELECT TOP 1 broader_category
+    FROM UserResults
+    WHERE user_id = ?
+    ORDER BY id DESC
+    """, (user_id,))
+    row = cursor.fetchone()
 
-    cursor.execute("SELECT * FROM UserScores WHERE user_id = ?", (user_id,))
-    rows = cursor.fetchall()
 
-    document_list = [
-        r'PDF Docs/Document 1.pdf', r'PDF Docs/Document 2.pdf', r'PDF Docs/Document 3.pdf',
-        r'PDF Docs/Document 4.pdf', r'PDF Docs/Document 5.pdf', r'PDF Docs/Document 6.pdf',
-        r'PDF Docs/Document 7.pdf', r'PDF Docs/Document 8.pdf', r'PDF Docs/Document 9.pdf',
-        r'PDF Docs/Document 10.pdf', r'PDF Docs/Document 11.pdf', r'PDF Docs/Document 12.pdf'
-    ]
+    if not row:
+        return "No assessment result found"
+
+    broader_category = row[0]
+
+    # Map broader category → PDF file
+    category_pdf_map = {
+        "Technology and Developement": r"PDF Docs/PDF1.pdf",
+        "Product and Design": r"PDF Docs/PDF2.pdf",
+        "Business & Strategy": r"PDF Docs/PDF3.pdf",
+        "Marketing & Sales": r"PDF Docs/PDF4.pdf",
+        "Support & Operations": r"PDF Docs/PDF5.pdf",
+    }
 
     pdf_files = []
 
-    # Modify and merge the first PDF (Document 13) to replace 'xxxx' with the user's name
-    if selected_documents:
-        # Open the base PDF (Document 13) using PyMuPDF
-        pdf_document = fitz.open(selected_documents[0])
+    # --- PDF 0 (Intro / Cover – always included) ---
+    base_pdf_path = r"PDF Docs/PDF0.pdf"
+    pdf_document = fitz.open(base_pdf_path)
 
-        # Iterate through the pages
-        for page in pdf_document:
-            # Search for the placeholder text 'xxxx' and replace it
-            text_instances = page.search_for('xxxx')
-            for inst in text_instances:
-                # Replace the text at the found location
-                page.insert_text(inst[:2], user_name, fontsize=11, color=(0, 0, 0))  # Adjust fontsize and color as needed
+    for page in pdf_document:
+        text_instances = page.search_for("xxxx")
+        for inst in text_instances:
+            page.insert_text(
+                inst[:2],
+                user_name,
+                fontsize=11,
+                color=(0, 0, 0)
+            )
 
-        # Save the modified PDF to a BytesIO object
-        pdf_bytes = BytesIO()
-        pdf_document.save(pdf_bytes)
-        pdf_bytes.seek(0)
-        pdf_files.append(pdf_bytes)
+    base_pdf_bytes = BytesIO()
+    pdf_document.save(base_pdf_bytes)
+    base_pdf_bytes.seek(0)
+    pdf_files.append(base_pdf_bytes)
+    pdf_document.close()
 
-        # Close the PDF document
-        pdf_document.close()
+    # --- Category-specific PDF ---
+    category_pdf_path = category_pdf_map.get(broader_category)
+    if category_pdf_path:
+        with open(category_pdf_path, "rb") as f:
+            pdf_files.append(BytesIO(f.read()))
 
-        # Remove the first document so it's not added again later
-        selected_documents.pop(0)
-
-    # Now add the custom PDF sections based on UserScores
-    for row in rows:
-        if row[2] == "Values":
-            if row[3] <= 6:
-                selected_documents.append(document_list[0])
-            elif row[3] > 6 and row[3] <= 15:
-                selected_documents.append(document_list[1])
-            elif row[3] > 15 and row[3] <= 20:
-                selected_documents.append(document_list[2])
-        elif row[2] == "Methodology":
-            if row[3] <= 13:
-                selected_documents.append(document_list[3])
-            elif row[3] > 13 and row[3] <= 33:
-                selected_documents.append(document_list[4])
-            elif row[3] > 33 and row[3] <= 44:
-                selected_documents.append(document_list[5])
-        elif row[2] == "Stakeholder Management":
-            if row[3] <= 7:
-                selected_documents.append(document_list[6])
-            elif 7 < row[3] <= 18:
-                selected_documents.append(document_list[7])
-            elif 18 < row[3] <= 24:
-                selected_documents.append(document_list[8])
-        elif row[2] == "Resource Management":
-            if row[3] < 11:
-                selected_documents.append(document_list[9])
-            elif 11 < row[3] <= 27:
-                selected_documents.append(document_list[10])
-            elif 27 < row[3] <= 36:
-                selected_documents.append(document_list[11])
-
-    # Add selected documents to the merge list
-    for doc in selected_documents:
-        with open(doc, "rb") as pdf_file:
-            pdf_files.append(BytesIO(pdf_file.read()))
-
-    # Merging all PDFs into one
+    # --- Merge PDFs ---
     merger = PdfMerger()
     for pdf in pdf_files:
         merger.append(pdf)
 
-    # Final output to the user
     final_pdf = BytesIO()
     merger.write(final_pdf)
     merger.close()
-
     final_pdf.seek(0)
-    return send_file(final_pdf, as_attachment=True, download_name='Assessment_Report.pdf', mimetype='application/pdf')
+
+    return send_file(
+        final_pdf,
+        as_attachment=True,
+        download_name="UFAM_Premium_Report.pdf",
+        mimetype="application/pdf"
+    )
+
+
+
+@app.route("/payment")
+def payment():
+    return render_template("payment.html")
 
