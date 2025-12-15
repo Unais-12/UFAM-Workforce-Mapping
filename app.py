@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config["SESSION_PERMANENT"] = False
-app.config['SESSION_COOKIE_NAME'] = 'my_custom_session'
-app.config['SECRET_KEY'] = 'bdkfhjdfgdnjgiohijrogjeiougekjnkjndbgkvndkjbgkdfngjb'
+app.config['SESSION_COOKIE_NAME'] = os.getenv('SESSION_COOKIE_NAME')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_KEY_PREFIX'] = 'gias_survey:'
 app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
