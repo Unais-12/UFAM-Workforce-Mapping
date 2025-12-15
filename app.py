@@ -40,11 +40,16 @@ serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 Session(app)
 
 conn_str = (
-    r'DRIVER={SQL Server};'
-    r'SERVER=LITERALLYME;'
-    r'DATABASE=Survey;'
-    r'trusted_connection = yes'
+    r'DRIVER={ODBC Driver 18 for SQL Server};'
+    r'SERVER=tcp:unais.database.windows.net,1433;'
+    r'DATABASE=ufamdb;'
+    r'UID=CloudSA6ed0f2b6;'
+    r'PWD=Iunais-1234;'
+    r'Encrypt=yes;'
+    r'TrustServerCertificate=no;'
+    r'Connection Timeout=30;'
 )
+
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
